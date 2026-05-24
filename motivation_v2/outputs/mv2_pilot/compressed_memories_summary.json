@@ -12,24 +12,24 @@
     512,
     1024
   ],
-  "total_jsonl_lines": 840,
-  "tasks_seen": 54,
-  "tasks_used": 42,
+  "total_jsonl_lines": 3100,
+  "tasks_seen": 202,
+  "tasks_used": 155,
   "per_strategy": {
     "direct": {
-      "seen": 24,
-      "used": 21,
-      "success": 21
+      "seen": 90,
+      "used": 83,
+      "success": 83
     },
     "verify": {
-      "seen": 13,
-      "used": 7,
-      "success": 7
+      "seen": 52,
+      "used": 29,
+      "success": 29
     },
     "explore": {
-      "seen": 17,
-      "used": 14,
-      "success": 14
+      "seen": 60,
+      "used": 43,
+      "success": 43
     }
   },
   "output_jsonl": "/workspace/EASMO/motivation_v2/outputs/mv2_pilot/compressed_memories.jsonl"

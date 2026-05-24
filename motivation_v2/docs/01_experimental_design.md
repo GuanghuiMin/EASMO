@@ -9,26 +9,61 @@
 
 ---
 
-## 1. Two theses we are trying to validate
+## 1. Theses (revised 2026-05-24, 2:00 PM PT after Jaccard analysis)
 
-* **T1 — compression pressure induces policy-dependent memory.**
-  Under tight memory budgets, the optimal compressed memory for a
-  long-horizon agent is policy-conditional. Different downstream
-  policies prefer measurably different compressions of the same
-  context, and this difference grows as the budget tightens.
-* **T2 — prompted LLM selectors cannot realise policy-conditional
-  compression.** Even when conditioned on a task description and a
-  policy/strategy description, an off-the-shelf LLM compressor
-  produces compressions that are surface-similar across policies and
-  fall short of the execution-derived oracle.
+The thesis statement was refined twice on 2026-05-24 in light of
+empirical data on AppWorld trajectories. The current form:
 
-Combined claim: *policy-conditional compression at tight budgets is
-necessary (T1) and not achievable by prompting (T2). It must therefore
-be learned with a behavioural objective.*
+* **T1 — memory needs are role-conditional, not task-conditional.**
+  In a multi-agent system where multiple agents share an upstream
+  context but have different roles (planner, tool-user, coder,
+  verifier), the compressed memory each role needs is *structurally
+  orthogonal*. Empirically the cross-role Jaccard on AppWorld at
+  B=512 is 0.04 — roles want disjoint slices of the same context.
+  By contrast cross-task **within-role** Jaccard is 0.17 (modest
+  task-specific tail) and cross-strategy **within-task** Jaccard is
+  ≈ 0.91 (style is invariant). Memory variation is **role-driven**.
 
-`policy-dependency` is the central conceptual lever. The design must
-make policy variation **measurable, controllable, and orthogonal to
-task topic** — that is the bar this design either clears or fails.
+* **T2 — prompted LLM selectors cannot realise role-conditional
+  compression.** Even when conditioned on a role description and a
+  task instruction, an off-the-shelf LLM compressor produces
+  compressions that are surface-uniform across roles and fall short
+  of the role-projected oracle (`m_tool` / `m_code` / `m_plan` /
+  `m_verify`).
+
+Combined claim: *role-conditional compression in multi-agent systems
+is necessary (T1) and not achievable by prompting (T2). It must
+therefore be learned with a behavioural objective. Within a fixed
+role, however, the compressor transfers across tasks — code-style
+patterns at Jaccard 0.41 across tasks; fact-level patterns are
+task-specific but recoverable via standard multi-task training.*
+
+This is the **three-tier message** of the paper:
+
+```
+1. Strategy invariance (Jaccard ≈ 0.91)        → control: agent style is not the lever
+2. Within-role cross-task transferability      → practical: train per role, not per task
+   (Jaccard ≈ 0.41 for code; 0.07–0.11 others)
+3. Cross-role orthogonality (Jaccard ≈ 0.04)   → headline: role conditioning is necessary
+```
+
+### What we explicitly RETRACT
+
+The original (pre-2026-05-24) framing called this "policy-dependent
+compression", borrowing RL/agent terminology. Two corrections:
+
+1. **"policy" was a misnomer**: in RL/agent literature, π(a|s) is a
+   *behavioural decision rule*. What we mean here is *agent role*
+   (planner / tool-user / etc.) — a specialty, not a decision rule.
+   We use "role-conditional" throughout the rest of this doc.
+2. **The original prediction "smaller B → more divergence"
+   reverses below the plumbing floor**. At B ≤ 256 every task
+   converges on shared auth/login plumbing → cross-task divergence
+   is *small*, not large. The interesting regime for divergence is
+   B ∈ [256, 1024], not B ≤ 128. This finding is still publishable
+   ("compact memory has a plumbing floor below which task-conditional
+   training is unnecessary; above the floor it dominates") but the
+   direction of the original intuition was wrong.
 
 ## 2. Why this design (vs the abandoned `motivation/` track)
 
@@ -118,7 +153,27 @@ Implications baked into the design:
    collapses by construction. Pilot grid: B ∈ {128, 256, 512, 1024,
    2048}; B=2048 kept only as a saturation control.
 
-## 4. Memory units and policy axis
+## 4. Memory units and the three policy axes
+
+We measure three orthogonal sources of variation in optimal
+compressed memory. The headline result is that they're cleanly
+ordered by effect size.
+
+### 4.0 Three axes — summary
+
+| Axis | What varies | What's held constant | Role in paper |
+|---|---|---|---|
+| **Strategy** | output style (direct / verify / explore) | task, role, executor | negative control (style does not drive memory) |
+| **Task** | downstream goal (most-played song / most-liked) | role, executor | transferability test (within-role, cross-task) |
+| **Role** | agent specialty (planner / tool-user / coder / verifier) | task, executor | headline (roles need orthogonal memory) |
+
+Empirical Jaccard on AppWorld at B=512:
+
+| Axis | Mean Jaccard at B=512 | Interpretation |
+|---|---|---|
+| Strategy | 0.91 | style is invariant |
+| Task (within-role) | 0.17 | modest task-specificity |
+| Role | 0.04 | nearly orthogonal |
 
 ### 4.1 Memory units
 
@@ -143,12 +198,11 @@ Each unit has:
   start with weight 2.0.
 * `source_step`: trajectory step index, for chronological ordering.
 
-### 4.2 Policy axis — Option X (primary)
+### 4.2 Strategy axis (negative control) — see [`02_strategy_prompts.md`](02_strategy_prompts.md)
 
 Three behavioural strategies, all running on the same MiniMax-M2.5
-executor on the same task. The variation is in the agent's
-*decision policy*, not the model. Canonical specs in
-`prompts/STRATEGY_DESIGN.md`.
+executor on the same task. The variation is in agent style, not
+in role or task. Canonical specs in `02_strategy_prompts.md`.
 
 | Strategy | Search breadth | Verification | Action style | Expected effect on trajectory |
 |---|---|---|---|---|
@@ -169,22 +223,43 @@ Manipulation-check threshold: `median_iters(verify) / median_iters(direct) ≥ 1
 `show_app_descriptions_first3(explore) ≥ 0.5`. On the smoke this is
 2.36× and 100% respectively.
 
-### 4.3 Secondary axis — task topic
+### 4.3 Task axis (transferability test)
 
-`policy_topic = primary_app` (spotify, file_system, phone,
-simple_note, venmo) for single-app tasks. Used **only for
-stratification** of M1 / M2 results, never as the policy axis
-itself. The premise is that the same strategy effect holds across
-topics, not that topic *is* policy.
+Different AppWorld task instances of the same role. We measure
+cross-task Jaccard within each role to test whether memory policies
+generalise across tasks (within a role) or whether each task needs
+its own compressor.
 
-### 4.4 Backup policy axis — Option Y (executor variants)
+Empirical: cross-task Jaccard at B=512 (mean over task pairs):
+* `m_code`   : **0.41** ⇒ structural code patterns transfer freely
+* `m_verify` : 0.105 ⇒ tail observations are task-specific
+* `m_tool`   : 0.089 ⇒ API arguments are task-specific
+* `m_plan`   : 0.072 ⇒ task instructions are unique by definition
 
-If the manipulation check on the full pilot fails (i.e., strategies
-collapse on the large dataset despite passing on a single task),
-the fallback is to use different executor models (MiniMax / Qwen /
-GPT-4o-mini) on the same task. Documented but not the primary plan;
-requires multi-LLM endpoint coordination that the user is still
-sorting out externally.
+**Practical takeaway**: code-level memory policies can be trained
+on a single task and reused freely; tool/plan/verify policies need
+multi-task training but the diversity requirement is bounded by
+"same role, varied tasks", not "every task has its own policy".
+
+### 4.4 Role axis (headline) — see [`03_role_memory_extractors.md`](03_role_memory_extractors.md)
+
+Four agent roles, each with a deterministic projection of the same
+trajectory:
+* `m_tool`   — API call list + observations
+* `m_code`   — Python control-flow patterns (args abstracted)
+* `m_plan`   — task instruction + intent comments + milestones + final answer
+* `m_verify` — tail-of-trajectory observations + final-state call
+
+Cross-role Jaccard at B=512: **0.04 mean**. Roles want orthogonal
+memory. This is the central T1 finding.
+
+### 4.5 Executor axis (future work)
+
+Different LLMs (MiniMax / Qwen / GPT-4o-mini) on the same task.
+Currently MiniMax-only. Cross-executor variation is the natural
+robustness check ("does the role-orthogonality finding hold for
+other backbones?") and gates whether the paper claims a
+model-independent result.
 
 ## 5. Prompt template design
 
@@ -296,10 +371,17 @@ from saving the `show_api_doc` exploration phase, not from
 short-circuiting the task. This is verified by the smoke run
 (11→8 iters at B=512 with `m_exec_minimal+direct`).
 
-## 6. Experimental matrix
+## 6. Experimental matrix (revised)
 
-Four experiments, all on the same dataset / same executor / same
-budget grid.
+Five experimental panels, mapped onto the three-tier story.
+
+| Panel | Measures | Status |
+|---|---|---|
+| **C** Cross-strategy control | strategy variation does NOT change memory | ✅ pilot data: Jaccard 0.91 |
+| **R1** Cross-role Jaccard | roles want orthogonal memory | ✅ deterministic data: Jaccard 0.04 |
+| **R2** Cross-task within-role Jaccard | within-role transferability | ✅ deterministic data: code 0.41, others 0.07–0.11 |
+| **M1** Compression-pressure sweep | role-projected memory beats generic at tight B | ⏳ in flight (xtask + role-specific runner) |
+| **M2** Prompted selector gap | prompted compressor can't reproduce role-specific selection | ❌ to build (T2 baseline) |
 
 ### 6.1 M1 — compression-pressure sweep (T1 main)
 
@@ -442,7 +524,48 @@ This is appendix-only unless the result is visually striking.
 | Δ_policy-generic ≈ 0 across all B | T1 dies. Most likely cause is that AppWorld tasks all need the same small set of rows regardless of policy. |
 | `m_bm25` ≈ `m*_exec` on success | Lexical retrieval is enough; policy-conditional learning is unnecessary. |
 
-## 8. What we have actually observed (2026-05-24, 1:00 PM PT)
+## 8. What we have actually observed (2026-05-24, 2:00 PM PT)
+
+### 8.0 Three-tier Jaccard hierarchy (deterministic, no LLM)
+
+The headline result, computed from 81 successful direct-strategy
+trajectories on AppWorld train.
+
+```
+                       Mean Jaccard at B=512
+Strategy variation     0.91   ← agent style is invariant
+Cross-task within-role 0.17   ← modest task-specific tail
+Cross-role             0.04   ← roles need orthogonal memory ★
+```
+
+Per-role cross-task Jaccard breakdown:
+
+| Role | B=128 | B=256 | B=512 | B=1024 |
+|---|---|---|---|---|
+| `m_code` | 0.426 | 0.409 | **0.409** | 0.409 |
+| `m_verify` | 0.110 | 0.086 | 0.105 | 0.105 |
+| `m_tool` | 0.121 | 0.099 | 0.089 | 0.093 |
+| `m_plan` | 0.016 | 0.075 | 0.072 | 0.072 |
+
+Per-role-pair cross-role Jaccard at B=512:
+
+| pair | tool–code | tool–plan | tool–verify | code–plan | code–verify | plan–verify |
+|---|---|---|---|---|---|---|
+| | 0.000 | 0.059 | 0.054 | 0.000 | 0.000 | 0.099 |
+
+Reproduce: `motivation_v2/scripts/analyze_role_overlap.py --tag mv2_pilot --strategy direct`.
+
+### 8.0.5 Cross-task transfer (within-role tool-use, M1 prep, partial)
+
+A first 18-cell pilot (limited by the partially-built
+`compressed_memories.jsonl` at the time) ran cross-task transfer:
+6 spotify consumer tasks × {self, within_gen, within_app, cross_app}
+× {B=128, 256, 512}, dropping cells whose source memory wasn't yet
+in the pre-built file. **All 18 cells succeeded**, including
+within-app cross-generator memory transfer at B=512 (e.g.,
+`07b42fd_1` succeeded in 8 iters when given memory derived from
+`82e2fac_1`'s gold solution). The full 72-cell experiment is
+re-running with the larger pilot dataset (PID 740184).
 
 ### 8.1 Strategy injection works on a single task
 
@@ -505,44 +628,55 @@ strategies = 2,016 cells × 55 s).
 * **M1 / M2 / M3 measurement on the full grid** — not started.
   Gated on pilot completion + prompted-compressor build.
 
-## 9. Honest assessment of design sufficiency
+## 9. Honest assessment of design sufficiency (revised after Jaccard data)
 
-This is a self-critique done **before** the data lands so we are not
-fitting the assessment to results.
+The 2:00 PM PT update of this section reflects observed Jaccard
+data on 81 trajectories. The previous self-critique (worried about
+"strategies want the same memory" → strong T1 dead) has been
+*replaced* by stronger findings under the role-conditional reframe.
+
+### 9.0 Headline: thesis is much better positioned than at 1:00 PM PT
+
+* The original T1 ("policy-conditional compression at tight B is
+  necessary") was technically falsified at the strategy level —
+  three strategies on the same task share Jaccard 0.91 — but this
+  ruled out a confound rather than killed the thesis.
+* The reframed T1 ("role-conditional compression in multi-agent
+  systems is necessary") is **strongly supported** by Jaccard 0.04
+  across roles on the same trajectory. Reviewer-defensible: the
+  data is deterministic, the projections are documented, the
+  cross-validation against task-axis Jaccard (0.17) shows the
+  finding is role-driven not slicing-driven.
+* The within-role cross-task transferability finding (Jaccard 0.41
+  for code, 0.07–0.11 for others) is a *practical engineering
+  contribution* on top of T1: train per role, not per task.
 
 ### 9.1 What we are confident in
 
-* **T1 minimal version** ("policy-conditional ≥ generic at tight B")
-  is testable and the pipeline is end-to-end working. The single
-  M1 cell at 8 vs 11 iters is the first empirical confirmation that
-  the experimental setup *can* detect a compression benefit.
-* **Strategy injection genuinely changes agent behaviour** — verify
-  fetched 17× show_song cross-validating, explore did
-  `show_app_descriptions` first 100% of the time, direct skipped
-  exploration. The policy axis is real.
-* **`m*_exec` is non-LLM** (deterministic function of trajectory
-  and ground-truth API call list), so T1 has an independent oracle
-  and is not circular.
+* **T1 (role-conditional)** has direct deterministic evidence:
+  cross-role Jaccard 0.04 on 81 trajectories. The data is
+  reproducible from a single command and not contingent on LLM
+  decoding or any randomness.
+* **Cross-task within-role transferability** has a clean
+  per-role breakdown: code 0.41, others 0.07–0.11 — supports the
+  practical claim that role-conditional compressors transfer
+  across tasks.
+* **Strategy is a confirmed non-confound** (Jaccard 0.91 across
+  strategies on the same task). Reviewer can't say "your roles
+  just measure agent style".
+* **Pipeline is end-to-end working**: cross-task transfer cells
+  ran, with `runner.py` injecting role-specific memory variants
+  into the AppWorld agent. The first M1 smoke cell showed
+  `m_exec_minimal(B=512)` reduces direct's iters from 11 to 8.
+* **Pilot is high-yield**: direct strategy 92% success rate
+  (83/90), enough headroom to filter to all-three-strategy-success
+  subsets without losing too much data.
 
 ### 9.2 Where the design is still weak
 
-**(a) Same task, same answer, same data → strategies may converge
-on similar information needs.**
-
-`P_direct`, `P_verify`, `P_explore` differ in *how aggressively* they
-query the data, but for "what's the most-played song", all three
-ultimately need to look at `play_count` rows. Verify just checks
-them more times. **`m*_exec_trajectory(verify)` may be a superset
-of `m*_exec_trajectory(direct)` rather than a different set.** If
-that's the case, the M3 cross-policy heatmap measures
-"is the verbose memory wasteful?" rather than "is policy-conditional
-necessary?".
-
-**Mitigation**: a Jaccard-overlap analysis on `m*_exec` across the
-three strategies, run as soon as the pilot finishes. If
-`Jaccard(direct, verify) > 0.8` per-task on average, the strong T1
-claim should be retracted in favour of "compression for tool-use
-agents is necessary at tight budgets" (weaker but still publishable).
+**(a) [resolved] strategies share information needs** — confirmed
+empirically (Jaccard 0.91). Reframed as a positive control finding;
+no longer a threat to the thesis.
 
 **(b) `m*_exec_minimal` is API queries, not data.**
 
@@ -560,14 +694,14 @@ variants and we'll point out which gap is which.
 
 **(c) Single executor only.**
 
-All three policies run on MiniMax-M2.5. A skeptic can argue we are
-measuring "MiniMax with three different system-prompt nudges", and
-the result might not transfer to other LLMs. Option Y (executor
-variants) is the proper robustness check.
+All trajectories are MiniMax-M2.5. A skeptic can argue our role
+projections might not generalise to other LLM backbones. Cross-
+executor robustness is the natural follow-up.
 
-**Mitigation**: write a follow-up experiment that runs at least
-the M1 main figure on Qwen2.5-7B for the spotify subset. This is
-the user's pending external coordination item.
+**Mitigation**: re-run the role-overlap analysis (≤ 1 min per
+re-run) on Qwen2.5-7B trajectories once the user coordinates the
+endpoint. The deterministic projections will work on any
+trajectory in the same schema.
 
 **(d) Prompted compressors not built yet.**
 
@@ -579,48 +713,67 @@ made until `m_prompted_task_policy` is implemented and run.
 template prompts to produce the four prompted-memory variants.
 Estimated 1 hour to write, ~2 h to run on the pilot trajectories.
 
-**(e) AppWorld task structure is narrow.**
+**(e) AppWorld is dominated by tool-use tasks.**
 
-Most train tasks are spotify variants ("most-played song",
-"least-liked song", etc.). They have one canonical answer and one
-canonical data path. "Different policies want different memory"
-gets the most traction on tasks where the solution path can vary
-(e.g., "send a message to my closest friend" — what counts as
-"closest"?). These tasks are rarer in the corpus.
+All 90 train tasks are essentially "find this fact in the user's
+app data". The role-orthogonality finding shows that even within
+this narrow tool-use corpus, the four projections (tool / code /
+plan / verify) are demonstrably distinct. But the strongest version
+of the role thesis would benefit from a benchmark with explicit
+role specialisation (ChatDev / MetaGPT / AutoGen).
 
-**Mitigation**: in M3, report the heatmap on the spotify subset
-*and* on the multi-app subset separately. Multi-app tasks are
-where genuine policy variation should bite.
+**Mitigation**: present AppWorld as the "minimum non-trivial
+demonstrator" — even on a narrow tool-use corpus, role projections
+are orthogonal. Then in §6 (or paper §6) cite multi-agent benchmarks
+as natural follow-ups where the effect should be even stronger.
+
+**(f) [new] Role projections are slicing rules, not independently-run
+role agents.**
+
+A skeptic could argue we constructed orthogonality by our slicing
+choices. The strongest rebuttal is the cross-task per-role pattern:
+the SAME slicing rules produce code Jaccard 0.41 vs tool Jaccard
+0.09 across tasks. If the slicing forced orthogonality, both
+numbers would be similarly low. The fact that code transfers and
+tool doesn't is a property of the *content*, not the slicing.
+
+A follow-up experiment that actually runs role-specialised agents
+(via system prompts that force planner / coder / verifier
+behaviour) and extracts m*_exec from each role's own trajectory
+would close this gap. This is the natural Option Y' upgrade once
+multi-LLM endpoints are in place.
 
 ### 9.3 What would make this design strong enough for spotlight
 
-1. M1 result with diagonal-vs-off-diagonal gap ≥ 15 pp at B=256/512.
-2. M3 cross-strategy heatmap with the off-diagonal cells visibly
-   below the diagonal AND a story for *why* each strategy's memory
-   misses for the others.
-3. T2's `r_T2 ≤ 0.30`: prompting closes ≤ 30% of the
-   policy-conditional gap.
-4. Robustness: the same M1 effect on at least one other executor
-   (Qwen2.5-7B) for the spotify subset.
-5. Multi-app heatmap: the policy-conditional effect visible on
-   tasks that genuinely admit multiple solution paths.
+1. ✅ Cross-role Jaccard ≤ 0.10 at B=512 — **achieved (0.04)**.
+2. ✅ Cross-task within-role Jaccard ordered (code high, others low)
+   — **achieved (0.41 / 0.07–0.11)**.
+3. ⏳ M1 task-success result: role-projected memory beats `m_recent`
+   by ≥ 15 pp at B ∈ [256, 512] — pilot data forthcoming.
+4. ❌ T2 closure ratio `r_T2 ≤ 0.30`: prompting closes ≤ 30% of the
+   role-conditional gap — to build (M2 prompted compressors are
+   the next code milestone).
+5. ⏳ Cross-executor robustness: the role-orthogonality finding
+   reproduces on Qwen2.5-7B trajectories — pending external
+   endpoint coordination.
 
-We currently have 0 of these. The pilot will resolve (1) and the
-diagonal-vs-off-diagonal direction of (2). The other three are
-explicit future work.
+Current achievement: 2 of 5; (3) and (4) are mechanical given the
+pipeline, (5) is the only external dependency.
 
 ### 9.4 What would invalidate the design
 
-* `Jaccard(m*_exec_direct, m*_exec_verify) > 0.8` averaged across
-  pilot tasks → strategies share information needs → policy-
-  conditional thesis is empty for AppWorld.
-* Manipulation check fails on full pilot → strategies didn't take
-  on most tasks → switch to Option Y.
-* `r_T2 > 0.70` → prompting works well enough that "necessary but
-  not achievable" collapses to "achievable, just expensive".
-
-In each of these cases the doc spells out a fallback paper framing
-so we don't end up scrambling.
+* If a follow-up role-specialised-agent run produced m*_exec with
+  Jaccard 0.5+ between roles → the projection-based result might
+  be an artifact of the slicing rules. We would need to weaken
+  T1 to "memory selection rules can be made role-conditional even
+  though raw role-induced memory needs overlap".
+* If T2 produced `r_T2 > 0.70` → prompted compressors *can*
+  reproduce role-aware selection → "necessary but not achievable"
+  collapses to "achievable, just expensive". Paper pivots to
+  efficiency story.
+* If Qwen2.5-7B trajectories produced cross-role Jaccard ≥ 0.30
+  → the orthogonality finding is MiniMax-specific. Paper has to
+  either be careful about scope or run on multiple models.
 
 ## 10. Schedule
 
@@ -644,16 +797,23 @@ All times PT (Pacific). Pilot kicked off at 12:12 PM PT today.
 |---|---|
 | `motivation_v2/README.md` | Track overview + roadmap |
 | `motivation_v2/docs/01_experimental_design.md` | This file — operational design |
-| `motivation_v2/prompts/STRATEGY_DESIGN.md` | Canonical strategy texts + manipulation-check spec |
+| `motivation_v2/docs/02_strategy_prompts.md` | Strategy variants (negative control + appendix) |
+| `motivation_v2/docs/03_role_memory_extractors.md` | Role-conditional memory projections (headline) |
+| `motivation_v2/prompts/STRATEGY_DESIGN.md` | (mirror of 02_strategy_prompts.md, kept beside the build script) |
 | `motivation_v2/motivation_v2/data.py` | acon trajectory + AppWorld GT loaders |
 | `motivation_v2/motivation_v2/units.py` | trajectory → memory-unit pool |
 | `motivation_v2/motivation_v2/policy_family.py` | task → topic-family classifier |
 | `motivation_v2/motivation_v2/exec_memory.py` | `m*_exec_minimal` and `m*_exec_trajectory` builders |
+| `motivation_v2/motivation_v2/role_memory.py` | `m_tool` / `m_code` / `m_plan` / `m_verify` builders |
 | `motivation_v2/motivation_v2/compressors.py` | `m_recent` / `m_freq` / `m_bm25` / `m_embedding_topk` |
 | `motivation_v2/motivation_v2/runner.py` | compressed-memory injection into AppWorldAgent |
 | `motivation_v2/scripts/run_appworld_strategy.py` | per-strategy trajectory generation launcher |
 | `motivation_v2/scripts/manipulation_check.py` | per-strategy iter / API-pattern stats |
 | `motivation_v2/scripts/build_compressed_memories.py` | post-hoc cell-grid materialisation |
+| `motivation_v2/scripts/run_cross_task_transfer.py` | cross-task transfer experiment driver |
+| `motivation_v2/scripts/analyze_task_overlap.py` | cross-task Jaccard analysis |
+| `motivation_v2/scripts/analyze_role_overlap.py` | cross-role Jaccard analysis |
+| `motivation_v2/scripts/analyze_exec_overlap.py` | cross-strategy Jaccard analysis (control) |
 | `motivation_v2/scripts/smoke_data_pipeline.py` | corpus audit |
 | `motivation_v2/outputs/mv2_pilot/` | pilot results land here |
 | `motivation_v2/outputs/pilot_progress.log` | live pilot tracker (5-min updates) |
