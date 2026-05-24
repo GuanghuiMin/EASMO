@@ -1,0 +1,59 @@
+{
+  "per_budget": {
+    "128": {
+      "n_tasks": 17,
+      "jaccard_direct_verify": 1.0,
+      "jaccard_direct_explore": 1.0,
+      "jaccard_verify_explore": 1.0,
+      "jaccard_3way_intersection_over_union": 1.0,
+      "mean_units_direct": 6.470588235294118,
+      "mean_units_verify": 6.470588235294118,
+      "mean_units_explore": 6.470588235294118,
+      "minimal_dv_sanity_should_be_1.0": 1.0
+    },
+    "256": {
+      "n_tasks": 17,
+      "jaccard_direct_verify": 0.9609351432880845,
+      "jaccard_direct_explore": 0.9559969442322384,
+      "jaccard_verify_explore": 0.9513858690329279,
+      "jaccard_3way_intersection_over_union": 0.9383956729544964,
+      "mean_units_direct": 11.764705882352942,
+      "mean_units_verify": 11.705882352941176,
+      "mean_units_explore": 11.882352941176471,
+      "minimal_dv_sanity_should_be_1.0": 1.0
+    },
+    "512": {
+      "n_tasks": 17,
+      "jaccard_direct_verify": 0.9100091607831546,
+      "jaccard_direct_explore": 0.9571559015763168,
+      "jaccard_verify_explore": 0.9098617333911452,
+      "jaccard_3way_intersection_over_union": 0.898912348502587,
+      "mean_units_direct": 25.058823529411764,
+      "mean_units_verify": 25.235294117647058,
+      "mean_units_explore": 25.058823529411764,
+      "minimal_dv_sanity_should_be_1.0": 1.0
+    },
+    "1024": {
+      "n_tasks": 17,
+      "jaccard_direct_verify": 0.7473538512740061,
+      "jaccard_direct_explore": 0.7697582160063623,
+      "jaccard_verify_explore": 0.802507656224316,
+      "jaccard_3way_intersection_over_union": 0.7039579290803374,
+      "mean_units_direct": 38.411764705882355,
+      "mean_units_verify": 38.94117647058823,
+      "mean_units_explore": 38.705882352941174,
+      "minimal_dv_sanity_should_be_1.0": 1.0
+    },
+    "2048": {
+      "n_tasks": 17,
+      "jaccard_direct_verify": 0.6120152210362467,
+      "jaccard_direct_explore": 0.6255799173340655,
+      "jaccard_verify_explore": 0.6569107181331654,
+      "jaccard_3way_intersection_over_union": 0.5486579244872923,
+      "mean_units_direct": 51.411764705882355,
+      "mean_units_verify": 53.529411764705884,
+      "mean_units_explore": 52.94117647058823,
+      "minimal_dv_sanity_should_be_1.0": 1.0
+    }
+  }
+}
