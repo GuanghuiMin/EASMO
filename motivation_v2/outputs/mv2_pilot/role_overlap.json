@@ -1,0 +1,102 @@
+{
+  "cross_role": {
+    "128": {
+      "tool_code_mean": 0.0,
+      "tool_code_n": 81,
+      "tool_plan_mean": 0.003787878787878788,
+      "tool_plan_n": 81,
+      "tool_verify_mean": 0.02237498441202145,
+      "tool_verify_n": 81,
+      "code_plan_mean": 0.0,
+      "code_plan_n": 81,
+      "code_verify_mean": 0.0,
+      "code_verify_n": 81,
+      "plan_verify_mean": 0.1533705663335293,
+      "plan_verify_n": 81
+    },
+    "256": {
+      "tool_code_mean": 0.0,
+      "tool_code_n": 81,
+      "tool_plan_mean": 0.006716637272192827,
+      "tool_plan_n": 81,
+      "tool_verify_mean": 0.027849534875678667,
+      "tool_verify_n": 81,
+      "code_plan_mean": 0.0,
+      "code_plan_n": 81,
+      "code_verify_mean": 0.0,
+      "code_verify_n": 81,
+      "plan_verify_mean": 0.10957605494642532,
+      "plan_verify_n": 81
+    },
+    "512": {
+      "tool_code_mean": 0.0,
+      "tool_code_n": 81,
+      "tool_plan_mean": 0.05925044977379778,
+      "tool_plan_n": 81,
+      "tool_verify_mean": 0.05424088279245222,
+      "tool_verify_n": 81,
+      "code_plan_mean": 0.0,
+      "code_plan_n": 81,
+      "code_verify_mean": 0.0,
+      "code_verify_n": 81,
+      "plan_verify_mean": 0.09890101829099651,
+      "plan_verify_n": 81
+    },
+    "1024": {
+      "tool_code_mean": 0.0,
+      "tool_code_n": 81,
+      "tool_plan_mean": 0.09457530539225537,
+      "tool_plan_n": 81,
+      "tool_verify_mean": 0.08135406131650443,
+      "tool_verify_n": 81,
+      "code_plan_mean": 0.0,
+      "code_plan_n": 81,
+      "code_verify_mean": 0.0,
+      "code_verify_n": 81,
+      "plan_verify_mean": 0.09890101829099651,
+      "plan_verify_n": 81
+    }
+  },
+  "cross_task_per_role": {
+    "128": {
+      "tool_mean": 0.12052381774603997,
+      "tool_n_pairs": 3240,
+      "code_mean": 0.42561728395061726,
+      "code_n_pairs": 3240,
+      "plan_mean": 0.016028828852902927,
+      "plan_n_pairs": 3240,
+      "verify_mean": 0.1096410199882422,
+      "verify_n_pairs": 3240
+    },
+    "256": {
+      "tool_mean": 0.09949121530952629,
+      "tool_n_pairs": 3240,
+      "code_mean": 0.4093621399176955,
+      "code_n_pairs": 3240,
+      "plan_mean": 0.07519574175824176,
+      "plan_n_pairs": 3240,
+      "verify_mean": 0.08588890447686744,
+      "verify_n_pairs": 3240
+    },
+    "512": {
+      "tool_mean": 0.08895122979328007,
+      "tool_n_pairs": 3240,
+      "code_mean": 0.4093621399176955,
+      "code_n_pairs": 3240,
+      "plan_mean": 0.07153483635631612,
+      "plan_n_pairs": 3240,
+      "verify_mean": 0.1051400913900914,
+      "verify_n_pairs": 3240
+    },
+    "1024": {
+      "tool_mean": 0.09300904691410819,
+      "tool_n_pairs": 3240,
+      "code_mean": 0.4093621399176955,
+      "code_n_pairs": 3240,
+      "plan_mean": 0.07153483635631612,
+      "plan_n_pairs": 3240,
+      "verify_mean": 0.1051400913900914,
+      "verify_n_pairs": 3240
+    }
+  }
+}
