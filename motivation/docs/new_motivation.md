@@ -178,34 +178,76 @@ This avoids confounding memory effects with model capability or scaffold differe
 
 ⸻
 
-2.4 Policy family definition
+2.4 Policy axis (revised 2026-05-24 — Option X primary)
 
-For AppWorld, define policy families by task type / app dependency.
-
-Example policy families:
-
-Policy family	Behavior focus	Relevant memory
-Calendar policy	scheduling, availability, conflicts	calendar events, time constraints
-Email/message policy	replying, forwarding, extracting commitments	email threads, recipients, tone
-Contact policy	resolving people, aliases, relationships	contact cards, names, emails
-Shopping/order policy	purchasing, returns, delivery, price constraints	orders, products, addresses
-Travel policy	flights, hotels, locations, time windows	travel bookings, location constraints
-Finance/payment policy	invoices, budgets, payment status	transactions, payment records
-
-The policy family should be determined from the AppWorld task category, required APIs, or successful trajectory.
-
-> **Review note (R-2):** AppWorld tasks are commonly multi-app — a
-> single task may touch contacts → email → calendar in one trajectory.
-> "policy = dominant final-state app" is the rule used in this doc:
-> assign a task to the policy family whose APIs / DB rows are queried
-> by the final-state evaluator. Multi-app tasks where the
-> final-state evaluator touches ≥ 2 apps are tagged `multi_app` and
-> **excluded from the M3 cross-policy heatmap** (§6) but **kept in
-> M1 / M2** as part of the dataset.
+> **Conceptual fix (after critique):** the original "policy family =
+> task topic" framing conflates two different sources of variation —
+> *which information the task needs* (topic) and *how an agent
+> chooses to use it* (policy). Cross-policy memory transfer with
+> task-family-as-policy degenerates into "is irrelevant memory
+> bad?" which is trivially yes.
 >
-> The pilot in §10 reports `tasks_per_policy_family` and
-> `multi_app_fraction` so we know whether the headline dataset is
-> dense enough to populate a 4×4–6×6 heatmap.
+> The corrected design treats **"policy" as a behavioural strategy**
+> chosen *independently* of task topic, and reports task topic as a
+> **secondary axis** for stratification. We define policy via three
+> strategy variants of the same agent loop running on the same
+> executor model on the same task — each producing a distinct
+> trajectory and therefore a distinct execution-derived memory.
+
+### 2.4a Primary policy axis (Option X — strategy variants)
+
+Three strategies are injected into the AppWorld agent's task prompt
+right before the task instruction. They are short, behavioural
+mandates that change the agent's API-call pattern, not the model or
+the task. Canonical specs in
+[`motivation_v2/prompts/STRATEGY_DESIGN.md`](../../motivation_v2/prompts/STRATEGY_DESIGN.md);
+implementation in `motivation_v2/prompts/build_strategy_prompts.py`
++ `motivation_v2/scripts/run_appworld_strategy.py`.
+
+| Strategy   | Search breadth | Verification | Action style       |
+|------------|----------------|--------------|--------------------|
+| `P_direct` | minimal        | none         | answer-first       |
+| `P_verify` | task-driven    | mandatory cross-check | answer-then-confirm |
+| `P_explore`| exhaustive     | optional     | survey-then-answer |
+
+**Validation on `82e2fac_3`** (smoke run, MiniMax-M2.5 executor):
+
+| | iters | input tokens | unique APIs | total API calls | distinctive behaviour |
+|---|---|---|---|---|---|
+| baseline (no strategy) | 11 | 46K | 8 | 11 | normal |
+| `P_direct` | 11 | 57K | 7 | 11 | small task: little to compress; matches baseline |
+| `P_verify` | **26** | **204K** | **11** | **36** | 17× `show_song` cross-checks + `show_album` + `show_profile` |
+| `P_explore`| 14 | 82K | 8 | 14 | 5× `show_api_doc`, 100% `show_app_descriptions` in first 3 steps |
+
+Manipulation-check rule (must pass before relying on M1/M2/M3
+results): `median(iters_verify) / median(iters_direct) ≥ 1.5×`. On
+the smoke run this is 2.36×. The `direct` vs `baseline` near-equality
+on a 1-iter-tail task is expected; the strategy effect should be
+strongest on difficulty-2/3 tasks where there's room to shrink.
+
+### 2.4b Secondary axis (task topic, single-app)
+
+Same definition as before:
+* `policy_topic = primary_app` (spotify, file_system, phone,
+  simple_note, venmo) for single-app tasks (`required_apps` minus
+  `supervisor` plumbing has length 1).
+* Multi-app tasks tagged `multi_app` and excluded from the M3
+  cross-policy heatmap (R-2 stands).
+
+This axis is now used **only for stratification** of the M1/M2
+results, not as the policy axis itself: we want to show "the
+strategy effect holds across task topics", which is much weaker
+than "strategy IS the policy".
+
+### 2.4c Backup policy axis (Option Y — executor variants)
+
+If Option X's manipulation check fails or the strategy effect is
+too small to be visible at any budget, fall back to Option Y
+(different executor models — MiniMax / Qwen-7B / GPT-4o-mini —
+treated as different policies on the same task). Y is more
+conceptually robust ("real model differences are unfaked") but
+requires extra LLM endpoints and 2-3× compute. Documented here so
+the design has a fallback; not the primary plan.
 
 ⸻
 
@@ -812,38 +854,37 @@ For each policy family, collect tasks where full-context execution succeeds.
 
 ⸻
 
-6.4 Memory construction
+6.4 Memory construction (revised — strategy as policy)
 
-For each task x from policy family p, construct:
+Under the §2.4a strategy-as-policy framing, M3 has a much cleaner
+shape than the original task-family-as-policy version. Same task
+`x`, three trajectories `traj_X(x)` for `X ∈ {direct, verify,
+explore}`, three execution-derived memories
+`m*_exec_trajectory(x, X)`. The M3 cross-policy heatmap is now:
 
-m*_p(x, B): execution-derived memory for the correct policy/task
-m*_q(x, B): memory units derived from another policy family q
+| | consumer P_direct | consumer P_verify | consumer P_explore |
+|---|---|---|---|
+| **memory from P_direct**  | self (diagonal) | cross | cross |
+| **memory from P_verify**  | cross           | self | cross |
+| **memory from P_explore** | cross           | cross | self |
 
-The cross-policy memory should come from the same user/app-state context if possible.
+Each cell reports task success rate when a consumer agent running
+strategy `Y` is given the memory derived from a producer running
+strategy `X` on the same task. **Same task, same context, same
+executor, only the producer/consumer policy differs.** This is a
+genuine cross-policy test, not a topic-mismatch test.
 
-If exact same state is not available, use matched tasks with similar app-state size and memory-unit count.
-
-> **Review note (R-2, R-3):** the "same user/app-state context"
-> requirement is the cleanest version of the test but its feasibility
-> depends on AppWorld's structure: each task in AppWorld is paired
-> with a distinct simulator state snapshot, and most user-state
-> snapshots only host **one** task. The pilot's first deliverable
-> (§10.2) is to count:
+> **Review note (R-3 — resolved):** the "shared-state pair" problem
+> from the original draft disappears under strategy-as-policy: every
+> task automatically yields three same-context same-task-instance
+> data points (one per strategy). We no longer need to find pairs
+> of tasks with shared user-state snapshots; the snapshot is held
+> constant by construction.
 >
-> * `n_shared_state_pairs(p, q)` — how many tasks of policy `p` and
->   tasks of policy `q` share a user-state snapshot.
->
-> If for the average pair `n_shared_state_pairs ≥ 20`, M3 uses
-> same-state pairs (clean). Otherwise M3 falls back to **matched
-> pairs**: for each task `x_p`, find the task `x_q` minimising
-> `|len(memory_units(x_q)) - len(memory_units(x_p))|` and most
-> overlapping in entity universe. Document explicitly which mode is
-> used.
->
-> Single-app filter (R-2): the M3 heatmap is built **only on tasks
-> tagged single-app** (final-state evaluator touches one app). Multi-
-> app tasks are kept for M1 / M2 but excluded from M3 to avoid the
-> "is it cross-policy mismatch or just irrelevant memory?" confound.
+> Task-topic axis (R-2): the heatmap is reported per task family
+> (spotify-only, file_system-only, …) AND aggregated across
+> single-app families. Multi-app tasks join the aggregated panel
+> only.
 
 ⸻
 
@@ -1197,30 +1238,54 @@ Before running full experiments, test whether the core pattern exists.
 
 ⸻
 
-10.2 Pilot setting
+10.2 Pilot setting (revised — strategy-as-policy primary)
 
-Benchmark: AppWorld (split = `train` — 89 tasks)
-Executor: MiniMax-M2.5 (in-house endpoint)
-Tasks: all `train` tasks where full-context succeeds (expected 50–70)
-Policy families: derived from final-state evaluator app set
-Budgets: 128, 256, 512, 1024, 2048 (full grid so we can see the valley shape)
+Benchmark: AppWorld (split = `train` — 90 tasks; `dev` — 57 tasks
+joinable later for additional families)
+Executor: MiniMax-M2.5 (in-house endpoint at 10.183.22.68:8005)
+Strategies (§2.4a): `direct`, `verify`, `explore`
+Tasks: all `train` tasks where **all three strategies succeed at
+full context** (the M1/M3 analysis only includes tasks where every
+strategy can solve the task baseline; otherwise diagonals would be
+artificially deflated for some strategies)
+Budgets: 128, 256, 512, 1024, 2048 (full grid so we can see the
+valley shape; B=4096 as saturation control)
 Memory conditions (Pilot):
   - full context (upper bound)
-  - `m*_exec_minimal`
-  - `m*_exec_trajectory`
-  - `m_recent`           (declared generic baseline)
-  - BM25
-  - prompted task+policy memory (single MiniMax-M2.5 prompt)
+  - `m*_exec_minimal`             (ground-truth oracle, executor-independent)
+  - `m*_exec_trajectory(direct)`  (P_direct's own derived memory)
+  - `m*_exec_trajectory(verify)`  (P_verify's own derived memory)
+  - `m*_exec_trajectory(explore)` (P_explore's own derived memory)
+  - `m_recent`                    (declared generic baseline)
+  - BM25                          (retrieval baseline)
+  - prompted task+strategy memory (M2 condition)
 
 Pilot deliverables (gate to full run):
 
-* `n_full_context_success / n_total` per policy family (R-4, R-10)
-* `tasks_per_policy_family` table (R-2)
-* `n_shared_state_pairs(p, q)` table (R-3)
-* `multi_app_fraction` (R-2)
-* M1 success curves vs B for each memory condition, per family
-  (with the bowl-shape probe of R-5)
+* **Manipulation check**: `motivation_v2/scripts/manipulation_check.py`
+  produces the per-strategy iter / API call distributions.
+  Verdict required: `median_iters(verify) / median_iters(direct)
+  ≥ 1.5` AND `show_app_descriptions_first3(explore) ≥ 0.5`. Without
+  these, X has not taken and we fall back to Option Y.
+* `n_full_context_success_all3 / n_total_train` (R-4, R-10): tasks
+  where ALL three strategies succeed at full context.
+* `tasks_per_topic_family` table (single-app stratification, R-2)
+* M1 success curves vs B for each (strategy, memory) condition,
+  stratified by topic (with the bowl-shape probe of R-5)
+* M3 3×3 heatmap at the tightest B with overlap signal
 * Closure ratio `r_T2(B)` at B=256 / 512 (R-7)
+
+> **Compute estimate**: with the validated 71s/task throughput on
+> short tasks (smoke ran in 71s), and verify's 2.4× iter cost:
+>
+> * `direct` over 90 tasks: ~70s × 90 = **~1.8 h**
+> * `verify` over 90 tasks: ~120s × 90 = **~3.0 h**
+> * `explore` over 90 tasks: ~90s × 90 = **~2.3 h**
+>
+> Sequential total: ~7 h. Three parallel jobs (one per strategy)
+> bring wall clock to ~3 h with shared MiniMax endpoint contention.
+> Pilot is doable in one half-day. Full train + dev (147 tasks)
+> raises wall clock to ~5 h.
 
 ⸻
 

@@ -1,6 +1,6 @@
 # Session handoff — paste this into a new chat if context fills up
 
-> Updated: 2026-05-24 18:35 UTC (T1+T2 redesign; old motivation deprecated; see §Audit + §Redesign at the end)
+> Updated: 2026-05-24 18:50 UTC (Option X — strategy-as-policy — validated end-to-end on smoke; see §X-Validation at the end)
 >
 > **Paste the contents of this file into a fresh Cursor chat session**
 > with a one-line follow-up like "继续昨晚的 motivation 实验，看看
@@ -380,3 +380,96 @@ runner pipeline; build only the compression analysis on top.
 * Do not use binary action-match as the headline metric.
 * Do not use ReAct/Plan/CoT as the policy distinction.
 * Do not use token-level Jaccard or leave-one-out as killer metrics.
+
+---
+
+## §X-Validation (2026-05-24 18:50 UTC) — Option X works
+
+### What changed conceptually
+
+The user pointed out that "policy = task family" in the original
+new_motivation.md draft was a topic-mismatch test, not a policy-
+mismatch test. Spotify-vs-venmo memory is *trivially* mismatched
+because the data is unrelated. The corrected design (§2.4 of
+`new_motivation.md`) defines "policy" as a **behavioural strategy**
+applied to the same task with the same executor:
+
+* **`P_direct`**: minimum API calls, answer-first.
+* **`P_verify`**: mandatory cross-validation through a second source.
+* **`P_explore`**: list apps + APIs upfront before computing answer.
+
+This is **Option X** in the trade-off space. Option Y (different
+executor models) is documented as backup but requires endpoint
+coordination the user said is non-trivial.
+
+### What got built
+
+* `motivation_v2/prompts/STRATEGY_DESIGN.md` — canonical strategy
+  texts + manipulation-check spec.
+* `motivation_v2/prompts/build_strategy_prompts.py` — splices
+  strategy block into a copy of acon's `prompt_v1.jinja`,
+  materialises files under
+  `acon/experiments/appworld/prompts/_motivation_v2/<strategy>/`.
+* `motivation_v2/scripts/run_appworld_strategy.py` — launcher
+  that wraps acon's `run.main` with a strategy-specific
+  `prompt_file`. Same trajectory schema, same output layout.
+* `motivation_v2/scripts/manipulation_check.py` — measures whether
+  strategy directives changed agent behaviour (iter counts, API
+  call patterns, exploration/verification proxies).
+
+### Smoke result (task `82e2fac_3`, MiniMax-M2.5)
+
+| | iters | input tokens | unique APIs | total API calls |
+|---|---|---|---|---|
+| baseline (no strategy) | 11 | 46K | 8 | 11 |
+| `P_direct` | 11 | 57K | 7 | 11 |
+| `P_verify` | **26** | **204K** | **11** | **36** |
+| `P_explore` | 14 | 82K | 8 | 14 |
+
+Manipulation-check verdict: ✓ verify/direct iter ratio = 2.36× ≥ 1.5;
+✓ explore `show_app_descriptions` in first 3 steps = 100% ≥ 50%.
+Strategies are demonstrably different in trajectory content (verify
+fetched 17× show_song for cross-check, plus show_album and
+show_profile that no other strategy touched).
+
+### Where to pick up
+
+1. The pipeline is end-to-end working on 1 task per strategy.
+   Trajectories live at
+   `acon/experiments/appworld/outputs/MiniMaxAI_MiniMax-M2.5_mv2_smoke_<strategy>/train/task_82e2fac_3/`.
+2. Next step is the **3-strategy × 90-task pilot run** (~7h
+   sequential, ~3h with 3 parallel jobs). Launch with:
+
+   ```bash
+   for s in direct verify explore; do
+     nohup /workspace/acon/.venv/bin/python \
+         /workspace/EASMO/motivation_v2/scripts/run_appworld_strategy.py \
+         --strategy $s --split train --tag mv2_pilot --continue_existing \
+         > /workspace/EASMO/motivation_v2/outputs/${s}_pilot.log 2>&1 &
+   done
+   ```
+
+3. After all three finish, run manipulation_check on the full set:
+
+   ```bash
+   /workspace/acon/.venv/bin/python \
+       /workspace/EASMO/motivation_v2/scripts/manipulation_check.py \
+       --tag mv2_pilot
+   ```
+
+4. If manipulation check passes (verify/direct iter ratio ≥ 1.5,
+   explore first-3-step exploration ≥ 50%), proceed to build the
+   compression analysis layer:
+   * `motivation_v2/motivation_v2/compressors.py` — `m_recent`,
+     `m_freq`, BM25, embedding-top-k baselines.
+   * `motivation_v2/motivation_v2/runner.py` — wraps
+     `AppWorldAgent` to inject a compressed-memory string in place
+     of the full env state, run the agent, return task success.
+     This requires acon's `.venv`.
+   * `motivation_v2/scripts/run_m1.py` — compression-pressure
+     sweep across (B, strategy, memory_variant) on the pilot
+     task subset.
+
+5. If manipulation check FAILS (strategies indistinguishable on the
+   90-task scale despite passing on 1 task), fall back to Option Y
+   (executor variants) per §2.4c.
