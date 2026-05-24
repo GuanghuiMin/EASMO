@@ -1,0 +1,36 @@
+{
+  "tag": "mv2_pilot",
+  "strategies": [
+    "direct",
+    "verify",
+    "explore"
+  ],
+  "split": "train",
+  "budgets": [
+    128,
+    256,
+    512,
+    1024
+  ],
+  "total_jsonl_lines": 264,
+  "tasks_seen": 11,
+  "tasks_used": 11,
+  "per_strategy": {
+    "direct": {
+      "seen": 4,
+      "used": 4,
+      "success": 4
+    },
+    "verify": {
+      "seen": 3,
+      "used": 3,
+      "success": 3
+    },
+    "explore": {
+      "seen": 4,
+      "used": 4,
+      "success": 4
+    }
+  },
+  "output_jsonl": "/workspace/EASMO/motivation_v2/outputs/mv2_pilot/compressed_memories.jsonl"
+}
