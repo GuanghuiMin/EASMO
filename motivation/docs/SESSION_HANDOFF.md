@@ -1,6 +1,6 @@
 # Session handoff — paste this into a new chat if context fills up
 
-> Updated: 2026-05-24 18:05 UTC (design audit + new continuous metric; see §Audit at the end)
+> Updated: 2026-05-24 18:35 UTC (T1+T2 redesign; old motivation deprecated; see §Audit + §Redesign at the end)
 >
 > **Paste the contents of this file into a fresh Cursor chat session**
 > with a one-line follow-up like "继续昨晚的 motivation 实验，看看
@@ -9,32 +9,56 @@
 
 ## What this project is
 
-EASMO — investigating **policy-dependent prompt compression** for
-agentic systems. The motivation section (M1–M5 + ablations) tests a
-two-thesis spine:
+EASMO — **policy-conditional context compression for long-horizon LLM
+agents**. The motivation tests a two-thesis spine:
 
-* **T1** (compression-pressure-induced policy-dependence): policy-
-  dependence of optimal memory is amplified at tight compression
-  budgets; whether this is monotonic or two-regime depends on
-  in-flight data.
+* **T1** (compression-pressure-induced policy-dependence): under tight
+  memory budgets, the optimal compressed memory is policy-conditional
+  — different policies want different things even from the same
+  context.
 * **T2** (prompts can't policy-condition): off-the-shelf LLM-as-
-  selector produces compressions that are *surface-similar* across
-  agents even when conditioned on agent description.
+  selector cannot reproduce a true policy-conditional compression
+  even when prompted with task + policy descriptions.
 
-Combined: policy-conditional compression at tight budgets is
+Combined claim: policy-conditional compression at tight budgets is
 **necessary** (T1) and **not achievable by prompting** (T2). It must
 be learned with a behavioral objective. That's EASMO.
 
-## Where things stand (read this first)
+## Where things stand (read this first — major redesign 2026-05-24)
 
-* **Path D framing** is the floor (T2 is robust on three independent
-  measurements: M5 default, M5-tight T=0.0, M4 classifier).
-* **Path C framing** (budget-regime structure) — T1 hinge — is in
-  flight via the `wide_*` re-runs.
-* **Both T1 and T2 depend** on the `instance_noise_test` (currently
-  running on LongMemEval B=512) finishing with `cross/within ratio
-  ≥ 3×` to rule out seed noise as the explanation for M3 transfer
-  drop. This is the **single most important number** to read first.
+* **Old motivation track (`motivation/`) is deprecated** as primary
+  evidence. The setup (LLM-only selector + same-LLM-different-prompt
+  agents + LongMemEval/LoCoMo QA + binary action_match metric) has a
+  fatal logical issue: T2 holding makes the T1 hinge test unsatisfiable
+  by construction (cross-agent and within-agent memories are
+  identical-by-T2 → cross/within ratio ≈ 1 always). The wide_* and
+  instance_noise runs are kept as long-memory QA appendix material
+  only.
+* **New motivation track (`motivation_v2/`)** is the active line. It
+  uses **AppWorld** (real agentic benchmark), **execution-derived
+  ground-truth memory `m*_exec`** (non-LLM oracle, decouples T1 from
+  T2), and **policy = task family** (spotify / phone / venmo /
+  file_system / simple_note — defined by the final-state evaluator's
+  app set). See `motivation/docs/new_motivation.md` for the design
+  with 11 review-fix in-line notes.
+* **Infrastructure dependency**: AppWorld + agent runner is provided
+  by Microsoft's ACON repo at `/workspace/acon/` (arXiv 2510.00615).
+  Working venv: `/workspace/acon/.venv` (pydantic v1 + sqlmodel
+  0.0.10; the EASMO `.venv` has v2 incompat that breaks AppWorld
+  imports). AppWorld task data is downloaded under
+  `acon/experiments/appworld/data/`. Trajectory generation goes
+  through `acon/experiments/appworld/run_all.py`.
+* **Empirical corpus check (done)**: `motivation_v2/scripts/smoke_data_pipeline.py`
+  audits the AppWorld train+dev splits. Headline numbers:
+  `train` has 60/90 single-app tasks (spotify=42 dominant, then
+  file_system=9, phone=6, simple_note=3). `dev` adds venmo (3) +
+  more spotify (30). Combined train+dev gives 5 single-app families.
+  `shared-state cross-policy pairs = 0`, so M3 must use matched-pair
+  fallback (R-3 in the design).
+* **Successful trajectories on disk**: only 4 (3 train_tiny tasks,
+  ~50% executor success rate so far). Full pilot needs ~50–70
+  successful trajectories spanning all 5 families, which means
+  generating trajectories on at least train+dev (147 tasks).
 
 ## Concrete state (2026-05-24 00:23 UTC)
 
@@ -45,15 +69,26 @@ be learned with a behavioral objective. That's EASMO.
 * Original design spec: `motivation/docs/01_experiments_spec.md`
 * W&B: https://wandb.ai/guanghui_min-university-of-virginia/easmo-motivation
 
-### Background processes (PIDs, as of 2026-05-24 18:05 UTC)
+### Background processes (PIDs, as of 2026-05-24 18:35 UTC)
+
+These are all from the **deprecated** old motivation track. They are
+left running because killing them now wastes 18 h of compute and the
+data still has secondary value as long-memory QA appendix material.
+None of them inform the new T1/T2 verdicts.
 
 ```
-571621   instance_noise_test  (B=512 n=30 rerun w/ NEW continuous overlap metric, ~3h ETA)
-572118   queue_B128 watcher   (auto-starts B=128 n=30 rerun when 571621 exits)
-3872897  wide_locomo run_all  (in M1, ~80%, ETA ~1.5h to finish M1; M3 will pick up new metric)
-3872899  wide_longmemeval run_all (in M1, ~95%, ETA ~10min to finish M1)
-3916704  auto_push_watcher.sh (pushes any new results every 20 min, now with timeout 90 fix)
+571621   instance_noise_test  (B=512 n=30 rerun, deprecated — appendix material)
+572118   queue_B128 watcher   (auto-starts B=128 n=30 — deprecated)
+3872897  wide_locomo run_all  (M1 80% — appendix material)
+3872899  wide_longmemeval run_all (M1 95% — appendix material)
+3916704  auto_push_watcher.sh (pushes any new results every 20 min)
 ```
+
+**No new motivation_v2 background runs are active yet.** Trajectory
+generation for AppWorld train+dev (~147 tasks, ~22 h sequential or
+3 h × 8 parallel workers) is the next long-pole. Not started — needs
+human go-ahead because it competes with the in-flight processes for
+the MiniMax endpoint and is a multi-hour commitment.
 
 History of instance_noise PIDs (for context):
 * `3867384` — original B=512 n=10 run; finished at 00:05 UTC with a
@@ -277,3 +312,71 @@ is to wrap the `git push` line in `sync_and_push.sh` with
 * No changes to `oracle.py` (M1) or `selector_ablation.py` (M5) — M1
   is mid-flight in `wide_*` runs; M5 doesn't depend on the binary
   metric the same way.
+
+### What changed in the codebase (2026-05-24 18:35 UTC — redesign)
+
+* `motivation/docs/02_results_and_interpretation.md`: deprecation
+  banner at the top routing readers to `new_motivation.md`.
+* `motivation/docs/new_motivation.md`: 11 in-line review-fix notes
+  (R-1 … R-11) addressing the design audit; new §10.0 infrastructure
+  prep section; pilot deliverables tightened around AppWorld's
+  actual data shape.
+* `motivation_v2/` — NEW track for AppWorld experiments:
+  * `motivation_v2/data.py` — load AppWorld ground truth + acon
+    trajectories.
+  * `motivation_v2/policy_family.py` — task → policy family
+    classifier (single-app rule, supervisor=plumbing).
+  * `motivation_v2/exec_memory.py` — both `m*_exec_minimal` and
+    `m*_exec_trajectory` builders, deterministic, no LLM.
+  * `scripts/smoke_data_pipeline.py` — corpus audit + smoke test
+    on existing 4 successful trajectories. Already verified working.
+  * `motivation_v2/README.md` — track overview.
+* No `motivation_v2/runner.py` or `compressors.py` yet — those need
+  AppWorld imports which require the acon `.venv`. Next session.
+
+---
+
+## §Redesign (2026-05-24 18:35 UTC) — read this if you're picking up here
+
+The old motivation track has a fatal logical issue: **T2 (LLM
+selectors don't policy-condition) being true makes the T1 hinge test
+(`instance_noise` cross/within ratio) unsatisfiable**, because both
+within-agent and cross-agent candidates come from the same
+unconditioned LLM and are interchangeable by T2. There is no
+LLM-independent ground-truth memory in that pipeline to anchor T1.
+
+**The redesign**: switch motivation main track to AppWorld, where
+"execution-derived memory" `m*_exec` (the API calls / DB rows the
+gold solution touches) is a non-LLM oracle that anchors T1
+independently of any selector. T2 is then tested as "can a prompted
+LLM selector reproduce m*_exec's downstream task success?".
+
+**Engineering**: leverage Microsoft's ACON repo (already at
+`/workspace/acon`, arXiv 2510.00615) for the AppWorld + agent-
+runner pipeline; build only the compression analysis on top.
+
+### Where to pick up
+
+1. Run `motivation_v2/scripts/smoke_data_pipeline.py` — verifies
+   data pipeline + prints the corpus audit.
+2. Read `motivation/docs/new_motivation.md`. The 11 review notes
+   describe the design fixes vs the original draft.
+3. Decide: launch AppWorld trajectory generation? It's a ~22 h
+   sequential job (147 tasks × ~10 min each). Could be parallelised
+   externally with multiple `run_all.py` processes if endpoint
+   concurrency allows. Without trajectories, M1 / M2 / M3 can't run
+   on real data.
+4. Build `motivation_v2/compressors.py` (`m_recent`, `m_freq`, BM25,
+   embedding-top-k) — no LLM needed.
+5. Build `motivation_v2/runner.py` — wraps acon's `AppWorldAgent`
+   with a "compressed-memory mode" that injects `m*_exec` (or a
+   baseline) instead of the full env state. **Requires acon `.venv`,
+   not EASMO `.venv`.**
+6. End-to-end M1 pilot on spotify-only subset.
+
+### Anti-patterns to avoid (from §13 of new_motivation.md)
+
+* Do not use LLM-generated oracle memory as gold (circular).
+* Do not use binary action-match as the headline metric.
+* Do not use ReAct/Plan/CoT as the policy distinction.
+* Do not use token-level Jaccard or leave-one-out as killer metrics.
