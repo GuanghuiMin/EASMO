@@ -149,7 +149,23 @@ def main():
         }
 
         # Path-D decision
-        if ratio_signal >= 3.0:
+        # Guard: a verdict is only meaningful if the conditional set has
+        # both (a) enough signal rows and (b) a non-degenerate within drop.
+        # Without those, the ratio is 0/0 -> Inf and tells us nothing about
+        # policy vs seed noise.
+        MIN_SIGNAL_ROWS = 5
+        if len(signal) < MIN_SIGNAL_ROWS:
+            summary["path_d_verdict"] = (
+                f"INSUFFICIENT SIGNAL — only {len(signal)} signal rows "
+                f"(need ≥ {MIN_SIGNAL_ROWS}); re-run with more contexts "
+                "or a budget where M1 self-match is non-trivial"
+            )
+        elif swm <= 1e-6 and scm <= 1e-6:
+            summary["path_d_verdict"] = (
+                "DEGENERATE — both within and cross drops are ~0 on signal "
+                "rows; cannot distinguish policy vs noise"
+            )
+        elif ratio_signal >= 3.0:
             summary["path_d_verdict"] = "STRONG — Spotlight-defensible"
         elif ratio_signal >= 1.5:
             summary["path_d_verdict"] = "WEAK — Path D borderline"

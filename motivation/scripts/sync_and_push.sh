@@ -37,5 +37,13 @@ fi
 
 TS="$(date -u +%Y-%m-%dT%H:%MZ)"
 git commit -m "results($TS): $MSG"
-git push origin main
-echo "[sync_and_push] Pushed at $TS — '$MSG'"
+# Bound the network call so the watcher loop can't hang indefinitely
+# on a stuck SSH / TCP keepalive (this happened on 2026-05-24 01:32 UTC,
+# leaving the watcher silent for 16 h).
+if timeout 90 git push origin main; then
+    echo "[sync_and_push] Pushed at $TS — '$MSG'"
+else
+    rc=$?
+    echo "[sync_and_push] git push timed out / failed (rc=$rc) at $TS — '$MSG'; will retry next cycle"
+    exit 0
+fi

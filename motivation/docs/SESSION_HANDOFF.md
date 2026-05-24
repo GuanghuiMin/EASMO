@@ -1,6 +1,6 @@
 # Session handoff — paste this into a new chat if context fills up
 
-> Updated: 2026-05-24 00:23 UTC
+> Updated: 2026-05-24 17:30 UTC (mid-day audit; see §Audit at the end)
 >
 > **Paste the contents of this file into a fresh Cursor chat session**
 > with a one-line follow-up like "继续昨晚的 motivation 实验，看看
@@ -45,14 +45,18 @@ be learned with a behavioral objective. That's EASMO.
 * Original design spec: `motivation/docs/01_experiments_spec.md`
 * W&B: https://wandb.ai/guanghui_min-university-of-virginia/easmo-motivation
 
-### Background processes (PIDs)
+### Background processes (PIDs, as of 2026-05-24 17:30 UTC)
 
 ```
-3867384  instance_noise_test    (LongMemEval B=512, ~1h ETA)
-3872897  wide_locomo run_all    (full 6-budget curve, ~10-12h ETA)
-3872899  wide_longmemeval run_all (~10-12h ETA)
+539832   instance_noise_test    (LongMemEval B=512 n=30 rerun, ~3h ETA)
+3872897  wide_locomo run_all    (in M1, 312/414 = 75%, ETA ~2h to finish M1)
+3872899  wide_longmemeval run_all (in M1, 486/540 = 90%, ETA ~30min to finish M1)
 3916704  auto_push_watcher.sh   (pushes any new results every 20 min)
 ```
+
+The original `instance_noise_test` PID 3867384 finished at 00:05 UTC
+but produced a degenerate result (see §Audit). The 539832 process is
+the corrected re-run.
 
 ### Critical bug — fixed
 
@@ -171,3 +175,69 @@ bash motivation/scripts/sync_and_push.sh "instance_noise B=512 done — ratio=X.
 If anything in the doc seems off after data lands — recompute from raw
 CSV via `scripts/recompute_m3_summary.py` and `scripts/budget_regime_test.py`.
 Both are pure post-processing and reproducible.
+
+---
+
+## §Audit (2026-05-24 17:30 UTC) — read this if you're picking up here
+
+A mid-flight check found three issues; all three have been addressed.
+**Don't trust the pre-audit numbers in `02_results_and_interpretation.md`
+without checking the §Result update 2026-05-24 section there.**
+
+### A1. `instance_noise_summary.json` was a false positive
+
+The 00:05 run with `B=512 n=10 K=3` gave **`n_signal_rows = 0/30`**
+— every target's `self_match` was 0.0, so the cross/within ratio was
+`0/0 = Infinity`, which the verdict logic naively classified as
+`STRONG`. With M1's ~21% pass rate at B=512 on LongMemEval, getting
+0 hits out of 30 was unlucky but not surprising at n=10 contexts.
+
+* **Verdict logic patched** in `scripts/instance_noise_test.py` to
+  emit `INSUFFICIENT SIGNAL` when `n_signal_rows < 5` or both drops
+  are ~0. The old `instance_noise_summary.json` has been re-derived
+  to read the same.
+* **Re-run started at 17:25 UTC** with `n_contexts = 30` (PID 539832,
+  log: `outputs/instance_noise_rerun_B512_n30.log`). When this
+  finishes (~3 h), check `outputs/default_longmemeval/instance_noise_summary.json`
+  again. It will have been overwritten. Then run **B=128 with n=30**
+  to confirm the same ratio at the tightest budget (T1's strongest
+  claim).
+
+### A2. `wide_*` M1 quality is uneven
+
+The `oracle_memories.jsonl` files show the **per-budget pass rate is
+essentially flat on LongMemEval (~21% across 128 → 4096) and very
+sparse on LoCoMo (0–12%, with 0/52 at B=256)**. Two consequences:
+
+* T1's "tight budgets amplify policy-dependence" claim has to come
+  from M3 (cross-agent transfer), not from M1 self-fidelity.
+* LoCoMo conditional M3 is going to have wide CIs because there are
+  too few paired passing rows. Be prepared to demote LoCoMo to a
+  robustness check rather than a co-headline result.
+
+### A3. `auto_push_watcher.sh` was silently hung 16 h
+
+A `git push` at 01:32 UTC hung on the network and the watcher's
+`wait` blocked indefinitely. Killed the hung child, manually ran
+`sync_and_push.sh` to flush the backlog (commit `ea842d9`), watcher
+is back to normal. **If you see no log entries for >25 min in
+`/tmp/easmo_watcher.log`, suspect the same hang.** A long-term fix
+is to wrap the `git push` line in `sync_and_push.sh` with
+`timeout 60`.
+
+### What to do when each rerun finishes
+
+1. **`instance_noise_test B=512 n=30` (PID 539832)** — read
+   `outputs/default_longmemeval/instance_noise_summary.json`. Decide
+   verdict from `n_signal_rows` + `conditional_ratio_cross_over_within`.
+   If signal_rows >= 5 and ratio >= 3×, Path-D survives. Then run
+   B=128 with n=30 (~3 h more).
+2. **`wide_longmemeval` finishes M1 (~17:50 UTC)** — `run_all` will
+   continue into M2/M3/M4/M5. Watch
+   `outputs/wide_longmemeval/m3_summary.json` once it lands; that's
+   the T1 final number on LongMemEval.
+3. **`wide_locomo` finishes M1 (~19:30 UTC)** — same pattern, but
+   first sanity-check `m1_summary.json`'s pass count. If it's < 30,
+   M3 transfer signal will be sparse; consider re-running with a
+   higher `candidate_top_k` or accepting LoCoMo as a robustness side
+   panel.

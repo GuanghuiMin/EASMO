@@ -962,6 +962,88 @@ When they finish, return to this doc and update:
 
 ---
 
+## Result update 2026-05-24 (mid-day audit)
+
+This section was added during a mid-flight audit of the in-flight
+runs. It documents three issues that need to be acknowledged before
+any of the §Path-D / §Path-C numbers above can be trusted as final.
+
+### 1. `instance_noise_test` (B=512, n=10) — degenerate, **verdict was a false positive**
+
+The 2026-05-24 00:05 UTC run produced `n_signal_rows = 0 / 30`: every
+target agent had `self_match = 0.0` on its own candidate-0 memory at
+B=512. With a zero numerator and zero denominator, the
+`conditional_ratio_cross_over_within` field returned `Infinity`, and
+the verdict logic naively classified that as `STRONG —
+Spotlight-defensible`. **It was not.** No data was actually
+collected.
+
+Two fixes have been applied:
+
+1. **Verdict logic patched** (`scripts/instance_noise_test.py`) to
+   require `n_signal_rows ≥ 5` and a non-zero conditional within drop;
+   otherwise emits `INSUFFICIENT SIGNAL` or `DEGENERATE`. The
+   previously-written `outputs/default_longmemeval/instance_noise_summary.json`
+   has been re-derived to read `INSUFFICIENT SIGNAL` and `Infinity`
+   has been replaced with `null`.
+2. **Re-run started** at 2026-05-24 17:25 UTC with `n_contexts = 30`
+   (the full default set) and the same `B=512`, `K=3`, `N=16`. Log:
+   `outputs/instance_noise_rerun_B512_n30.log`. Expected ETA ~3 h.
+   With M1's ~21% pass rate at B=512 on LongMemEval, we now expect
+   ~5–10 signal rows out of 90 (vs the previous 0/30), enough to make
+   the cross/within ratio meaningful.
+
+A second re-run at the **tightest** budget (`B=128`) is planned right
+after, since handoff calls that out as T1's strongest claim.
+
+### 2. `wide_*` M1 progress (still in flight)
+
+| Run | M1 progress | Per-budget pass rate (action-match ≥ 0.85) |
+|---|---|---|
+| `wide_longmemeval` | 486/540 (90%) | B=128: 23.5%, B=256: 19.8%, B=512: 19.8%, B=1024: 21.0%, B=2048: 22.2%, B=4096: 23.8% |
+| `wide_locomo` | 312/414 (75%) | B=128: 3.8%, B=256: **0.0%**, B=512: 3.8%, B=1024: 11.5%, B=2048: 7.7%, B=4096: 9.8% |
+
+Two implications:
+
+* **LongMemEval pass rate is essentially flat across budgets.** This
+  matches the `default_longmemeval` aggregate (26.9%) but means the
+  *budget* axis is unlikely to show the monotonic-decreasing T1
+  pattern at the M1 level. The action-match drop is going to have to
+  come from M3 (cross-agent) rather than M1 (self-fidelity).
+* **LoCoMo M1 pass rate is too low to support per-budget M3.** B=256
+  has zero passing candidates so far (0/52). Without paired passing
+  rows, M3's conditional drop on LoCoMo will have wide CIs (or be
+  computable on only ~5–10 contexts per budget). Expect to either
+  re-frame LoCoMo as a robustness check on LongMemEval, or pull
+  LoCoMo from the headline.
+
+### 3. `auto_push_watcher.sh` had been silently hung 16 h
+
+A `git push` from the 2026-05-24 01:32 UTC sync hung on a network
+call and never returned. Because the watcher uses
+`bash sync_and_push.sh "auto-sync" || true`, the wrapper caught
+errors but not hangs, and the loop sat in `wait` for 16 h. Visible
+symptom: `/tmp/easmo_watcher.log` has no entries after `01:32Z`,
+local repo is one commit ahead of origin, but `ps` shows the
+watcher alive.
+
+Resolved manually: killed the hung `git` child, ran
+`sync_and_push.sh` once to flush the backlog (`ea842d9`), watcher
+loop is healthy again. Consider adding `timeout 60 git push …` in
+`sync_and_push.sh` if this recurs.
+
+### What's still pending
+
+| Item | Blocking | ETA |
+|---|---|---|
+| `instance_noise B=512 n=30` rerun → real Path-D verdict | T1+T2 hinge | ~3 h |
+| `instance_noise B=128 n=30` (T1's tightest claim) | T1 | +3 h after above |
+| `wide_longmemeval` finishes M1 → M2/M3/M4/M5 | Path C | ~30 min M1 + many more for downstream |
+| `wide_locomo` finishes M1 → decide whether to keep | Path C corroboration | ~2 h M1 |
+| `recompute_m3_summary.py` + `budget_regime_test.py` on clean wide data | Path C verdict | after both wide runs finish |
+
+---
+
 ## Where the code lives
 
 ```

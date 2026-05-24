@@ -11,7 +11,7 @@
     -0.05,
     0.0
   ],
-  "unconditional_ratio_cross_over_within": Infinity,
+  "unconditional_ratio_cross_over_within": null,
   "conditional_within_drop_mean": 0.0,
   "conditional_within_ci": [
     0.0,
@@ -22,6 +22,7 @@
     0.0,
     0.0
   ],
-  "conditional_ratio_cross_over_within": Infinity,
-  "path_d_verdict": "STRONG — Spotlight-defensible"
+  "conditional_ratio_cross_over_within": null,
+  "path_d_verdict": "INSUFFICIENT SIGNAL \u2014 only 0 signal rows (need >= 5); re-run with more contexts or a budget where M1 self-match is non-trivial",
+  "_note": "Original B=512 / n_contexts=10 run yielded 0 signal rows (all target self_match==0); verdict re-derived 2026-05-24 with stricter guard. Re-run pending with larger n_contexts."
 }
