@@ -1036,11 +1036,137 @@ loop is healthy again. Consider adding `timeout 60 git push …` in
 
 | Item | Blocking | ETA |
 |---|---|---|
-| `instance_noise B=512 n=30` rerun → real Path-D verdict | T1+T2 hinge | ~3 h |
+| `instance_noise B=512 n=30` rerun (NEW continuous metric) → real Path-D verdict | T1+T2 hinge | ~3 h |
 | `instance_noise B=128 n=30` (T1's tightest claim) | T1 | +3 h after above |
-| `wide_longmemeval` finishes M1 → M2/M3/M4/M5 | Path C | ~30 min M1 + many more for downstream |
+| `wide_longmemeval` finishes M1 → M2/M3/M4/M5 (M3 will use new metric) | Path C | ~30 min M1 + many more for downstream |
 | `wide_locomo` finishes M1 → decide whether to keep | Path C corroboration | ~2 h M1 |
 | `recompute_m3_summary.py` + `budget_regime_test.py` on clean wide data | Path C verdict | after both wide runs finish |
+
+---
+
+## Result update 2026-05-24 (afternoon — design audit)
+
+A second pass found that the binary nature of the headline metric was
+itself a major source of the "no signal" problem documented above.
+This section records that audit and the changes made to the codebase.
+
+### Why the prior runs looked degenerate
+
+```python
+# motivation/motivation/metrics.py (pre-audit)
+def action_match_rate(dist_a, dist_b):
+    """Top-1 action match: 1.0 if argmax actions agree, else 0.0."""
+```
+
+Every M1, M3, and `instance_noise` "match" was a 0/1 bit: do the
+`argmax` actions of two N=16 sample distributions agree? On QA tasks
+where one canonical answer dominates, a single sample flipping
+between 8/16 and 7/16 votes rolls the match between 1 and 0. Two
+distributions overlapping ~80% can score 0; two distributions
+overlapping ~30% can score 1 if the same wrong answer happens to top
+both.
+
+This explains:
+* The "0 / 30 signal rows" `instance_noise` result at B=512 — the
+  metric is a near-Bernoulli with low p, so K=3 candidates per agent
+  × 10 contexts almost certainly produces 0 hits.
+* The flat-across-budgets M1 pass rate (~21% on LongMemEval, all
+  budgets 128 → 4096): the binary metric saturates at the noise
+  floor of the sampling process, not the actual compression-quality
+  curve.
+* The M3 conditional drop only being computable on rows where
+  `action_match_self == 1.0`, drastically shrinking the analysable
+  set.
+
+### Other design weaknesses surfaced (carried as caveats)
+
+These are not fixed by metric changes alone; they are paper-level
+limitations that any T1/T2 framing has to acknowledge:
+
+1. **Three "agents" share the same base LLM** (MiniMax-M2.5) and
+   differ only in system prompt template + a small temperature
+   spread (0.4 / 0.4 / 0.7). Any "policy difference" is a stylistic
+   wrapper, not a genuinely different decision policy. A real
+   cross-model agent (e.g. GPT-4o-mini, Qwen-2.5-7B) would be
+   needed to make policy-dependence claims robust.
+2. **LongMemEval and LoCoMo are QA benchmarks**, not agentic. There
+   is one canonical answer per question, so all three agents
+   *should* converge to the same answer regardless of "policy".
+   The action-distribution variation we measure is mostly stylistic
+   format variation, not strategic variation. AppWorld (already
+   loadable via `motivation/data.py`) is the appropriate benchmark
+   for T1's "policy-dependent compression" claim.
+3. **T1 + T2 are in tension on this experimental setup.** T2 says
+   "LLM-as-selector cannot policy-condition memory" — i.e.
+   cross-agent and within-agent candidates have similar content.
+   T1's `instance_noise` test wants `cross/within ≥ 3×`, which
+   requires cross-agent memories to differ behaviourally. If T2 is
+   true on LLM selectors, the test for T1 cannot succeed using LLM
+   selectors. A proper T1 test needs a **non-LLM oracle memory**
+   (e.g. fine-tuned compressor, or human-annotated minimal
+   sufficient memories per agent).
+4. **`instance_noise` uses one probe state** per context. For
+   LongMemEval / LoCoMo this is by construction (the question is
+   the only probe), but it does mean each row is one Bernoulli
+   trial worth of signal. Multi-probe averaging applies only to
+   AppWorld contexts.
+
+### Code changes (in this commit)
+
+* `motivation/metrics.py`: added `action_overlap_rate(p, q) = 1 -
+  TV(p, q)` (continuous, range [0, 1]) and `js_divergence` for
+  completeness. `action_match_rate` retained for legacy reporting
+  but no longer the primary signal.
+* `motivation/instance_noise.py` + `scripts/instance_noise_test.py`:
+  every row now stores BOTH binary and continuous overlap
+  (`self_match` / `self_overlap`, etc.). The Path-D verdict is
+  driven by the **continuous overlap ratio** with signal threshold
+  `self_overlap ≥ 0.5` (loose; admits rows where M1 binary match
+  was 0 due to one flipped argmax sample). Verdicts: `STRONG ≥3×`,
+  `WEAK 1.5–3×`, `DEAD <1.5`, plus `INSUFFICIENT SIGNAL` and
+  `DEGENERATE` guards.
+* `motivation/transfer.py` + `scripts/run_m3.py`: every transfer row
+  now stores `overlap_self`, `overlap_cross`, `overlap_drop`
+  alongside the binary fields. Pair breakdowns and m3_summary.json
+  now expose both flavours so the conditional-drop conversation is
+  not bottlenecked on the binary signal fraction.
+* `scripts/recompute_m3_summary.py`: schema-aware — emits the
+  overlap-based summary if the CSV has the new columns, falls back
+  to binary-only on older CSVs.
+
+### Why this matters for the verdict
+
+The prior `instance_noise` run produced 0/30 binary signal rows on
+B=512, n_contexts=10. With the new continuous metric and
+n_contexts=30 (90 rows total) we expect:
+
+* **Binary signal rows**: still ~5–15 (with M1 binary pass at ~21%)
+* **Overlap signal rows** (`self_overlap ≥ 0.5`): expected ~40–70,
+  because `self_overlap` is a graded measure that catches the
+  "almost-passes" the binary metric throws away.
+
+That order-of-magnitude bump in usable rows is what makes the
+cross/within ratio statistically interpretable. **The verdict on
+Path D should be read off the OVERLAP ratio, not the binary ratio**,
+in the new summary file.
+
+### Honest framing on what this audit changes
+
+* **Path D** is now testable rather than vacuously confirmed. It can
+  still die — if overlap ratio comes back ~1×, M3's drop really is
+  selector seed noise. That's a real risk.
+* **Path C** (budget structure) similarly will be re-read on
+  `m3_overlap_*` fields once `wide_*` finishes. The "U-shape at
+  B=256" narrative may collapse under the smoother metric, in which
+  case T1's wording shifts to "tight budgets remain hard" rather
+  than "two-regime structure".
+* **T2** is unchanged. M5's within-vs-cross gap and M4 classifier
+  results don't depend on the action-match metric; they're text
+  similarity / classification on the memories themselves.
+* **LoCoMo as co-headline** is still in trouble: even with the
+  smoother metric, M1 at B=256 is 0 / 52 candidates on LoCoMo, so
+  there's nothing to recover. Plan to demote LoCoMo to a robustness
+  side panel.
 
 ---
 

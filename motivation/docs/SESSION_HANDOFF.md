@@ -1,6 +1,6 @@
 # Session handoff — paste this into a new chat if context fills up
 
-> Updated: 2026-05-24 17:30 UTC (mid-day audit; see §Audit at the end)
+> Updated: 2026-05-24 18:05 UTC (design audit + new continuous metric; see §Audit at the end)
 >
 > **Paste the contents of this file into a fresh Cursor chat session**
 > with a one-line follow-up like "继续昨晚的 motivation 实验，看看
@@ -45,18 +45,24 @@ be learned with a behavioral objective. That's EASMO.
 * Original design spec: `motivation/docs/01_experiments_spec.md`
 * W&B: https://wandb.ai/guanghui_min-university-of-virginia/easmo-motivation
 
-### Background processes (PIDs, as of 2026-05-24 17:30 UTC)
+### Background processes (PIDs, as of 2026-05-24 18:05 UTC)
 
 ```
-539832   instance_noise_test    (LongMemEval B=512 n=30 rerun, ~3h ETA)
-3872897  wide_locomo run_all    (in M1, 312/414 = 75%, ETA ~2h to finish M1)
-3872899  wide_longmemeval run_all (in M1, 486/540 = 90%, ETA ~30min to finish M1)
-3916704  auto_push_watcher.sh   (pushes any new results every 20 min)
+571621   instance_noise_test  (B=512 n=30 rerun w/ NEW continuous overlap metric, ~3h ETA)
+572118   queue_B128 watcher   (auto-starts B=128 n=30 rerun when 571621 exits)
+3872897  wide_locomo run_all  (in M1, ~80%, ETA ~1.5h to finish M1; M3 will pick up new metric)
+3872899  wide_longmemeval run_all (in M1, ~95%, ETA ~10min to finish M1)
+3916704  auto_push_watcher.sh (pushes any new results every 20 min, now with timeout 90 fix)
 ```
 
-The original `instance_noise_test` PID 3867384 finished at 00:05 UTC
-but produced a degenerate result (see §Audit). The 539832 process is
-the corrected re-run.
+History of instance_noise PIDs (for context):
+* `3867384` — original B=512 n=10 run; finished at 00:05 UTC with a
+  bogus `STRONG` verdict (0/0 = ∞, see §Audit-A1).
+* `539832` — first audit re-run with binary metric, n=30; killed at
+  18:01 UTC after the design-audit identified the metric itself as
+  the bottleneck.
+* `571621` — current re-run with continuous `action_overlap_rate`
+  metric (1 − TV) as the primary signal channel.
 
 ### Critical bug — fixed
 
@@ -227,17 +233,47 @@ is to wrap the `git push` line in `sync_and_push.sh` with
 
 ### What to do when each rerun finishes
 
-1. **`instance_noise_test B=512 n=30` (PID 539832)** — read
-   `outputs/default_longmemeval/instance_noise_summary.json`. Decide
-   verdict from `n_signal_rows` + `conditional_ratio_cross_over_within`.
-   If signal_rows >= 5 and ratio >= 3×, Path-D survives. Then run
-   B=128 with n=30 (~3 h more).
-2. **`wide_longmemeval` finishes M1 (~17:50 UTC)** — `run_all` will
-   continue into M2/M3/M4/M5. Watch
-   `outputs/wide_longmemeval/m3_summary.json` once it lands; that's
-   the T1 final number on LongMemEval.
-3. **`wide_locomo` finishes M1 (~19:30 UTC)** — same pattern, but
-   first sanity-check `m1_summary.json`'s pass count. If it's < 30,
-   M3 transfer signal will be sparse; consider re-running with a
-   higher `candidate_top_k` or accepting LoCoMo as a robustness side
-   panel.
+1. **`instance_noise_test B=512 n=30` v2 (PID 571621)** — read
+   `outputs/default_longmemeval/instance_noise_summary.json`. The
+   summary now has BOTH binary and overlap fields. **Use the
+   overlap ones for the verdict** (`overlap_conditional_ratio_cross_over_within`,
+   `n_signal_rows_overlap`). The signal threshold is
+   `self_overlap ≥ 0.5` (any compressed memory whose action
+   distribution overlaps the full-context distribution by ≥ 50%).
+   - If `n_signal_rows_overlap ≥ 5` and overlap ratio ≥ 3×: Path-D
+     STRONG.
+   - If overlap ratio in [1.5, 3): Path-D WEAK / borderline.
+   - If overlap ratio < 1.5: Path-D DEAD, fall back to Path B.
+   The B=128 rerun (PID will be created by 572118 once 571621 exits)
+   then confirms / disconfirms at the tightest budget.
+2. **`wide_longmemeval` finishes M1** — `run_all` spawns M2/M3
+   subprocesses fresh, so M3 (`scripts/run_m3.py`) will load the
+   patched code automatically and emit `overlap_self/cross/drop`
+   columns in `transfer_results.csv` and `m3_overlap_*` fields in
+   `m3_summary.json`. **Read `m3_overlap_mean_conditional_drop`,
+   not `m3_mean_conditional_drop`,** for the headline.
+3. **`wide_locomo` finishes M1** — same pattern, but first
+   sanity-check `m1_summary.json`'s pass count. With 0–12% binary
+   M1 pass rates, the binary M3 will be near-noise-floor regardless;
+   the overlap M3 might salvage usable signal. If even
+   `m3_overlap_signal_rows < 30`, demote LoCoMo to a robustness side
+   panel rather than a co-headline.
+
+### What changed in the codebase (2026-05-24 18:05 UTC)
+
+* `motivation/metrics.py`: added `action_overlap_rate(p, q) = 1 - TV(p, q)`
+  and `js_divergence`. Smooth replacement for the binary
+  `action_match_rate` which is essentially a Bernoulli on QA tasks
+  with N=16 samples and was the root cause of "0 signal rows".
+* `motivation/instance_noise.py`, `scripts/instance_noise_test.py`:
+  records both binary and overlap channels; verdict logic uses
+  overlap with threshold `self_overlap ≥ 0.5`.
+* `motivation/transfer.py`, `scripts/run_m3.py`,
+  `scripts/recompute_m3_summary.py`: same — both channels emitted,
+  schema-versioned so `recompute_m3_summary.py` works on old + new
+  CSVs.
+* `motivation/scripts/sync_and_push.sh`: `git push` now runs under
+  `timeout 90` so the watcher can't silently hang.
+* No changes to `oracle.py` (M1) or `selector_ablation.py` (M5) — M1
+  is mid-flight in `wide_*` runs; M5 doesn't depend on the binary
+  metric the same way.
