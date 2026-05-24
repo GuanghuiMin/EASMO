@@ -1,0 +1,7 @@
+context_id,budget,agent_a,agent_b,token_jaccard,sentence_jaccard,tfidf_cosine,memory_a_tokens,memory_b_tokens
+longmemeval::c8090214_abs,256,A_cot,A_plan,0.5625,0.0,0.6703257446184845,77,40
+longmemeval::c8090214_abs,256,A_cot,A_react,0.52,0.0,0.606909412909197,77,41
+longmemeval::c8090214_abs,256,A_plan,A_react,0.8387096774193549,0.0,0.8273903423713953,40,41
+longmemeval::e01b8e2f,256,A_cot,A_plan,0.5853658536585366,0.0,0.5401102443206102,40,57
+longmemeval::e01b8e2f,256,A_cot,A_react,0.41935483870967744,0.0,0.5334285243277838,40,15
+longmemeval::e01b8e2f,256,A_plan,A_react,0.2894736842105263,0.0,0.37142097503380916,57,15

@@ -1,0 +1,50 @@
+# Default LongMemEval config — 30 contexts × 3 agents × 4 budgets.
+# Estimated runtime on MiniMax: ~3-5 h for M1, plus a few minutes each
+# for M2/M3/M4. Iterate ``max_contexts`` upward as comfort grows.
+
+experiment:
+  name: motivation-default-longmemeval
+  output_dir: outputs/default_longmemeval
+  seed: 42
+
+wandb:
+  enabled: true
+  project: easmo-motivation
+  tags: [m1, m2, m3, longmemeval]
+  group: default-longmemeval
+
+llm:
+  base_url: ${oc.env:NOKIA_LLM_BASE_URL,http://10.183.22.68:8005/v1}
+  model_id: ${oc.env:NOKIA_LLM_MODEL_ID,MiniMaxAI/MiniMax-M2.5}
+  api_key: EMPTY
+  request_timeout_s: 180
+  max_concurrent: 8
+  retry_attempts: 3
+  retry_backoff_s: 5
+
+data:
+  source: longmemeval
+  data_path: /workspace/.cache/huggingface/hub/datasets--xiaowu0162--longmemeval/snapshots/2ec2a557f339b6c0369619b1ed5793734cc87533/longmemeval_oracle
+  max_contexts: 30
+  max_context_tokens: 8000
+
+agents:
+  - id: A_react
+    scaffold: react
+  - id: A_plan
+    scaffold: plan
+  - id: A_cot
+    scaffold: cot
+
+budgets: [128, 256, 512, 1024]
+samples_per_state: 16
+
+m1:
+  candidate_top_k: 5
+  action_match_pass: 0.85
+
+m3:
+  divergence_probe_states: 20
+
+m5:
+  within_k: 3

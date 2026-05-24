@@ -1,0 +1,13 @@
+context_id,budget,source_agent,target_agent,action_match_self,action_match_cross,task_drop,policy_divergence
+longmemeval::c8090214_abs,256,A_react,A_plan,0.0,0.0,0.0,0.75
+longmemeval::c8090214_abs,256,A_react,A_cot,0.0,0.0,0.0,0.75
+longmemeval::c8090214_abs,256,A_plan,A_react,0.0,0.0,0.0,0.25
+longmemeval::c8090214_abs,256,A_plan,A_cot,0.0,0.0,0.0,0.75
+longmemeval::c8090214_abs,256,A_cot,A_react,0.0,0.0,0.0,0.75
+longmemeval::c8090214_abs,256,A_cot,A_plan,0.0,0.0,0.0,0.75
+longmemeval::e01b8e2f,256,A_react,A_plan,1.0,0.0,1.0,0.75
+longmemeval::e01b8e2f,256,A_react,A_cot,1.0,1.0,0.0,0.25
+longmemeval::e01b8e2f,256,A_plan,A_react,1.0,1.0,0.0,1.0
+longmemeval::e01b8e2f,256,A_plan,A_cot,1.0,1.0,0.0,0.75
+longmemeval::e01b8e2f,256,A_cot,A_react,1.0,1.0,0.0,0.25
+longmemeval::e01b8e2f,256,A_cot,A_plan,0.0,0.0,0.0,0.75

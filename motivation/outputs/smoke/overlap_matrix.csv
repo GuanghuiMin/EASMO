@@ -1,0 +1,7 @@
+context_id,budget,agent_a,agent_b,token_jaccard,sentence_jaccard,tfidf_cosine,memory_a_tokens,memory_b_tokens
+appworld::82e2fac_1::f6ed28a526,256,A_cot,A_plan,0.5039370078740157,0.0,0.5469430824771156,204,191
+appworld::82e2fac_1::f6ed28a526,256,A_cot,A_react,0.5045045045045045,0.0,0.5581187451995121,204,250
+appworld::82e2fac_1::f6ed28a526,256,A_plan,A_react,0.5094339622641509,0.0,0.49891159853653033,191,250
+appworld::82e2fac_2::c4274958ce,256,A_cot,A_plan,0.3176470588235294,0.0,0.3924017124614869,123,93
+appworld::82e2fac_2::c4274958ce,256,A_cot,A_react,0.375,0.0,0.552514410014372,123,86
+appworld::82e2fac_2::c4274958ce,256,A_plan,A_react,0.40298507462686567,0.0,0.4665575587246903,93,86

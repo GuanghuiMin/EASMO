@@ -1,0 +1,47 @@
+# Smoke-test config: 2 contexts × 3 agents × 1 budget — should finish in
+# ~5–10 minutes on MiniMax and validate every piece of the pipeline.
+
+experiment:
+  name: motivation-smoke
+  output_dir: outputs/smoke
+  seed: 42
+
+wandb:
+  enabled: true
+  project: easmo-motivation
+  entity: null      # use default
+  tags: [smoke, m1]
+  group: smoke
+
+llm:
+  base_url: ${oc.env:NOKIA_LLM_BASE_URL,http://10.183.22.68:8005/v1}
+  model_id: ${oc.env:NOKIA_LLM_MODEL_ID,MiniMaxAI/MiniMax-M2.5}
+  api_key: EMPTY
+  request_timeout_s: 180
+  max_concurrent: 4         # in-flight requests
+  retry_attempts: 3
+  retry_backoff_s: 5
+
+data:
+  source: appworld
+  appworld_split: train_tiny     # 3 tasks
+  max_contexts: 2                # cap to keep smoke test snappy
+  probe_states_per_context: 4    # how many (state, gold-action) probe points per ctx
+  trajectory_glob: /workspace/acon/experiments/appworld/outputs/MiniMaxAI_MiniMax-M2.5_minimax_tiny/train_tiny/task_*/appworld_trajectory.json
+  max_context_tokens: 4000       # truncate long trajectories for speed
+
+agents:
+  # All three share the same base model (MiniMax-M2.5); only the scaffold differs.
+  - id: A_react
+    scaffold: react
+  - id: A_plan
+    scaffold: plan
+  - id: A_cot
+    scaffold: cot
+
+budgets: [256]                  # only one budget in smoke test
+samples_per_state: 4            # N=4 in smoke (8 in default)
+
+m1:
+  candidate_top_k: 3            # only 3 candidates in smoke (5 in default)
+  action_match_pass: 0.85

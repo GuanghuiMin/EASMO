@@ -1,0 +1,70 @@
+{
+  "m3_total_runs": 552,
+  "m3_mean_task_drop": 0.030797101449275364,
+  "m3_signal_rows": 27,
+  "m3_signal_fraction": 0.04891304347826087,
+  "m3_mean_conditional_drop": 0.8518518518518519,
+  "m3_conditional_spearman_drop_vs_div": 0.015204481545070963,
+  "m3_conditional_linear_fit_r2": 0.009293799845639272,
+  "m3_spearman_drop_vs_div": -0.020863338189555186,
+  "m3_linear_fit_r2": 0.00019060574160123522,
+  "m3_pass_unconditional_drop_15": false,
+  "m3_pass_conditional_drop_15": true,
+  "m3_pass_signal_fraction_10": false,
+  "m3_pair_breakdown": [
+    {
+      "source_agent": "A_cot",
+      "target_agent": "A_plan",
+      "n": 92,
+      "n_signal": 8,
+      "mean_task_drop_unconditional": 0.043478260869565216,
+      "mean_conditional_drop": 0.875,
+      "mean_policy_div": 0.9836956521739131
+    },
+    {
+      "source_agent": "A_cot",
+      "target_agent": "A_react",
+      "n": 92,
+      "n_signal": 4,
+      "mean_task_drop_unconditional": 0.021739130434782608,
+      "mean_conditional_drop": 0.5,
+      "mean_policy_div": 0.9918478260869565
+    },
+    {
+      "source_agent": "A_plan",
+      "target_agent": "A_cot",
+      "n": 92,
+      "n_signal": 2,
+      "mean_task_drop_unconditional": 0.021739130434782608,
+      "mean_conditional_drop": 1.0,
+      "mean_policy_div": 0.9864130434782609
+    },
+    {
+      "source_agent": "A_plan",
+      "target_agent": "A_react",
+      "n": 92,
+      "n_signal": 3,
+      "mean_task_drop_unconditional": 0.0,
+      "mean_conditional_drop": 1.0,
+      "mean_policy_div": 0.8641304347826086
+    },
+    {
+      "source_agent": "A_react",
+      "target_agent": "A_cot",
+      "n": 92,
+      "n_signal": 0,
+      "mean_task_drop_unconditional": 0.0,
+      "mean_conditional_drop": 0.0,
+      "mean_policy_div": 0.970108695652174
+    },
+    {
+      "source_agent": "A_react",
+      "target_agent": "A_plan",
+      "n": 92,
+      "n_signal": 10,
+      "mean_task_drop_unconditional": 0.09782608695652174,
+      "mean_conditional_drop": 0.9,
+      "mean_policy_div": 0.907608695652174
+    }
+  ]
+}

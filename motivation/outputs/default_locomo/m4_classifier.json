@@ -1,0 +1,28 @@
+{
+  "test_accuracy": 0.39285714285714285,
+  "n_train": 220,
+  "n_test": 56,
+  "confusion_matrix": [
+    [
+      6,
+      9,
+      3
+    ],
+    [
+      6,
+      9,
+      4
+    ],
+    [
+      4,
+      8,
+      7
+    ]
+  ],
+  "label_names": [
+    "A_cot",
+    "A_plan",
+    "A_react"
+  ],
+  "pass_70": false
+}

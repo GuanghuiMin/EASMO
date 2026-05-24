@@ -1,0 +1,52 @@
+# Wide-budget LoCoMo: 4x the budget range to lift M1 oracle pass rate.
+# Used to give conditional drop a wider signal base (more signal_rows).
+# Estimated: ~10-15 h end-to-end (M1+M2+M3+M4+M5+M3judge).
+
+experiment:
+  name: motivation-wide-locomo
+  output_dir: outputs/wide_locomo
+  seed: 42
+
+wandb:
+  enabled: true
+  project: easmo-motivation
+  tags: [m1, m2, m3, m3judge, locomo, wide-budget]
+  group: wide-locomo
+
+llm:
+  base_url: ${oc.env:NOKIA_LLM_BASE_URL,http://10.183.22.68:8005/v1}
+  model_id: ${oc.env:NOKIA_LLM_MODEL_ID,MiniMaxAI/MiniMax-M2.5}
+  api_key: EMPTY
+  request_timeout_s: 180
+  max_concurrent: 8
+  retry_attempts: 3
+  retry_backoff_s: 5
+
+data:
+  source: locomo
+  data_path: /workspace/EASMO/motivation/data_cache/locomo10.json
+  max_contexts: 30
+  max_context_tokens: 8000
+  qa_per_conversation: 3
+
+agents:
+  - id: A_react
+    scaffold: react
+  - id: A_plan
+    scaffold: plan
+  - id: A_cot
+    scaffold: cot
+
+# Widened budget range: 1024 / 8000 ~= 12.8%, 4096 / 8000 ~= 51%
+budgets: [128, 256, 512, 1024, 2048, 4096]
+samples_per_state: 16
+
+m1:
+  candidate_top_k: 5
+  action_match_pass: 0.85
+
+m3:
+  divergence_probe_states: 20
+
+m5:
+  within_k: 3

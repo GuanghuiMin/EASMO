@@ -1,0 +1,27 @@
+{
+  "n_rows": 30,
+  "n_signal_rows": 0,
+  "unconditional_within_drop_mean": -0.016666666666666666,
+  "unconditional_within_ci": [
+    -0.05,
+    0.0
+  ],
+  "unconditional_cross_drop_mean": -0.016666666666666666,
+  "unconditional_cross_ci": [
+    -0.05,
+    0.0
+  ],
+  "unconditional_ratio_cross_over_within": Infinity,
+  "conditional_within_drop_mean": 0.0,
+  "conditional_within_ci": [
+    0.0,
+    0.0
+  ],
+  "conditional_cross_drop_mean": 0.0,
+  "conditional_cross_ci": [
+    0.0,
+    0.0
+  ],
+  "conditional_ratio_cross_over_within": Infinity,
+  "path_d_verdict": "STRONG — Spotlight-defensible"
+}

@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+*.so
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# Local secrets / state
+.netrc
+.env
+
+# Experiment runtime artifacts (re-creatable, large)
+**/wandb/
+**/data_cache/
+*.log
+
+# Heavy generated artifacts kept out of the repo; results JSON / CSV
+# under outputs/ ARE tracked so the paper-quality numbers live with
+# the code. Per-experiment oracle_memories.jsonl is small enough to
+# track too (a few hundred KB each).

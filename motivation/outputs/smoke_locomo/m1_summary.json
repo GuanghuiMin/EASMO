@@ -1,0 +1,9 @@
+{
+  "m1_total_triples": 6,
+  "m1_pass_count": 1,
+  "m1_pass_fraction": 0.16666666666666666,
+  "m1_total_minutes": 5.110842887560526,
+  "m1_mean_action_match/A_react": 0.0,
+  "m1_mean_action_match/A_plan": 0.5,
+  "m1_mean_action_match/A_cot": 0.0
+}

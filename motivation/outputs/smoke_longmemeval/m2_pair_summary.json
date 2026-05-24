@@ -1,0 +1,41 @@
+{
+  "pairs": [
+    {
+      "agent_a": "A_cot",
+      "agent_b": "A_plan",
+      "n": 2,
+      "token_jaccard_mean": 0.5739329268292683,
+      "token_jaccard_std": 0.016168600179570423,
+      "sentence_jaccard_mean": 0.0,
+      "sentence_jaccard_std": 0.0,
+      "tfidf_cosine_mean": 0.6052179944695473,
+      "tfidf_cosine_std": 0.09207626327622583
+    },
+    {
+      "agent_a": "A_cot",
+      "agent_b": "A_react",
+      "n": 2,
+      "token_jaccard_mean": 0.46967741935483875,
+      "token_jaccard_std": 0.0711668760420009,
+      "sentence_jaccard_mean": 0.0,
+      "sentence_jaccard_std": 0.0,
+      "tfidf_cosine_mean": 0.5701689686184903,
+      "tfidf_cosine_std": 0.051958834603530436
+    },
+    {
+      "agent_a": "A_plan",
+      "agent_b": "A_react",
+      "n": 2,
+      "token_jaccard_mean": 0.5640916808149405,
+      "token_jaccard_std": 0.38836849526969125,
+      "sentence_jaccard_mean": 0.0,
+      "sentence_jaccard_std": 0.0,
+      "tfidf_cosine_mean": 0.5994056587026022,
+      "tfidf_cosine_std": 0.32241903165774705
+    }
+  ],
+  "overall": {
+    "mean_pairwise_token_jaccard": 0.5359006756663492,
+    "pass_jaccard_under_0.4": false
+  }
+}

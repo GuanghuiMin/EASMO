@@ -1,0 +1,51 @@
+# Default LoCoMo config — 30 contexts (3 QA × 10 convs) × 3 agents × 4 budgets.
+# Estimated runtime on MiniMax: ~2-4 h for M1.
+
+experiment:
+  name: motivation-default-locomo
+  output_dir: outputs/default_locomo
+  seed: 42
+
+wandb:
+  enabled: true
+  project: easmo-motivation
+  tags: [m1, m2, m3, locomo]
+  group: default-locomo
+
+llm:
+  base_url: ${oc.env:NOKIA_LLM_BASE_URL,http://10.183.22.68:8005/v1}
+  model_id: ${oc.env:NOKIA_LLM_MODEL_ID,MiniMaxAI/MiniMax-M2.5}
+  api_key: EMPTY
+  request_timeout_s: 180
+  max_concurrent: 8
+  retry_attempts: 3
+  retry_backoff_s: 5
+
+data:
+  source: locomo
+  data_path: /workspace/EASMO/motivation/data_cache/locomo10.json
+  max_contexts: 30
+  max_context_tokens: 8000
+  qa_per_conversation: 3
+
+agents:
+  - id: A_react
+    scaffold: react
+  - id: A_plan
+    scaffold: plan
+  - id: A_cot
+    scaffold: cot
+
+budgets: [128, 256, 512, 1024]
+samples_per_state: 16     # bumped from 8: tighter empirical-distribution estimates
+
+m1:
+  candidate_top_k: 5
+  action_match_pass: 0.85
+
+m3:
+  divergence_probe_states: 20
+
+m5:
+  within_k: 3             # candidates per agent for within-agent overlap test
+  # M5 runs on a single budget (first in `budgets:`) to stay cheap.

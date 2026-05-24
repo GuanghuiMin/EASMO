@@ -1,0 +1,8 @@
+{
+  "m3_total_runs": 12,
+  "m3_mean_task_drop": 0.08333333333333333,
+  "m3_spearman_drop_vs_div": 0.1049727762162956,
+  "m3_linear_fit_r2": 0.017349063150589483,
+  "m3_pass_drop_15": false,
+  "m3_pass_correlation": false
+}

@@ -1,0 +1,49 @@
+{
+  "pairs": [
+    {
+      "agent_a": "A_cot",
+      "agent_b": "A_plan",
+      "n": 92,
+      "token_jaccard_mean": 0.3101264048892461,
+      "token_jaccard_std": 0.2509678623844357,
+      "sentence_jaccard_mean": 0.07261623959564463,
+      "sentence_jaccard_std": 0.23273394636760705,
+      "tfidf_cosine_mean": 0.43442908455332946,
+      "tfidf_cosine_std": 0.28359548039747945,
+      "sbert_cosine_mean": 0.614219100497987,
+      "sbert_cosine_std": 0.32198200173588404
+    },
+    {
+      "agent_a": "A_cot",
+      "agent_b": "A_react",
+      "n": 92,
+      "token_jaccard_mean": 0.28286881663274704,
+      "token_jaccard_std": 0.2698256728803384,
+      "sentence_jaccard_mean": 0.07562526987079417,
+      "sentence_jaccard_std": 0.25135684505476397,
+      "tfidf_cosine_mean": 0.4035101206994028,
+      "tfidf_cosine_std": 0.31760603227002926,
+      "sbert_cosine_mean": 0.5255732873869736,
+      "sbert_cosine_std": 0.3417201124331033
+    },
+    {
+      "agent_a": "A_plan",
+      "agent_b": "A_react",
+      "n": 92,
+      "token_jaccard_mean": 0.2881563649630681,
+      "token_jaccard_std": 0.29734459737993163,
+      "sentence_jaccard_mean": 0.10356470821572711,
+      "sentence_jaccard_std": 0.2923643785461903,
+      "tfidf_cosine_mean": 0.38021218084253267,
+      "tfidf_cosine_std": 0.32550155213358606,
+      "sbert_cosine_mean": 0.520241145808857,
+      "sbert_cosine_std": 0.3687735326799619
+    }
+  ],
+  "overall": {
+    "mean_pairwise_token_jaccard": 0.2937171954950204,
+    "mean_pairwise_sbert_cosine": 0.5533445112312725,
+    "pass_jaccard_under_0.4": true,
+    "pass_sbert_under_0.75": true
+  }
+}

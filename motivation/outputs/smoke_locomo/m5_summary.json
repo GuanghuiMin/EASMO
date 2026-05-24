@@ -1,0 +1,10 @@
+{
+  "m5_within_agent_jaccard_mean": 0.5499451424756894,
+  "m5_cross_agent_jaccard_mean": 0.5328595918606978,
+  "m5_jaccard_gap": 0.017085550614991618,
+  "m5_within_agent_sbert_mean": 0.9037603172991012,
+  "m5_cross_agent_sbert_mean": 0.89940999061973,
+  "m5_sbert_gap": 0.004350326679371186,
+  "m5_pass_lexical_10pp_gap": false,
+  "m5_pass_semantic_10pp_gap": false
+}
