@@ -1,5 +1,36 @@
 # Motivation Experiments — Design Spec, Results, and Interpretation
 
+> ## ⚠️ 2026-05-24 Status: this experimental track is **deprecated** as primary motivation
+>
+> After the 2026-05-24 design audit (see §Result update 2026-05-24,
+> afternoon section near the end of this doc), the Thesis 1 / Thesis 2
+> framing in this document was found to be **logically self-defeating**
+> on the LLM-only-selector / QA-benchmark / scaffold-based-policy setup
+> used here:
+>
+> > T2 says *prompted LLM selectors don't policy-condition*. But the
+> > T1 hinge test (`instance_noise`) requires cross-policy memories to
+> > differ behaviourally — which depends on the selector
+> > policy-conditioning. **If T2 holds the T1 test cannot succeed via
+> > LLM-generated memories, and T1 has no independent oracle.**
+>
+> A new motivation experiment design lives in
+> [`new_motivation.md`](new_motivation.md). It uses **AppWorld** (real
+> agentic benchmark) with **execution-derived memory** (non-LLM
+> ground truth) so T1 and T2 are testable independently.
+>
+> **What this doc still covers as supplementary material:**
+>
+> - LongMemEval / LoCoMo wide-budget runs become the "long-memory QA
+>   generalisation" appendix in the new design (§8 of `new_motivation.md`).
+> - All M1 / M2 / M3 / M4 / M5 numbers below are kept as historical
+>   record but should NOT be cited as "policy-conditional memory
+>   evidence". They are evidence of "compressed-memory transfer drop on
+>   QA tasks under MiniMax-M2.5 selector with binary action match" —
+>   which is a much narrower claim.
+> - The continuous-overlap metric audit (§Result update afternoon)
+>   stands and applies to any future work on this code path.
+>
 > Companion document to [`ICLR27_Memory_motivation_experiments.md`](ICLR27_Memory_motivation_experiments.md)
 > (the original experimental design spec).
 >
