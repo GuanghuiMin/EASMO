@@ -359,22 +359,33 @@ This baseline tests whether generic compression is sufficient.
 
 3.4 Retrieval memory
 
-Strong non-learned baselines.
+Strong non-learned baselines. Use task instruction as query.
 
-Use task instruction as query.
+**Headline retrieval baseline**: `m_bm25` (lexical BM25 over the
+trajectory unit pool). This is the one that appears in the M1 / M2
+main figures.
 
-Recommended retrieval baselines:
+**Optional / appendix-only retrieval baselines**:
 
-BM25
-embedding top-k
-hybrid BM25 + embedding
-recency + BM25
+* `m_embedding_topk` (sentence-BERT cosine top-K). Not in the headline
+  for two reasons: (a) AppWorld memory units are highly structured
+  (`[spotify] GET /spotify/library/songs(...)`, `[spotify] GET
+  /spotify/songs/135()`, …) — the lexical signal is the structure, so
+  BM25 already captures most of what semantic retrieval would. (b)
+  loading and encoding with SBERT adds ~6 s startup per process and
+  multiple seconds per task, while BM25 finishes the whole pilot in
+  < 2 s. Empirically the two compressors should produce similar
+  selections on this benchmark; we report it in the appendix only if a
+  reviewer asks. Available behind the `--include_embedding` flag in
+  `motivation_v2/scripts/build_compressed_memories.py`.
+* Hybrid `BM25 + embedding` and `recency + BM25` are similarly
+  appendix-only.
 
-Denote:
+Denote `m_retrieval(x, B) = m_bm25(x, B)` for the headline.
 
-m_{\text{retrieval}}(x, B)
-
-This is important because reviewers will compare your method against retrieval.
+This is important because reviewers will compare your method against
+retrieval — but we only need ONE strong retrieval baseline at the
+headline level for that comparison to bite, not three.
 
 ⸻
 
@@ -517,10 +528,9 @@ Only include tasks where the executor succeeds with full context.
 Compare:
 
 Full context
-Execution-derived policy memory
-Generic memory
-BM25 / embedding retrieval
-Recency memory
+Execution-derived policy memory  (m*_exec_minimal + m*_exec_trajectory)
+Generic memory                    (m_recent, m_freq)
+BM25 retrieval                    (m_bm25 — headline; embedding-topk optional, see §3.4)
 Prompted generic memory
 Prompted task+policy memory
 

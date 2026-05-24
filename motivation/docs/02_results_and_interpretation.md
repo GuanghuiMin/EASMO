@@ -1,38 +1,45 @@
 # Motivation Experiments — Design Spec, Results, and Interpretation
 
-> ## ⚠️ 2026-05-24 Status: this experimental track is **deprecated** as primary motivation
+> ## ⛔ 2026-05-24 Status: **abandoned. Not appendix material.**
 >
-> After the 2026-05-24 design audit (see §Result update 2026-05-24,
-> afternoon section near the end of this doc), the Thesis 1 / Thesis 2
-> framing in this document was found to be **logically self-defeating**
-> on the LLM-only-selector / QA-benchmark / scaffold-based-policy setup
-> used here:
+> This entire experimental track (M1 / M2 / M3 / M4 / M5 / instance_noise
+> on LongMemEval / LoCoMo with MiniMax-M2.5 as both selector and
+> evaluator, agents differentiated by ReAct/Plan/CoT scaffold) is
+> abandoned, not demoted. Numbers below are kept only because git
+> history is cheaper than deletion. Do **not** cite them in the paper,
+> not even in the appendix.
 >
-> > T2 says *prompted LLM selectors don't policy-condition*. But the
-> > T1 hinge test (`instance_noise`) requires cross-policy memories to
-> > differ behaviourally — which depends on the selector
-> > policy-conditioning. **If T2 holds the T1 test cannot succeed via
-> > LLM-generated memories, and T1 has no independent oracle.**
+> **Why abandoned (not just deprecated):**
 >
-> A new motivation experiment design lives in
-> [`new_motivation.md`](new_motivation.md). It uses **AppWorld** (real
-> agentic benchmark) with **execution-derived memory** (non-LLM
-> ground truth) so T1 and T2 are testable independently.
+> 1. The T1+T2 framing is logically self-defeating on this setup: T2
+>    (LLM selectors don't policy-condition) being true makes the T1
+>    hinge test unsatisfiable by construction (cross-policy and within-
+>    policy LLM-generated memories are interchangeable by T2 → ratio
+>    ≈ 1).
+> 2. The "agents" (A_react / A_plan / A_cot) are the same MiniMax-M2.5
+>    model with different system prompts. Whatever differences exist
+>    between them are stylistic, not behaviourally distinct policies.
+> 3. LongMemEval and LoCoMo are QA benchmarks — there is one canonical
+>    answer per question, so all "agents" need the same information
+>    by construction. "Different policies want different memory" is
+>    not even tested.
+> 4. The headline metric (binary `action_match_rate`) is a Bernoulli
+>    on N=16 samples that produces near-zero signal rows on tight
+>    budgets even when the underlying compressions are clearly different.
+>    The continuous-overlap fix landed (`action_overlap_rate`) but
+>    rendered moot by points 1-3.
 >
-> **What this doc still covers as supplementary material:**
+> All in-flight runs in this track were killed at 2026-05-24 19:55 UTC.
 >
-> - LongMemEval / LoCoMo wide-budget runs become the "long-memory QA
->   generalisation" appendix in the new design (§8 of `new_motivation.md`).
-> - All M1 / M2 / M3 / M4 / M5 numbers below are kept as historical
->   record but should NOT be cited as "policy-conditional memory
->   evidence". They are evidence of "compressed-memory transfer drop on
->   QA tasks under MiniMax-M2.5 selector with binary action match" —
->   which is a much narrower claim.
-> - The continuous-overlap metric audit (§Result update afternoon)
->   stands and applies to any future work on this code path.
+> **The active design lives in [`new_motivation.md`](new_motivation.md)**:
+> AppWorld (real agentic benchmark) + execution-derived memory `m*_exec`
+> (non-LLM oracle, decouples T1 from T2) + policy = behavioural strategy
+> variant (direct / verify / explore on the same task). Code in
+> `motivation_v2/`.
 >
 > Companion document to [`ICLR27_Memory_motivation_experiments.md`](ICLR27_Memory_motivation_experiments.md)
-> (the original experimental design spec).
+> (the original experimental design spec — also superseded by
+> `new_motivation.md`).
 >
 > This file records, for each experiment **M1–M5**, (a) what hypothesis it tests,
 > (b) the exact methodology we implemented, (c) the numerical results from the

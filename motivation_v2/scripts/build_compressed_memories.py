@@ -56,8 +56,18 @@ from motivation_v2.policy_family import assign_policy_family
 from motivation_v2.units import trajectory_unit_pool
 
 
-def _compressors_for(strategy: str, traj, gt, B: int, query: str) -> list:
-    """Return list of (compressor_name, ExecMemory) tuples for one (task, strat, B)."""
+def _compressors_for(strategy: str, traj, gt, B: int, query: str,
+                     include_embedding: bool = False) -> list:
+    """Return list of (compressor_name, ExecMemory) tuples for one (task, strat, B).
+
+    ``include_embedding`` defaults to False because (a) AppWorld memory
+    units are highly structured (API-endpoint + integer-id texts) where
+    BM25 already captures the lexical signal, (b) task instructions are
+    short factual queries with little paraphrase pressure, and
+    (c) loading sentence-transformers adds a 6-second startup +
+    per-call encoding cost that compounds to many minutes across the
+    full pilot. Re-enable from the CLI if a reviewer asks for it.
+    """
     pool = trajectory_unit_pool(traj)
     out = []
 
@@ -65,12 +75,12 @@ def _compressors_for(strategy: str, traj, gt, B: int, query: str) -> list:
     out.append(("m_recent", m_recent(pool, B, task_id=traj.task_id)))
     out.append(("m_freq",   m_freq(pool, B, task_id=traj.task_id)))
 
-    # Task-instruction-conditioned baselines.
+    # Task-instruction-conditioned retrieval baseline.
     out.append(("m_bm25",   m_bm25(pool, query, B, task_id=traj.task_id)))
 
-    # Embedding-top-k is gated on sentence-transformers availability;
-    # the helper falls back to BM25 if missing, so it's safe to call.
-    out.append(("m_embedding_topk", m_embedding_topk(pool, query, B, task_id=traj.task_id)))
+    # Optional: SBERT embedding retrieval. Off by default — see docstring.
+    if include_embedding:
+        out.append(("m_embedding_topk", m_embedding_topk(pool, query, B, task_id=traj.task_id)))
 
     # Execution-derived oracles (the headline T1 evidence).
     out.append(("m_exec_minimal", m_exec_minimal(gt, B)))
@@ -94,6 +104,11 @@ def main():
     parser.add_argument("--output_dir", required=True)
     parser.add_argument("--require_success", action="store_true", default=True,
                         help="Only build memories from successful trajectories")
+    parser.add_argument("--include_embedding", action="store_true",
+                        help="Also build SBERT embedding-topk memory variants. "
+                             "Off by default; structured AppWorld units give "
+                             "BM25 most of the signal and SBERT adds 6s+ "
+                             "startup cost.")
     args = parser.parse_args()
 
     out_dir = Path(args.output_dir)
@@ -133,7 +148,10 @@ def main():
                 per_strategy_count[strategy]["used"] += 1
 
                 for B in args.budgets:
-                    for cname, em in _compressors_for(strategy, traj, gt, B, gt.instruction):
+                    for cname, em in _compressors_for(
+                        strategy, traj, gt, B, gt.instruction,
+                        include_embedding=args.include_embedding,
+                    ):
                         rec = {
                             "task_id": traj.task_id,
                             "policy_strategy": strategy,
