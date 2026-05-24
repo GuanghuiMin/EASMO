@@ -17,7 +17,7 @@ from typing import Dict, List
 from .agents import AgentSpec, sample_action_distribution
 from .data import Context
 from .llm import MinimaxClient
-from .metrics import action_match_rate, total_variation
+from .metrics import action_match_rate, action_overlap_rate, total_variation
 from .utils import setup_logging
 
 _logger = setup_logging("motivation.transfer")
@@ -29,9 +29,17 @@ class TransferRow:
     budget: int
     source_agent: str
     target_agent: str
+
+    # ---- Binary top-1 match (legacy headline) -----------------------
     action_match_self: float       # A_j(z*_{A_j}) vs A_j(full)
     action_match_cross: float      # A_j(z*_{A_i}) vs A_j(full)
-    task_drop: float               # self - cross
+    task_drop: float               # match_self - match_cross
+
+    # ---- Continuous behavioural overlap = 1 - TV (primary) ----------
+    overlap_self: float            # mean (1-TV) on probe states
+    overlap_cross: float
+    overlap_drop: float            # overlap_self - overlap_cross
+
     policy_divergence: float       # mean TV(A_i, A_j) on reference states
 
     def to_dict(self) -> dict:
@@ -88,7 +96,26 @@ def mean_match_rate(
     target_full: Dict[str, Dict[str, float]],
     cross_dists: Dict[str, Dict[str, float]],
 ) -> float:
+    """Binary top-1 action match averaged across probe states (legacy)."""
     keys = set(target_full) & set(cross_dists)
     if not keys:
         return 0.0
     return sum(action_match_rate(target_full[k], cross_dists[k]) for k in keys) / len(keys)
+
+
+def mean_overlap_rate(
+    target_full: Dict[str, Dict[str, float]],
+    cross_dists: Dict[str, Dict[str, float]],
+) -> float:
+    """Continuous behavioural overlap (1 - TV) averaged across probe states.
+
+    This is the primary M3 signal post-2026-05-24-audit. The binary
+    top-1 match collapses too much information when N=16 samples spread
+    across multiple high-probability actions, especially on QA tasks
+    where one canonical answer dominates and a single sample flip
+    rolls match between 0 and 1.
+    """
+    keys = set(target_full) & set(cross_dists)
+    if not keys:
+        return 0.0
+    return sum(action_overlap_rate(target_full[k], cross_dists[k]) for k in keys) / len(keys)

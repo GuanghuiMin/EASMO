@@ -23,6 +23,10 @@ def action_match_rate(
 ) -> float:
     """Top-1 action match: 1.0 if argmax actions agree, else 0.0.
 
+    Kept for backward compat / reporting. Coarse — collapses an entire
+    16-sample distribution to a single argmax bit. Prefer
+    :func:`action_overlap_rate` as the primary signal-vs-noise metric.
+
     Returns float for easy averaging across many probe states.
     """
     if not dist_a or not dist_b:
@@ -30,6 +34,52 @@ def action_match_rate(
     a = max(dist_a.items(), key=lambda kv: kv[1])[0]
     b = max(dist_b.items(), key=lambda kv: kv[1])[0]
     return 1.0 if a == b else 0.0
+
+
+def action_overlap_rate(
+    dist_a: Dict[str, float],
+    dist_b: Dict[str, float],
+) -> float:
+    """Continuous behavioural overlap: ``1 - TV(dist_a, dist_b)``.
+
+    Range [0, 1]. 1 = identical distributions, 0 = disjoint support.
+    Smooth replacement for :func:`action_match_rate` when you need to
+    detect *graded* policy similarity rather than a binary argmax hit.
+
+    For agent-step / QA tasks both sides should already come from
+    :func:`agents.action_distribution`, i.e. each is a multinomial
+    over canonicalised actions summing to 1.0.
+
+    Why this matters: with N=16 samples the argmax can flip on a
+    single noisy pick (e.g. 8/16 vs 7/16 for a given top action), so
+    binary action-match rate has very high variance and tends to
+    return 0 even when the two distributions differ only mildly. TV
+    is order-statistic free and varies smoothly, which is critical
+    for the instance-noise hinge test (Path D) where signal rows are
+    rare.
+    """
+    if not dist_a or not dist_b:
+        return 0.0
+    return 1.0 - total_variation(dist_a, dist_b)
+
+
+def js_divergence(
+    p: Dict[str, float],
+    q: Dict[str, float],
+    *,
+    eps: float = 1e-6,
+) -> float:
+    """Jensen-Shannon divergence (symmetrised KL). Range [0, log 2]."""
+    keys = set(p) | set(q)
+    if not keys:
+        return 0.0
+    norm_p = sum(p.values()) or 1.0
+    norm_q = sum(q.values()) or 1.0
+    m = {k: 0.5 * (p.get(k, 0.0) / norm_p + q.get(k, 0.0) / norm_q) for k in keys}
+    pn = {k: p.get(k, 0.0) / norm_p for k in keys}
+    qn = {k: q.get(k, 0.0) / norm_q for k in keys}
+    # Reuse our smoothed kl_divergence so eps-handling is consistent.
+    return 0.5 * kl_divergence(pn, m, eps=eps) + 0.5 * kl_divergence(qn, m, eps=eps)
 
 
 def kl_divergence(

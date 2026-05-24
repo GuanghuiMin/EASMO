@@ -31,7 +31,7 @@ from typing import List, Sequence
 from .agents import AgentSpec, get_agent, sample_action_distribution
 from .data import Context
 from .llm import MinimaxClient
-from .metrics import action_match_rate
+from .metrics import action_match_rate, action_overlap_rate
 from .oracle import SELECTOR_SYSTEM, _build_selector_prompt, _extract_candidate
 from .utils import count_tokens, setup_logging, truncate_to_tokens
 
@@ -43,11 +43,26 @@ class InstanceNoiseRow:
     context_id: str
     budget: int
     target_agent: str
+
+    # ---- Binary top-1 action match (legacy / sanity) ------------------
+    # Kept so the new run is comparable to the old summaries; *do not*
+    # use these as the primary verdict signal — argmax flips on a single
+    # of 16 samples make this metric near-useless on QA tasks where one
+    # canonical answer dominates.
     self_match: float
     within_match_mean: float
     cross_match_mean: float
     within_drop: float          # self - within_mean
     cross_drop: float           # self - cross_mean
+
+    # ---- Continuous behavioural overlap = 1 - TV(p, q) ---------------
+    # Primary signal channel for Path-D verdict. Range [0, 1].
+    self_overlap: float
+    within_overlap_mean: float
+    cross_overlap_mean: float
+    within_overlap_drop: float  # self_overlap - within_overlap_mean
+    cross_overlap_drop: float   # self_overlap - cross_overlap_mean
+
     n_within: int
     n_cross: int
     n_target_candidates: int    # K used in this run
@@ -134,9 +149,11 @@ def run_instance_noise_test(
                 base_seed=seed + 3000 * ci, task_type=ctx.task_type,
             )
             self_match = action_match_rate(baseline_dist, self_dist)
+            self_overlap = action_overlap_rate(baseline_dist, self_dist)
 
             # Within-agent variants: candidates 1, 2, … of the SAME target
-            within_matches = []
+            within_matches: list[float] = []
+            within_overlaps: list[float] = []
             for k, cand in enumerate(target_cands[1:], start=1):
                 dist, _ = sample_action_distribution(
                     client, target, cand, ctx.probe_states[0].state_text,
@@ -144,9 +161,11 @@ def run_instance_noise_test(
                     base_seed=seed + 4000 * ci + 10 * k, task_type=ctx.task_type,
                 )
                 within_matches.append(action_match_rate(baseline_dist, dist))
+                within_overlaps.append(action_overlap_rate(baseline_dist, dist))
 
             # Cross-agent: candidate 0 of each *other* agent
-            cross_matches = []
+            cross_matches: list[float] = []
+            cross_overlaps: list[float] = []
             for other in agents:
                 if other.id == target.id:
                     continue
@@ -160,9 +179,16 @@ def run_instance_noise_test(
                     task_type=ctx.task_type,
                 )
                 cross_matches.append(action_match_rate(baseline_dist, dist))
+                cross_overlaps.append(action_overlap_rate(baseline_dist, dist))
 
             within_mean = sum(within_matches) / max(len(within_matches), 1)
             cross_mean = sum(cross_matches) / max(len(cross_matches), 1)
+            within_overlap_mean = (
+                sum(within_overlaps) / max(len(within_overlaps), 1)
+            )
+            cross_overlap_mean = (
+                sum(cross_overlaps) / max(len(cross_overlaps), 1)
+            )
             row = InstanceNoiseRow(
                 context_id=ctx.context_id,
                 budget=budget,
@@ -172,14 +198,23 @@ def run_instance_noise_test(
                 cross_match_mean=cross_mean,
                 within_drop=self_match - within_mean,
                 cross_drop=self_match - cross_mean,
+                self_overlap=self_overlap,
+                within_overlap_mean=within_overlap_mean,
+                cross_overlap_mean=cross_overlap_mean,
+                within_overlap_drop=self_overlap - within_overlap_mean,
+                cross_overlap_drop=self_overlap - cross_overlap_mean,
                 n_within=len(within_matches),
                 n_cross=len(cross_matches),
                 n_target_candidates=len(target_cands),
             )
             rows.append(row)
             _logger.info(
-                "  target=%s self=%.2f within=%.2f cross=%.2f (drop within=%.2f cross=%.2f)",
-                target.id, self_match, within_mean, cross_mean,
-                row.within_drop, row.cross_drop,
+                "  target=%s self_m=%.2f within_m=%.2f cross_m=%.2f | "
+                "self_o=%.2f within_o=%.2f cross_o=%.2f "
+                "(overlap drops within=%.2f cross=%.2f)",
+                target.id,
+                self_match, within_mean, cross_mean,
+                self_overlap, within_overlap_mean, cross_overlap_mean,
+                row.within_overlap_drop, row.cross_overlap_drop,
             )
     return rows

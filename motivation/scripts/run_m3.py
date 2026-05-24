@@ -22,7 +22,8 @@ from motivation.data import load_contexts
 from motivation.llm import MinimaxClient
 from motivation.metrics import linear_fit_r2, spearman
 from motivation.transfer import (
-    TransferRow, _policy_divergence, cross_agent_eval, mean_match_rate,
+    TransferRow, _policy_divergence, cross_agent_eval,
+    mean_match_rate, mean_overlap_rate,
 )
 from motivation.utils import (
     load_config, read_jsonl, seed_everything, setup_logging, write_json,
@@ -80,8 +81,11 @@ def main():
         w = csv.writer(f)
         w.writerow([
             "context_id", "budget", "source_agent", "target_agent",
-            "action_match_self", "action_match_cross",
-            "task_drop", "policy_divergence",
+            # binary (legacy)
+            "action_match_self", "action_match_cross", "task_drop",
+            # continuous (1 - TV) — added 2026-05-24 audit
+            "overlap_self", "overlap_cross", "overlap_drop",
+            "policy_divergence",
         ])
 
         with WandBRun(cfg, name=f"{cfg['experiment']['name']}-m3", job_type="m3") as run:
@@ -136,6 +140,7 @@ def main():
                             base_seed=seed + 301,
                         )
                         self_match = mean_match_rate(target_full[target_agent_id], self_dists)
+                        self_overlap = mean_overlap_rate(target_full[target_agent_id], self_dists)
 
                         # Cross: target_agent fed source_agent's memory.
                         cross_dists = cross_agent_eval(
@@ -144,6 +149,7 @@ def main():
                             base_seed=seed + 401,
                         )
                         cross_match = mean_match_rate(target_full[target_agent_id], cross_dists)
+                        cross_overlap = mean_overlap_rate(target_full[target_agent_id], cross_dists)
 
                         row = TransferRow(
                             context_id=ctx_id, budget=budget,
@@ -151,13 +157,19 @@ def main():
                             action_match_self=self_match,
                             action_match_cross=cross_match,
                             task_drop=self_match - cross_match,
+                            overlap_self=self_overlap,
+                            overlap_cross=cross_overlap,
+                            overlap_drop=self_overlap - cross_overlap,
                             policy_divergence=div,
                         )
                         rows.append(row)
                         w.writerow([row.context_id, row.budget,
                                     row.source_agent, row.target_agent,
                                     row.action_match_self, row.action_match_cross,
-                                    row.task_drop, row.policy_divergence])
+                                    row.task_drop,
+                                    row.overlap_self, row.overlap_cross,
+                                    row.overlap_drop,
+                                    row.policy_divergence])
                         f.flush()
                         done += 1
                         run.log({
@@ -187,6 +199,7 @@ def main():
             # Both are reported so reviewers can see both.
             # ------------------------------------------------------------------
 
+            # ---- Binary / legacy aggregate -----------------------------
             drops = [r.task_drop for r in rows]
             divs = [r.policy_divergence for r in rows]
 
@@ -195,23 +208,49 @@ def main():
             cond_divs  = [r.policy_divergence       for r in signal_rows]
             mean_cond_drop = (sum(cond_drops) / len(cond_drops)) if cond_drops else 0.0
 
+            # ---- Continuous / overlap aggregate (PRIMARY post-audit) ---
+            OVERLAP_SIGNAL_THRESHOLD = 0.5  # mirror instance_noise_test
+            ov_drops = [r.overlap_drop for r in rows]
+            ov_signal_rows = [
+                r for r in rows if r.overlap_self >= OVERLAP_SIGNAL_THRESHOLD
+            ]
+            ov_cond_drops = [
+                1.0 - r.overlap_cross for r in ov_signal_rows
+            ]
+            ov_cond_divs = [r.policy_divergence for r in ov_signal_rows]
+            mean_ov_cond_drop = (
+                sum(ov_cond_drops) / len(ov_cond_drops)
+            ) if ov_cond_drops else 0.0
+
             summary = {
                 "m3_total_runs": len(rows),
 
-                # Unconditional (legacy / noisy).
+                # ---- Binary (legacy) ----
                 "m3_mean_task_drop": (sum(drops) / len(drops)) if drops else 0.0,
-
-                # Conditional — the headline number.
                 "m3_signal_rows": len(signal_rows),
                 "m3_signal_fraction": len(signal_rows) / max(len(rows), 1),
                 "m3_mean_conditional_drop": mean_cond_drop,
                 "m3_conditional_spearman_drop_vs_div": spearman(cond_divs, cond_drops),
                 "m3_conditional_linear_fit_r2": linear_fit_r2(cond_divs, cond_drops),
-
-                # Original-data correlations (rarely meaningful when most rows
-                # have zero signal — kept for transparency).
                 "m3_spearman_drop_vs_div": spearman(divs, drops),
                 "m3_linear_fit_r2": linear_fit_r2(divs, drops),
+
+                # ---- Continuous overlap (PRIMARY) ----
+                "m3_overlap_signal_threshold": OVERLAP_SIGNAL_THRESHOLD,
+                "m3_overlap_signal_rows": len(ov_signal_rows),
+                "m3_overlap_signal_fraction": (
+                    len(ov_signal_rows) / max(len(rows), 1)
+                ),
+                "m3_overlap_mean_drop_unconditional": (
+                    (sum(ov_drops) / len(ov_drops)) if ov_drops else 0.0
+                ),
+                "m3_overlap_mean_conditional_drop": mean_ov_cond_drop,
+                "m3_overlap_conditional_spearman_drop_vs_div": spearman(
+                    ov_cond_divs, ov_cond_drops
+                ),
+                "m3_overlap_conditional_linear_fit_r2": linear_fit_r2(
+                    ov_cond_divs, ov_cond_drops
+                ),
             }
             summary["m3_pass_unconditional_drop_15"] = (
                 summary["m3_mean_task_drop"] > 0.15
@@ -219,6 +258,12 @@ def main():
             summary["m3_pass_conditional_drop_15"] = (mean_cond_drop > 0.15)
             summary["m3_pass_signal_fraction_10"] = (
                 summary["m3_signal_fraction"] >= 0.10
+            )
+            summary["m3_pass_overlap_conditional_drop_15"] = (
+                mean_ov_cond_drop > 0.15
+            )
+            summary["m3_pass_overlap_signal_fraction_10"] = (
+                summary["m3_overlap_signal_fraction"] >= 0.10
             )
 
             # Per-(source -> target) breakdown (conditional + unconditional).
@@ -233,28 +278,44 @@ def main():
                 cond_d = [1.0 - r.action_match_cross for r in signal]
                 mean_drop = sum(d) / len(d) if d else 0.0
                 mean_cd = sum(cond_d) / len(cond_d) if cond_d else 0.0
+
+                ov_signal = [
+                    r for r in rs
+                    if r.overlap_self >= OVERLAP_SIGNAL_THRESHOLD
+                ]
+                ov_cond_d = [1.0 - r.overlap_cross for r in ov_signal]
+                ov_d = [r.overlap_drop for r in rs]
+                mean_ov_drop = sum(ov_d) / len(ov_d) if ov_d else 0.0
+                mean_ov_cd = sum(ov_cond_d) / len(ov_cond_d) if ov_cond_d else 0.0
+
                 pair_breakdown.append({
                     "source_agent": src, "target_agent": tgt,
                     "n": len(rs),
                     "n_signal": len(signal),
+                    "n_overlap_signal": len(ov_signal),
                     "mean_task_drop_unconditional": mean_drop,
                     "mean_conditional_drop": mean_cd,
+                    "mean_overlap_drop_unconditional": mean_ov_drop,
+                    "mean_overlap_conditional_drop": mean_ov_cd,
                     "mean_policy_div": sum(v) / len(v) if v else 0.0,
                 })
                 run.log({
                     f"m3/task_drop/{src}_to_{tgt}": mean_drop,
                     f"m3/conditional_drop/{src}_to_{tgt}": mean_cd,
+                    f"m3/overlap_conditional_drop/{src}_to_{tgt}": mean_ov_cd,
                 })
             summary["m3_pair_breakdown"] = pair_breakdown
             run.summary(**summary)
             run.log_table(
                 "m3/transfer_rows",
                 columns=["context_id", "budget", "source_agent", "target_agent",
-                         "action_match_self", "action_match_cross",
-                         "task_drop", "policy_divergence"],
+                         "action_match_self", "action_match_cross", "task_drop",
+                         "overlap_self", "overlap_cross", "overlap_drop",
+                         "policy_divergence"],
                 rows=[[r.context_id, r.budget, r.source_agent, r.target_agent,
-                       r.action_match_self, r.action_match_cross,
-                       r.task_drop, r.policy_divergence] for r in rows],
+                       r.action_match_self, r.action_match_cross, r.task_drop,
+                       r.overlap_self, r.overlap_cross, r.overlap_drop,
+                       r.policy_divergence] for r in rows],
             )
             run.log_artifact(str(csv_path), artifact_name="transfer_results", artifact_type="dataset")
 

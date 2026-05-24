@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-WAIT_PID="${WAIT_PID:-539832}"
+WAIT_PID="${WAIT_PID:-571621}"
 REPO="/workspace/EASMO"
 cd "$REPO/motivation"
 
@@ -21,7 +21,7 @@ done
 
 echo "[queue_B128] $(date -u +%Y-%m-%dT%H:%MZ) PID $WAIT_PID exited; starting B=128 n=30 rerun"
 
-LOG="$REPO/motivation/outputs/instance_noise_rerun_B128_n30.log"
+LOG="$REPO/motivation/outputs/instance_noise_v2_B128_n30.log"
 
 # Detach so this wrapper can exit cleanly
 nohup "$REPO/.venv/bin/python" -m scripts.instance_noise_test \

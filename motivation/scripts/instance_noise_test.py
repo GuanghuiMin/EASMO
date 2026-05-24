@@ -110,84 +110,149 @@ def main():
             w = csv.writer(f)
             w.writerow([
                 "context_id", "budget", "target_agent",
+                # binary
                 "self_match", "within_match_mean", "cross_match_mean",
                 "within_drop", "cross_drop",
+                # continuous (1 - TV)
+                "self_overlap", "within_overlap_mean", "cross_overlap_mean",
+                "within_overlap_drop", "cross_overlap_drop",
                 "n_within", "n_cross", "n_target_candidates",
             ])
             for r in rows:
-                w.writerow([r.context_id, r.budget, r.target_agent,
-                            r.self_match, r.within_match_mean, r.cross_match_mean,
-                            r.within_drop, r.cross_drop,
-                            r.n_within, r.n_cross, r.n_target_candidates])
+                w.writerow([
+                    r.context_id, r.budget, r.target_agent,
+                    r.self_match, r.within_match_mean, r.cross_match_mean,
+                    r.within_drop, r.cross_drop,
+                    r.self_overlap, r.within_overlap_mean, r.cross_overlap_mean,
+                    r.within_overlap_drop, r.cross_overlap_drop,
+                    r.n_within, r.n_cross, r.n_target_candidates,
+                ])
         _logger.info("Wrote %s (%d rows)", csv_path, len(rows))
 
-        # Aggregate stats — both unconditional and conditional (on signal rows)
+        # ---- Binary (legacy) aggregate ----------------------------------
         all_within = [r.within_drop for r in rows]
         all_cross  = [r.cross_drop  for r in rows]
-        signal     = [r for r in rows if r.self_match >= 0.999]
-        sig_within = [r.within_drop for r in signal]
-        sig_cross  = [r.cross_drop  for r in signal]
+        bin_signal = [r for r in rows if r.self_match >= 0.999]
+        bsm_within = [r.within_drop for r in bin_signal]
+        bsm_cross  = [r.cross_drop  for r in bin_signal]
 
         wm, wlo, whi = bootstrap_ci(all_within)
         cm, clo, chi = bootstrap_ci(all_cross)
-        swm, swlo, swhi = bootstrap_ci(sig_within)
-        scm, sclo, schi = bootstrap_ci(sig_cross)
-        ratio_all   = (cm / wm)  if wm > 1e-6 else float("inf")
-        ratio_signal = (scm / swm) if swm > 1e-6 else float("inf")
+        bswm, bswlo, bswhi = bootstrap_ci(bsm_within)
+        bscm, bsclo, bschi = bootstrap_ci(bsm_cross)
+        ratio_all_bin   = (cm / wm)  if wm > 1e-6 else None
+        ratio_signal_bin = (bscm / bswm) if bswm > 1e-6 else None
+
+        # ---- Continuous overlap aggregate (PRIMARY) ---------------------
+        # signal threshold: target's own candidate-0 produces an action
+        # distribution that's at least 50% overlapping (TV ≤ 0.5) with the
+        # target's full-context distribution. Loose enough to admit rows
+        # where M1 binary match would have been 0 due to one flipped
+        # argmax sample.
+        OVERLAP_SIGNAL_THRESHOLD = 0.5
+
+        all_within_o = [r.within_overlap_drop for r in rows]
+        all_cross_o  = [r.cross_overlap_drop  for r in rows]
+        ov_signal = [r for r in rows if r.self_overlap >= OVERLAP_SIGNAL_THRESHOLD]
+        osm_within = [r.within_overlap_drop for r in ov_signal]
+        osm_cross  = [r.cross_overlap_drop  for r in ov_signal]
+
+        wmo, wloo, whio = bootstrap_ci(all_within_o)
+        cmo, cloo, chio = bootstrap_ci(all_cross_o)
+        oswm, oswlo, oswhi = bootstrap_ci(osm_within)
+        oscm, osclo, oschi = bootstrap_ci(osm_cross)
+        ratio_all_ov   = (cmo / wmo)  if wmo > 1e-6 else None
+        ratio_signal_ov = (oscm / oswm) if oswm > 1e-6 else None
 
         summary = {
-            "n_rows":          len(rows),
-            "n_signal_rows":   len(signal),
+            "n_rows":               len(rows),
+            "n_signal_rows_binary": len(bin_signal),
+            "n_signal_rows_overlap": len(ov_signal),
+            "overlap_signal_threshold": OVERLAP_SIGNAL_THRESHOLD,
 
-            "unconditional_within_drop_mean": wm,  "unconditional_within_ci": [wlo, whi],
-            "unconditional_cross_drop_mean":  cm,  "unconditional_cross_ci":  [clo, chi],
-            "unconditional_ratio_cross_over_within": ratio_all,
+            # Binary (legacy)
+            "binary_unconditional_within_drop_mean": wm,
+            "binary_unconditional_within_ci": [wlo, whi],
+            "binary_unconditional_cross_drop_mean":  cm,
+            "binary_unconditional_cross_ci":  [clo, chi],
+            "binary_unconditional_ratio_cross_over_within": ratio_all_bin,
+            "binary_conditional_within_drop_mean":  bswm,
+            "binary_conditional_within_ci": [bswlo, bswhi],
+            "binary_conditional_cross_drop_mean":   bscm,
+            "binary_conditional_cross_ci":  [bsclo, bschi],
+            "binary_conditional_ratio_cross_over_within": ratio_signal_bin,
 
-            "conditional_within_drop_mean":  swm, "conditional_within_ci": [swlo, swhi],
-            "conditional_cross_drop_mean":   scm, "conditional_cross_ci":  [sclo, schi],
-            "conditional_ratio_cross_over_within": ratio_signal,
+            # Continuous overlap (primary)
+            "overlap_unconditional_within_drop_mean": wmo,
+            "overlap_unconditional_within_ci": [wloo, whio],
+            "overlap_unconditional_cross_drop_mean":  cmo,
+            "overlap_unconditional_cross_ci":  [cloo, chio],
+            "overlap_unconditional_ratio_cross_over_within": ratio_all_ov,
+            "overlap_conditional_within_drop_mean":  oswm,
+            "overlap_conditional_within_ci": [oswlo, oswhi],
+            "overlap_conditional_cross_drop_mean":   oscm,
+            "overlap_conditional_cross_ci":  [osclo, oschi],
+            "overlap_conditional_ratio_cross_over_within": ratio_signal_ov,
         }
 
-        # Path-D decision
-        # Guard: a verdict is only meaningful if the conditional set has
-        # both (a) enough signal rows and (b) a non-degenerate within drop.
-        # Without those, the ratio is 0/0 -> Inf and tells us nothing about
-        # policy vs seed noise.
+        # Path-D decision — driven by *continuous overlap* signal.
         MIN_SIGNAL_ROWS = 5
-        if len(signal) < MIN_SIGNAL_ROWS:
+        primary_signal_n = len(ov_signal)
+        primary_ratio = ratio_signal_ov
+        primary_within = oswm
+        primary_cross  = oscm
+
+        if primary_signal_n < MIN_SIGNAL_ROWS:
             summary["path_d_verdict"] = (
-                f"INSUFFICIENT SIGNAL — only {len(signal)} signal rows "
-                f"(need ≥ {MIN_SIGNAL_ROWS}); re-run with more contexts "
-                "or a budget where M1 self-match is non-trivial"
+                f"INSUFFICIENT SIGNAL — only {primary_signal_n} overlap "
+                f"signal rows (need ≥ {MIN_SIGNAL_ROWS}); re-run with "
+                "more contexts or a budget where M1 self-overlap is "
+                "non-trivial"
             )
-        elif swm <= 1e-6 and scm <= 1e-6:
+        elif primary_within is None or abs(primary_within) <= 1e-6:
             summary["path_d_verdict"] = (
-                "DEGENERATE — both within and cross drops are ~0 on signal "
-                "rows; cannot distinguish policy vs noise"
+                "DEGENERATE — within-agent overlap drop is ~0; "
+                "denominator unstable, cannot judge ratio"
             )
-        elif ratio_signal >= 3.0:
-            summary["path_d_verdict"] = "STRONG — Spotlight-defensible"
-        elif ratio_signal >= 1.5:
-            summary["path_d_verdict"] = "WEAK — Path D borderline"
+        elif primary_ratio is None:
+            summary["path_d_verdict"] = "DEGENERATE — ratio undefined"
+        elif primary_ratio >= 3.0:
+            summary["path_d_verdict"] = (
+                "STRONG — overlap ratio ≥ 3× ⇒ M3 cross-agent drop is "
+                "policy-driven, not seed-noise"
+            )
+        elif primary_ratio >= 1.5:
+            summary["path_d_verdict"] = (
+                "WEAK — overlap ratio in [1.5, 3); Path D borderline"
+            )
         else:
-            summary["path_d_verdict"] = "M3 likely instance-noise — Path D dies, fall back to Path B"
+            summary["path_d_verdict"] = (
+                "DEAD — overlap ratio < 1.5; M3 cross-agent drop is "
+                "indistinguishable from selector seed noise. Retreat "
+                "to Path B."
+            )
 
         write_json(out_dir / "instance_noise_summary.json", summary)
         run.summary(**{k: v for k, v in summary.items()
                        if not isinstance(v, list)})
 
-        # Pretty print
+        # Pretty print — show both metrics side by side so it's obvious
+        # whether the binary metric was the bottleneck.
         print(f"\n===== Instance-noise ablation summary (budget={args.budget}) =====")
-        print(f"  n_rows={len(rows)}  n_signal={len(signal)}  "
-              f"({100*len(signal)/max(len(rows),1):.0f}% signal)")
-        print(f"\n  ALL rows:")
-        print(f"    within drop = {wm:.3f}  CI [{wlo:.3f}, {whi:.3f}]")
-        print(f"    cross  drop = {cm:.3f}  CI [{clo:.3f}, {chi:.3f}]")
-        print(f"    ratio cross / within = {ratio_all:.2f}x")
-        print(f"\n  CONDITIONAL (self_match==1.0):")
-        print(f"    within drop = {swm:.3f}  CI [{swlo:.3f}, {swhi:.3f}]")
-        print(f"    cross  drop = {scm:.3f}  CI [{sclo:.3f}, {schi:.3f}]")
-        print(f"    ratio cross / within = {ratio_signal:.2f}x")
+        print(f"  n_rows={len(rows)}  "
+              f"binary signal={len(bin_signal)}  "
+              f"overlap signal={len(ov_signal)} "
+              f"(@self_overlap≥{OVERLAP_SIGNAL_THRESHOLD})")
+        print("\n  --- BINARY top-1 match (legacy / sanity) ---")
+        print(f"  ALL rows:    within={wm:.3f}  cross={cm:.3f}  "
+              f"ratio={ratio_all_bin}")
+        print(f"  CONDITIONAL: within={bswm:.3f}  cross={bscm:.3f}  "
+              f"ratio={ratio_signal_bin}")
+        print("\n  --- CONTINUOUS overlap = 1-TV (PRIMARY) ---")
+        print(f"  ALL rows:    within drop={wmo:.3f}  cross drop={cmo:.3f}  "
+              f"ratio={ratio_all_ov}")
+        print(f"  CONDITIONAL: within drop={oswm:.3f}  cross drop={oscm:.3f}  "
+              f"ratio={ratio_signal_ov}")
         print(f"\n  Path-D verdict: {summary['path_d_verdict']}")
         print(f"\n  Elapsed: {(time.time() - t0)/60:.1f} min")
 
