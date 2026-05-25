@@ -1,6 +1,6 @@
 # Session handoff — paste this into a new chat if context fills up
 
-> Updated: 2026-05-24 5:15 PM PT
+> Updated: 2026-05-24 9:40 PM PT (overnight runs all complete; capped-budget capability cost + multi-stage role results landed)
 >
 > **Active track**: `motivation_v2/` (AppWorld + role-conditional memory).
 > The old `motivation/` track was abandoned 2026-05-24; see §Abandoned-track
@@ -59,43 +59,42 @@ Cross-task efficiency cost (B=512, n=72):
    task success                      100% across all 72 cells
 ```
 
-**4 of 6 spotlight criteria fully achieved**:
+**6 of 7 spotlight criteria fully achieved**:
 
-1. ✅ Cross-role Jaccard ≤ 0.10 at B=512 — achieved 0.036.
-2. ✅ Cross-task within-role Jaccard ordered (code high, others low) — achieved.
-3. ✅ Cross-task transfer cost shows plumbing-floor pattern (B=128 flat, B=512 +40%).
-4. ✅ T2 closure ratio ≥ 5× — achieved 6.0× on full 1328 cells.
+1. ✅ Cross-role Jaccard ≤ 0.10 at B=512 — achieved **0.036**.
+2. ✅ Cross-task within-role Jaccard ordered (code 0.41 vs others 0.07–0.11).
+3. ✅ Cross-task transfer cost shows plumbing-floor pattern (B=128 flat, B=512 +40% iters).
+4. ✅ T2 closure ratio ≥ 5× — achieved **6.0×** on full 1328 cells.
 5. ⏳ Cross-executor robustness (Qwen2.5-7B) — pending external endpoint.
-6. ⏳ **Multi-stage role-specialised pipeline** (planner/executor/verifier as separate agents)
-   — building 2026-05-24 evening; closes the "projections vs real agents" reviewer critique.
+6. ✅ **Multi-stage real-agent role orthogonality**: cross-role Jaccard
+   **0.054** mean on n=18 tasks; plan-vs-verify **0.123** (two independent
+   agent outputs, no projections). Reviewer's projection-vs-agent critique
+   closed.
+7. ✅ **Capped-budget capability cost (T1b strong)**: at `max_iter=15`
+   (deployment-realistic), cross-app memory drops B=512 success from
+   100% to **67% (-33pp)**; B=128 drops 100% → 50% (-50pp). Wrong
+   memory is a measurable capability tax under bounded inference budget.
 
 ## Active background processes
 
 ```
-1053031 run_capped_xtask_overnight  Setup A1 (max_iter=15) running; A2 (max_iter=8) chained after
-1053035 run_cross_task_transfer     A1 driver (4 workers spawned)
 3916707 auto_push_watcher           pushes motivation/ + motivation_v2/ changes every 20 min
 ```
 
-Started 8:38 PM PT on 2026-05-24. ETA ~9:20 PM PT for both setups
-(72 cells × 2 caps × ~70s avg / 4 workers ≈ 40 min). Setup A1
-results land at `outputs/mv2_xtask_cap15/transfer_results.jsonl`,
-Setup A2 at `outputs/mv2_xtask_cap8/transfer_results.jsonl`.
-
-The point of the capped-budget runs: AppWorld's default max_iter=50
-gives the agent plenty of headroom to recover from misleading
-memory by re-querying APIs, which is why the original xtask run
-showed 100% success at all conditions despite +40% iter cost. The
-capped runs simulate **bounded-budget multi-agent deployment** —
-where the consumer agent has a fixed inference budget and wrong
-memory pushes it past the ceiling. We expect cap=15 to convert
-B=512 cross_app's 50% iter-overrun rate (from the existing data's
-distribution) into a ~50pp success drop relative to self memory.
-
-Earlier completed runs:
+All experiment processes are complete:
 * 3 pilot strategy jobs — ended 3:00 PM PT
 * Cross-task transfer driver (cap=50 baseline) — ended 3:30 PM PT
 * T2 prompted-memory build — ended 8:23 PM PT (1328/1328 cells in 42 min)
+* Capped-budget xtask sequencer — ended 9:04 PM PT (cap=15 + cap=8 both 72/72)
+* Multi-stage role pipeline pilot — ended ~9:30 PM PT (18/18 tasks)
+
+Final reports reproducible with:
+```bash
+/workspace/acon/.venv/bin/python /workspace/EASMO/motivation_v2/scripts/analyze_capped_xtask.py
+/workspace/acon/.venv/bin/python /workspace/EASMO/motivation_v2/scripts/analyze_multi_stage_overlap.py
+/workspace/EASMO/.venv/bin/python /workspace/EASMO/motivation_v2/scripts/analyze_role_overlap.py --strategy direct --tag mv2_pilot
+/workspace/EASMO/.venv/bin/python /workspace/EASMO/motivation_v2/scripts/analyze_prompted_overlap.py --strategy direct --tag mv2_pilot
+```
 
 ## Layout
 

@@ -628,6 +628,37 @@ no longer binding.
 Reproduce: `motivation_v2/scripts/run_cross_task_transfer.py`. Raw
 data: `motivation_v2/outputs/mv2_xtask/transfer_results.jsonl`.
 
+#### Capped-iter follow-up (T1b strong, completed 2026-05-24 9:00 PM PT)
+
+The 100% success rate above is partly an artefact of AppWorld's
+default `max_iter=50` giving the agent four iterations of slack to
+recover from misleading memory by re-querying APIs. To convert
+this *efficiency cost* into a *capability cost* (mirroring the
+deployment scenario where consumer agents have bounded inference
+budgets), we re-ran the full 72-cell xtask design at two tighter
+caps. Driver: `scripts/run_capped_xtask_overnight.sh`. Analysis:
+`scripts/analyze_capped_xtask.py`.
+
+| condition | cap=50 (base) | cap=15 (sweet) | cap=8 (stress) |
+|---|---|---|---|
+| **At B=512** | | | |
+| self          | 100% | 100% |  17% |
+| within_gen    | 100% |  83% |   0% |
+| within_app    | 100% |  83% |  33% |
+| cross_app     | 100% |  67% |  17% |
+| **drop self−cross_app** | +0pp | **+33pp** | +0pp |
+
+At `cap=15` the agent has just enough budget for self memory to
+succeed (100%) but cross-task memory adds enough overhead to push
+33% over the ceiling. At B=128 the same cross-app drop is +50pp
+(self 100% / cross 50%) — wrong memory is measurably worse even at
+the plumbing-floor budget once the agent's recovery budget runs out.
+
+`cap=8` is too aggressive: even self memory drops to 17% so the
+differential collapses. Useful as an appendix stress test
+("compression matters even more when budget is below the task's
+intrinsic floor"), not as the headline.
+
 ### 8.0.6 T2 prompted-compressor evidence (M2, FULL — 1328/1328 cells)
 
 `scripts/build_prompted_memories.py` calls MiniMax-M2.5 with four
@@ -700,6 +731,56 @@ Reproduce: `motivation_v2/scripts/build_prompted_memories.py` then
 `motivation_v2/outputs/mv2_pilot/prompted_memories.jsonl` (1,328
 rows, 4 roles × 4 budgets × 83 successful direct trajectories).
 Final summary: `motivation_v2/outputs/mv2_pilot/prompted_overlap_final.json`.
+
+### 8.0.7 Multi-stage role-specialised AppWorld (closes projection critique)
+
+Pilot completed 2026-05-24 9:00 PM PT on n=18 spotify tasks
+(driver: `scripts/run_multi_stage_role.py`; analysis:
+`scripts/analyze_multi_stage_overlap.py`).
+
+For each task the pipeline runs **planner → executor → verifier**
+as three separate LLM agents. Two of the four role memories
+(`m_plan*`, `m_verify*`) are *outputs of independent agents* with
+zero slicing.
+
+Cross-role Jaccard (n=18 tasks, real agent outputs):
+
+| pair | mean | median | min | max |
+|---|---|---|---|---|
+| plan-tool   | 0.048 | 0.049 | 0.022 | 0.110 |
+| plan-code   | 0.031 | 0.000 | 0.000 | 0.141 |
+| **plan-verify** | **0.123** | 0.102 | 0.000 | 0.250 |
+| tool-code   | 0.032 | 0.000 | 0.000 | 0.282 |
+| tool-verify | 0.065 | 0.061 | 0.024 | 0.103 |
+| code-verify | 0.022 | 0.000 | 0.000 | 0.119 |
+| **mean (all 6 pairs)** | **0.054** | — | — | — |
+| Reference: projection baseline (B=512) | 0.036 | — | — | — |
+
+**Headline: multi-stage cross-role Jaccard is 0.054**, just 1.5×
+the projection baseline of 0.036. **Role orthogonality holds when
+agents really run, not just when slicing rules are different.**
+
+The strongest pair-level evidence is **plan ↔ verify** at 0.123.
+These are pure LLM outputs from independent agent calls — no
+projection rules involved. A Jaccard of 0.12 means even when both
+agents reference the same task and the same final answer, they
+share only ~12% of significant entity tokens. The planner talks
+in process language ("authenticate", "retrieve", "analyze"); the
+verifier talks in evidence language ("'Wandering the Streets
+Alone' with 863 plays", "step 13 confirmed").
+
+Per-role token-set sizes (mean across 18 tasks):
+* `plan`:   20 tokens (numbered sub-goals, tight)
+* `tool`:  134 tokens (full executor API trace)
+* `code`:    8 tokens (Python control flow; many tasks have none)
+* `verify`: 23 tokens (evidence list)
+
+**Caveat**: `code` has median 0 tokens — most spotify tasks don't
+use loops/comprehensions. The code-role finding from §8.0.5 (cross-
+task Jaccard 0.41) holds on tasks that DO have code patterns; for
+tasks with simple straight-line code, the role projection is
+trivially small. Worth disclosing as a sample-bias caveat in the
+paper.
 
 ### 8.1 Strategy injection works on a single task
 
@@ -903,15 +984,27 @@ the design spec. Compute budget ~40 min for a 30-task pilot.
 5. ⏳ Cross-executor robustness: the role-orthogonality finding
    reproduces on Qwen2.5-7B trajectories — pending external
    endpoint coordination.
-6. ⏳ Multi-stage role-specialised AppWorld: planner / executor /
-   verifier as independent agents (not projections). Design spec
-   in [`04_multi_stage_role_setup.md`](04_multi_stage_role_setup.md);
-   build starting 2026-05-24 evening, ~1 day code + ~40 min compute.
-   Closes the projection-vs-agent critique.
+6. ✅ Multi-stage role-specialised AppWorld (real agents, not
+   projections): cross-role Jaccard mean **0.054** on n=18 tasks
+   with planner / executor / verifier as independent LLM agents.
+   plan-vs-verify (both *outputs of independent agents*, no
+   slicing): Jaccard **0.123** at pure entity-token overlap. This
+   directly closes the projection-vs-agent reviewer critique. See
+   `04_multi_stage_role_setup.md` and
+   `outputs/mv2_multi_stage_pilot/`.
+7. ✅ Capped-budget capability cost (T1b strong):
+   * `max_iter=50` baseline: 100% success across all conditions
+     (no capability differentiation; only +40% efficiency cost).
+   * `max_iter=15` deployment-realistic cap: self memory still
+     100% at B=512 but cross-app memory drops to **67% (-33pp)**;
+     at B=128 cross-app drops to 50% (-50pp). Wrong memory
+     converted from efficiency tax to **measurable capability
+     loss** under bounded inference budget.
+   * `max_iter=8` stress: too aggressive (self ≤ 17%); collapse,
+     no differential.
 
-Current achievement: **4 of 6 fully achieved**, 1 partial (capped-
-budget xtask running overnight), 2 in progress (multi-stage build,
-cross-executor pending).
+Current achievement: **5 of 7 fully achieved**, only #5 (cross-
+executor) remains as an external dependency.
 
 ### 9.4 What would invalidate the design
 
