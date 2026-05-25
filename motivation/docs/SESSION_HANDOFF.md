@@ -70,12 +70,29 @@ Cross-task efficiency cost (B=512, n=72):
 ## Active background processes
 
 ```
+1053031 run_capped_xtask_overnight  Setup A1 (max_iter=15) running; A2 (max_iter=8) chained after
+1053035 run_cross_task_transfer     A1 driver (4 workers spawned)
 3916707 auto_push_watcher           pushes motivation/ + motivation_v2/ changes every 20 min
 ```
 
-All experiment processes have completed:
+Started 8:38 PM PT on 2026-05-24. ETA ~9:20 PM PT for both setups
+(72 cells × 2 caps × ~70s avg / 4 workers ≈ 40 min). Setup A1
+results land at `outputs/mv2_xtask_cap15/transfer_results.jsonl`,
+Setup A2 at `outputs/mv2_xtask_cap8/transfer_results.jsonl`.
+
+The point of the capped-budget runs: AppWorld's default max_iter=50
+gives the agent plenty of headroom to recover from misleading
+memory by re-querying APIs, which is why the original xtask run
+showed 100% success at all conditions despite +40% iter cost. The
+capped runs simulate **bounded-budget multi-agent deployment** —
+where the consumer agent has a fixed inference budget and wrong
+memory pushes it past the ceiling. We expect cap=15 to convert
+B=512 cross_app's 50% iter-overrun rate (from the existing data's
+distribution) into a ~50pp success drop relative to self memory.
+
+Earlier completed runs:
 * 3 pilot strategy jobs — ended 3:00 PM PT
-* Cross-task transfer driver — ended 3:30 PM PT
+* Cross-task transfer driver (cap=50 baseline) — ended 3:30 PM PT
 * T2 prompted-memory build — ended 8:23 PM PT (1328/1328 cells in 42 min)
 
 ## Layout

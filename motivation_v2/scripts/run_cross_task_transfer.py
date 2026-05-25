@@ -66,7 +66,7 @@ def _load_minimal_memories(path: Path):
 
 def _run_one_cell(args_tuple):
     (consumer_task_id, condition, source_task_id, budget,
-     memory_text, tag) = args_tuple
+     memory_text, tag, max_iter) = args_tuple
 
     # Defer the heavy import until we're inside the worker, so the
     # parent doesn't load productive_agents in the main process.
@@ -80,6 +80,7 @@ def _run_one_cell(args_tuple):
         compressor=f"xtask_{condition}_from_{source_task_id}",
         budget=budget,
         tag=tag,
+        max_iter=max_iter,
     )
     return {
         "consumer_task_id": consumer_task_id,
@@ -109,6 +110,10 @@ def main():
     parser.add_argument("--budgets", nargs="+", type=int, default=[128, 256, 512])
     parser.add_argument("--tag", default="mv2_xtask")
     parser.add_argument("--workers", type=int, default=4)
+    parser.add_argument("--max_iter", type=int, default=50,
+                        help="Override AppWorld agent's max_interactions; tight values "
+                             "(e.g. 15, 8) convert wrong-memory's efficiency cost into a "
+                             "capability cost, simulating bounded-budget multi-agent deployment.")
     parser.add_argument("--output_dir",
                         default="/workspace/EASMO/motivation_v2/outputs/mv2_xtask")
     args = parser.parse_args()
@@ -163,22 +168,22 @@ def main():
             # self
             mem = minimal.get((consumer, B))
             if mem is not None:
-                cells.append((consumer, "self", consumer, B, mem, args.tag))
+                cells.append((consumer, "self", consumer, B, mem, args.tag, args.max_iter))
             # within-gen
             src = within_gen_sources[consumer]
             mem = minimal.get((src, B))
             if mem is not None:
-                cells.append((consumer, "within_gen", src, B, mem, args.tag))
+                cells.append((consumer, "within_gen", src, B, mem, args.tag, args.max_iter))
             # within-app cross-gen
             src = within_app_sources[consumer]
             mem = minimal.get((src, B))
             if mem is not None:
-                cells.append((consumer, "within_app", src, B, mem, args.tag))
+                cells.append((consumer, "within_app", src, B, mem, args.tag, args.max_iter))
             # cross-app
             src = cross_app_sources[consumer]
             mem = minimal.get((src, B))
             if mem is not None:
-                cells.append((consumer, "cross_app", src, B, mem, args.tag))
+                cells.append((consumer, "cross_app", src, B, mem, args.tag, args.max_iter))
 
     print(f"Designed {len(cells)} cells "
           f"({len(consumers)} consumers × ~4 conditions × {len(args.budgets)} budgets)")
