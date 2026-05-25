@@ -547,7 +547,7 @@ This is appendix-only unless the result is visually striking.
 | Δ_policy-generic ≈ 0 across all B | T1 dies. Most likely cause is that AppWorld tasks all need the same small set of rows regardless of policy. |
 | `m_bm25` ≈ `m*_exec` on success | Lexical retrieval is enough; policy-conditional learning is unnecessary. |
 
-## 8. What we have actually observed (2026-05-24, 2:00 PM PT)
+## 8. What we have actually observed (2026-05-24, 5:00 PM PT — pilot complete)
 
 ### 8.0 Three-tier Jaccard hierarchy (deterministic, no LLM)
 
