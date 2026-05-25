@@ -34,13 +34,14 @@ of empirical data on AppWorld trajectories. The current form:
     constraint, this is the bottleneck.
 
 * **T2 — prompted LLM selectors cannot realise role-conditional
-  compression.** Even when conditioned on a role description and a
-  task instruction, an off-the-shelf LLM compressor produces
-  compressions that are surface-uniform across roles and fall short
-  of the role-projected oracle (`m_tool` / `m_code` / `m_plan` /
-  `m_verify`).
-  *(Status: 2026-05-24 evening — pipeline ready, prompted-compressor
-  build is the next step.)*
+  compression.** Empirically (n=1328 cells, MiniMax-M2.5 with
+  role-conditioned prompts): prompted memory's cross-role Jaccard
+  is **0.216 at B=512, vs the projection oracle's 0.036 (ratio
+  6.0×)**. Per-role recall against the projected oracle is **16%
+  mean**, with the `code` role catastrophic at **4.9%** — the LLM
+  responds to "compress for a coding agent" with API-call fact
+  lists, not the control-flow abstraction that's the actual code-
+  role signal.
 
 Combined claim: *role-conditional compression in multi-agent systems
 is necessary (T1) and not achievable by prompting (T2). It must
@@ -627,7 +628,7 @@ no longer binding.
 Reproduce: `motivation_v2/scripts/run_cross_task_transfer.py`. Raw
 data: `motivation_v2/outputs/mv2_xtask/transfer_results.jsonl`.
 
-### 8.0.6 T2 prompted-compressor evidence (M2, partial — 100/1328 cells)
+### 8.0.6 T2 prompted-compressor evidence (M2, FULL — 1328/1328 cells)
 
 `scripts/build_prompted_memories.py` calls MiniMax-M2.5 with four
 role-conditioned prompts (canonical templates in
@@ -644,41 +645,44 @@ language while projected oracles are formatted code/observations
 that wouldn't line-match by construction. Comparable to the role
 projections under the same metric.
 
-#### Cross-role Jaccard for prompted memory (B=512, n≈25 task-role pairs each)
+#### Cross-role Jaccard for prompted memory (B=512, n=83 trajectories)
 
 | pair | prompted | oracle (`m_role`) | ratio |
 |---|---|---|---|
-| tool–code   | 0.210 | 0.000 | 6.4× |
-| tool–plan   | 0.271 | 0.060 | 4.5× |
-| tool–verify | 0.331 | 0.054 | 6.1× |
-| code–plan   | 0.166 | 0.000 | ∞ |
-| code–verify | 0.122 | 0.000 | ∞ |
-| plan–verify | 0.234 | 0.099 | 2.4× |
-| **mean** | **0.222** | **0.036** | **6.2×** |
+| tool–code   | 0.190 | 0.000 | ∞ |
+| tool–plan   | 0.301 | 0.060 | 5.0× |
+| tool–verify | 0.317 | 0.054 | 5.9× |
+| code–plan   | 0.147 | 0.000 | ∞ |
+| code–verify | 0.089 | 0.000 | ∞ |
+| plan–verify | 0.250 | 0.099 | 2.5× |
+| **mean** | **0.216** | **0.036** | **6.0×** |
 
-**Prompted memory is 6.2× more uniform across roles than the
+**Prompted memory is 6.0× more uniform across roles than the
 projected oracle.** The LLM, despite being given explicit role
 descriptions, produces compressions whose entity-token overlap
 across roles is six times what the role projections achieve.
 **STRONG T2** by the closure-ratio criterion (ratio ≥ 5×).
+Numbers stable between partial (n=100, ratio 6.2×) and full
+(n=1328, ratio 6.0×) — robust pattern.
 
-#### Per-role recall: prompted vs projected oracle
+#### Per-role recall: prompted vs projected oracle (n=83)
 
 | Role | B=128 | B=256 | B=512 | B=1024 |
 |---|---|---|---|---|
-| `tool`   | 0.185 | 0.340 | **0.267** | 0.243 |
-| `code`   | 0.012 | 0.055 | **0.080** | 0.073 |
-| `plan`   | 0.274 | 0.233 | **0.254** | 0.235 |
-| `verify` | 0.163 | 0.138 | **0.182** | 0.168 |
-| **mean** | 0.158 | 0.192 | **0.196** | 0.180 |
+| `tool`   | 0.182 | 0.266 | **0.253** | 0.232 |
+| `code`   | 0.030 | 0.041 | **0.049** | 0.050 |
+| `plan`   | 0.269 | 0.212 | **0.213** | 0.217 |
+| `verify` | 0.120 | 0.129 | **0.138** | 0.142 |
+| **mean** | 0.150 | 0.162 | **0.163** | 0.160 |
 
-**Prompted memory shares only ≈ 20% of the projected oracle's
+**Prompted memory shares only ≈ 16% of the projected oracle's
 entity tokens** — the LLM picks substantively different facts for
 each role than the projection rule does. The `code` role is
-catastrophic: prompting captures only **5–8%** of the code-pattern
-abstraction, because the LLM responds to "compress for a coding
-agent" with API call fact lists, not with the control-flow patterns
-that actually transfer across tasks.
+**catastrophic**: prompting captures only **3–5%** of the
+code-pattern abstraction, because the LLM responds to "compress
+for a coding agent" with API call fact lists, not with the
+control-flow patterns that actually transfer across tasks
+(Jaccard 0.41 in the projected oracle).
 
 #### What the data says about T2
 
@@ -693,11 +697,9 @@ that actually transfer across tasks.
 
 Reproduce: `motivation_v2/scripts/build_prompted_memories.py` then
 `motivation_v2/scripts/analyze_prompted_overlap.py`. Raw data:
-`motivation_v2/outputs/mv2_pilot/prompted_memories.jsonl`.
-
-Numbers will tighten when the full 1328-cell build completes
-(~28 min ETA). The pattern is already very stable across the 100
-sampled cells.
+`motivation_v2/outputs/mv2_pilot/prompted_memories.jsonl` (1,328
+rows, 4 roles × 4 budgets × 83 successful direct trajectories).
+Final summary: `motivation_v2/outputs/mv2_pilot/prompted_overlap_final.json`.
 
 ### 8.1 Strategy injection works on a single task
 
@@ -890,17 +892,17 @@ multi-LLM endpoints are in place.
 3. ✅ Cross-task transfer cost shows the plumbing-floor pattern
    — **achieved**: at B=128 all conditions ≤ 14 iters; at B=512
    wrong-task memory inflates iters by ~40%.
-4. ⏳ T2 closure ratio: prompted compressor produces surface-uniform
-   output across role hints — **partial achieved (n=100/1328 cells)**:
-   prompted Jaccard 0.222 / oracle Jaccard 0.036 → ratio **6.2×**;
-   per-role recall ≈ 20%; STRONG T2 by ratio ≥ 5× criterion.
-   Full data due ~30 min after T2 build start.
+4. ✅ T2 closure ratio: prompted compressor surface-uniform across
+   role hints — **achieved (n=1328 cells, full data)**: prompted
+   Jaccard 0.216 / oracle 0.036 → ratio **6.0×**; per-role recall
+   16% mean (code role 4.9% — pattern abstraction missed entirely);
+   STRONG T2 by ratio ≥ 5× criterion.
 5. ⏳ Cross-executor robustness: the role-orthogonality finding
    reproduces on Qwen2.5-7B trajectories — pending external
    endpoint coordination.
 
-Current achievement: **4 of 5 (with #4 at strong-partial).** (5)
-is the only remaining external dependency.
+Current achievement: **4 of 5 fully achieved.** (5) is the only
+remaining external dependency.
 
 ### 9.4 What would invalidate the design
 
