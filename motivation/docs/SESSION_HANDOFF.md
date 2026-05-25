@@ -59,13 +59,15 @@ Cross-task efficiency cost (B=512, n=72):
    task success                      100% across all 72 cells
 ```
 
-**4 of 5 spotlight criteria fully achieved**:
+**4 of 6 spotlight criteria fully achieved**:
 
 1. ✅ Cross-role Jaccard ≤ 0.10 at B=512 — achieved 0.036.
 2. ✅ Cross-task within-role Jaccard ordered (code high, others low) — achieved.
 3. ✅ Cross-task transfer cost shows plumbing-floor pattern (B=128 flat, B=512 +40%).
 4. ✅ T2 closure ratio ≥ 5× — achieved 6.0× on full 1328 cells.
 5. ⏳ Cross-executor robustness (Qwen2.5-7B) — pending external endpoint.
+6. ⏳ **Multi-stage role-specialised pipeline** (planner/executor/verifier as separate agents)
+   — building 2026-05-24 evening; closes the "projections vs real agents" reviewer critique.
 
 ## Active background processes
 

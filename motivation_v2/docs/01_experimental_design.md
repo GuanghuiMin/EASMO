@@ -878,11 +878,14 @@ the SAME slicing rules produce code Jaccard 0.41 vs tool Jaccard
 numbers would be similarly low. The fact that code transfers and
 tool doesn't is a property of the *content*, not the slicing.
 
-A follow-up experiment that actually runs role-specialised agents
-(via system prompts that force planner / coder / verifier
-behaviour) and extracts m*_exec from each role's own trajectory
-would close this gap. This is the natural Option Y' upgrade once
-multi-LLM endpoints are in place.
+**Mitigation in flight (2026-05-24 evening)**: building the
+multi-stage role-specialised AppWorld pipeline (planner → executor
+→ verifier as three separate agents on the same task). Two of the
+four role memories (`m_plan*`, `m_verify*`) become *outputs of
+independent agents* rather than projections, fully addressing the
+slicing critique for those roles. See
+[`04_multi_stage_role_setup.md`](04_multi_stage_role_setup.md) for
+the design spec. Compute budget ~40 min for a 30-task pilot.
 
 ### 9.3 What would make this design strong enough for spotlight
 
@@ -900,9 +903,15 @@ multi-LLM endpoints are in place.
 5. ⏳ Cross-executor robustness: the role-orthogonality finding
    reproduces on Qwen2.5-7B trajectories — pending external
    endpoint coordination.
+6. ⏳ Multi-stage role-specialised AppWorld: planner / executor /
+   verifier as independent agents (not projections). Design spec
+   in [`04_multi_stage_role_setup.md`](04_multi_stage_role_setup.md);
+   build starting 2026-05-24 evening, ~1 day code + ~40 min compute.
+   Closes the projection-vs-agent critique.
 
-Current achievement: **4 of 5 fully achieved.** (5) is the only
-remaining external dependency.
+Current achievement: **4 of 6 fully achieved**, 1 partial (capped-
+budget xtask running overnight), 2 in progress (multi-stage build,
+cross-executor pending).
 
 ### 9.4 What would invalidate the design
 
