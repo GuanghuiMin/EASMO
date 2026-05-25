@@ -47,10 +47,10 @@ The three-tier hierarchy is the headline finding:
    └── tool/plan/verify facts        0.07–0.11
 3. Cross-role orthogonality          0.04   → headline: role conditioning necessary
 
-T2 partial (n=100/1328 cells, complete in ~40 min):
-   prompted cross-role Jaccard       0.222  (6.2× oracle's 0.036)
-   prompted-vs-oracle recall (mean)  0.196
-   code-role recall                  0.05–0.08  (catastrophic)
+T2 FULL (n=1328 cells, complete 8:23 PM PT):
+   prompted cross-role Jaccard       0.216  (6.0× oracle's 0.036)
+   prompted-vs-oracle recall (mean)  0.163
+   code-role recall                  0.049  (catastrophic — pattern abstraction missed)
 
 Cross-task efficiency cost (B=512, n=72):
    self memory                       12.8 iters /  79K tokens   (baseline)
@@ -59,23 +59,24 @@ Cross-task efficiency cost (B=512, n=72):
    task success                      100% across all 72 cells
 ```
 
-**4 of 5 spotlight criteria achieved**:
+**4 of 5 spotlight criteria fully achieved**:
 
 1. ✅ Cross-role Jaccard ≤ 0.10 at B=512 — achieved 0.036.
 2. ✅ Cross-task within-role Jaccard ordered (code high, others low) — achieved.
 3. ✅ Cross-task transfer cost shows plumbing-floor pattern (B=128 flat, B=512 +40%).
-4. ⏳ T2 closure ratio ≥ 5× — partial 6.2×; full data due ~5:50 PM PT.
+4. ✅ T2 closure ratio ≥ 5× — achieved 6.0× on full 1328 cells.
 5. ⏳ Cross-executor robustness (Qwen2.5-7B) — pending external endpoint.
 
 ## Active background processes
 
 ```
-880089  build_prompted_memories.py  T2 build (131/1328 cells at 5:15 PM, ETA ~5:55 PM PT)
 3916707 auto_push_watcher           pushes motivation/ + motivation_v2/ changes every 20 min
 ```
 
-The 3 pilot strategy jobs and the cross-task transfer driver have
-all completed. Pilot watcher exited at 3:00 PM PT.
+All experiment processes have completed:
+* 3 pilot strategy jobs — ended 3:00 PM PT
+* Cross-task transfer driver — ended 3:30 PM PT
+* T2 prompted-memory build — ended 8:23 PM PT (1328/1328 cells in 42 min)
 
 ## Layout
 
