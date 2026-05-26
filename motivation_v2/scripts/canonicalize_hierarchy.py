@@ -12,21 +12,22 @@ Spec reference: experiment_modification.md §5 (Experiment A).
 
 Each row in hierarchy_raw.jsonl looks like:
 
-    {"axis": "strategy", "executor": "MiniMaxAI/MiniMax-M2.5",
-     "budget": 512, "task_id": "82e2fac_3", "pair_label": "direct_verify",
-     "jaccard": 0.91, "n_a": 25, "n_b": 25}
+    {"axis": "role", "executor": "MiniMaxAI/MiniMax-M2.5",
+     "budget": 512, "task_id": "82e2fac_3", "pair_label": "tool_code",
+     "jaccard_token": 0.04, "jaccard_unit": 0.00,
+     "n_a_tokens": 38, "n_b_tokens": 41}
 
-Aggregate stats per (axis, budget, executor) include mean / std / median
-/ min / max / n_pairs.
+We report two Jaccard variants (spec §4.1):
+  * jaccard_token: bracket-stripped entity-token bag Jaccard (primary).
+  * jaccard_unit:  unit-text-normalized hashable-key set Jaccard.
 
-All entity-token Jaccards use the canonical_io.entity_tokens definition
-so cross-experiment comparisons are like-for-like.
+Aggregate stats per (axis, budget, executor) include mean / std /
+median / min / max / n_pairs for both variants.
 """
 
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from itertools import combinations
 from pathlib import Path
@@ -56,23 +57,23 @@ _BUDGETS_DEFAULT = (128, 256, 512, 1024)
 
 
 # ----------------------------------------------------------------------
-# Memory builders (entity-token sets per (task, axis-value, budget)).
+# Memory builders (entity-token + unit sets per (task, axis-value, budget))
 # ----------------------------------------------------------------------
 
 
-def _strategy_token_sets(
+def _strategy_memory_sets(
     strategies: List[str],
     tag: str,
     budgets: Tuple[int, ...],
-) -> Dict[Tuple[str, str, int], Set[str]]:
-    """Returns {(task_id, strategy, budget) -> token_set}.
+):
+    """Build (token_sets, unit_sets, common_tids) keyed by
+    (task_id, strategy, budget).
 
     For the strategy axis we use m_tool memory (default role) so that
-    only strategy varies. Trajectories are loaded per-strategy and the
-    intersection of task_ids across all strategies is kept so we
-    compare the SAME tasks across strategies.
+    only strategy varies. We keep the intersection of task_ids
+    successful under all three strategies so we compare matched cells.
     """
-    by_strategy: Dict[str, List] = {}
+    by_strategy: Dict[str, list] = {}
     for s in strategies:
         glob = (
             f"/workspace/acon/experiments/appworld/outputs/"
@@ -86,7 +87,8 @@ def _strategy_token_sets(
         common &= set(t.task_id for t in by_strategy[s])
     print(f"[A/strategy] common task_ids across {strategies}: n={len(common)}")
 
-    out: Dict[Tuple[str, str, int], Set[str]] = {}
+    tok: Dict[Tuple[str, str, int], Set[str]] = {}
+    unit: Dict[Tuple[str, str, int], Set[str]] = {}
     builder = ROLE_BUILDERS["tool"]
     for s in strategies:
         for t in by_strategy[s]:
@@ -95,45 +97,38 @@ def _strategy_token_sets(
             for B in budgets:
                 em = builder(t, B)
                 joined = "\n".join(u.text for u in em.units)
-                out[(t.task_id, s, B)] = entity_tokens(joined)
-    return out, sorted(common)
+                tok[(t.task_id, s, B)] = entity_tokens(joined)
+                unit[(t.task_id, s, B)] = {
+                    unit_text_normalized(u.text) for u in em.units
+                }
+    return tok, unit, sorted(common)
 
 
-def _role_token_sets(
+def _role_memory_sets(
     strategy: str,
     tag: str,
     budgets: Tuple[int, ...],
-) -> Dict[Tuple[str, str, int], Set[str]]:
-    """Returns {(task_id, role, budget) -> token_set}."""
+):
+    """Build (token_sets, unit_sets, all_tids) keyed by
+    (task_id, role, budget)."""
     glob = (
         f"/workspace/acon/experiments/appworld/outputs/"
         f"MiniMaxAI_MiniMax-M2.5_{tag}_{strategy}/train/task_*"
     )
     trajs = successful_trajectories(experiments_glob=glob)
     print(f"[A/role] {strategy} successful trajectories: n={len(trajs)}")
-    out: Dict[Tuple[str, str, int], Set[str]] = {}
+    tok: Dict[Tuple[str, str, int], Set[str]] = {}
+    unit: Dict[Tuple[str, str, int], Set[str]] = {}
     for t in trajs:
         for role, builder in ROLE_BUILDERS.items():
             for B in budgets:
                 em = builder(t, B)
                 joined = "\n".join(u.text for u in em.units)
-                out[(t.task_id, role, B)] = entity_tokens(joined)
-    return out, [t.task_id for t in trajs]
-
-
-def _task_token_sets_per_role(
-    strategy: str,
-    tag: str,
-    budgets: Tuple[int, ...],
-) -> Dict[Tuple[str, str, int], Set[str]]:
-    """Same as _role_token_sets but used for the cross-task axis.
-
-    For the task axis we report cross-task Jaccard *within each role*
-    separately (so the spec's headline 'Task Jaccard' becomes the mean
-    across roles to match the role-balanced framing). Returns the same
-    structure as _role_token_sets.
-    """
-    return _role_token_sets(strategy, tag, budgets)
+                tok[(t.task_id, role, B)] = entity_tokens(joined)
+                unit[(t.task_id, role, B)] = {
+                    unit_text_normalized(u.text) for u in em.units
+                }
+    return tok, unit, [t.task_id for t in trajs]
 
 
 # ----------------------------------------------------------------------
@@ -142,49 +137,58 @@ def _task_token_sets_per_role(
 
 
 def _strategy_pairs(
-    sets_: Dict[Tuple[str, str, int], Set[str]],
+    tok_sets: Dict[Tuple[str, str, int], Set[str]],
+    unit_sets: Dict[Tuple[str, str, int], Set[str]],
     common_tids: List[str],
     strategies: List[str],
     budget: int,
 ):
     for tid in common_tids:
         for s1, s2 in combinations(strategies, 2):
-            a = sets_[(tid, s1, budget)]
-            b = sets_[(tid, s2, budget)]
+            a_t, b_t = tok_sets[(tid, s1, budget)], tok_sets[(tid, s2, budget)]
+            a_u, b_u = unit_sets[(tid, s1, budget)], unit_sets[(tid, s2, budget)]
             yield {
                 "axis": "strategy",
                 "budget": budget,
                 "task_id": tid,
                 "pair_label": f"{s1}_{s2}",
-                "jaccard": jaccard(a, b),
-                "n_a": len(a),
-                "n_b": len(b),
+                "jaccard_token": jaccard(a_t, b_t),
+                "jaccard_unit": jaccard(a_u, b_u),
+                "n_a_tokens": len(a_t),
+                "n_b_tokens": len(b_t),
+                "n_a_units": len(a_u),
+                "n_b_units": len(b_u),
             }
 
 
 def _role_pairs(
-    sets_: Dict[Tuple[str, str, int], Set[str]],
+    tok_sets: Dict[Tuple[str, str, int], Set[str]],
+    unit_sets: Dict[Tuple[str, str, int], Set[str]],
     tids: List[str],
     budget: int,
 ):
     role_names = list(ROLE_BUILDERS.keys())
     for tid in tids:
         for r1, r2 in combinations(role_names, 2):
-            a = sets_[(tid, r1, budget)]
-            b = sets_[(tid, r2, budget)]
+            a_t, b_t = tok_sets[(tid, r1, budget)], tok_sets[(tid, r2, budget)]
+            a_u, b_u = unit_sets[(tid, r1, budget)], unit_sets[(tid, r2, budget)]
             yield {
                 "axis": "role",
                 "budget": budget,
                 "task_id": tid,
                 "pair_label": f"{r1}_{r2}",
-                "jaccard": jaccard(a, b),
-                "n_a": len(a),
-                "n_b": len(b),
+                "jaccard_token": jaccard(a_t, b_t),
+                "jaccard_unit": jaccard(a_u, b_u),
+                "n_a_tokens": len(a_t),
+                "n_b_tokens": len(b_t),
+                "n_a_units": len(a_u),
+                "n_b_units": len(b_u),
             }
 
 
 def _task_pairs_per_role(
-    sets_: Dict[Tuple[str, str, int], Set[str]],
+    tok_sets: Dict[Tuple[str, str, int], Set[str]],
+    unit_sets: Dict[Tuple[str, str, int], Set[str]],
     tids: List[str],
     budget: int,
 ):
@@ -192,72 +196,21 @@ def _task_pairs_per_role(
     role_names = list(ROLE_BUILDERS.keys())
     for role in role_names:
         for ta, tb in combinations(tids, 2):
-            a = sets_[(ta, role, budget)]
-            b = sets_[(tb, role, budget)]
+            a_t, b_t = tok_sets[(ta, role, budget)], tok_sets[(tb, role, budget)]
+            a_u, b_u = unit_sets[(ta, role, budget)], unit_sets[(tb, role, budget)]
             yield {
                 "axis": "task",
                 "budget": budget,
                 "task_id": f"{ta}|{tb}",
                 "pair_label": f"role={role}",
                 "role": role,
-                "jaccard": jaccard(a, b),
-                "n_a": len(a),
-                "n_b": len(b),
+                "jaccard_token": jaccard(a_t, b_t),
+                "jaccard_unit": jaccard(a_u, b_u),
+                "n_a_tokens": len(a_t),
+                "n_b_tokens": len(b_t),
+                "n_a_units": len(a_u),
+                "n_b_units": len(b_u),
             }
-
-
-# ----------------------------------------------------------------------
-# Plotting (matplotlib)
-# ----------------------------------------------------------------------
-
-
-def _plot_b512(rows: List[dict], out_path: Path, executor: str):
-    import matplotlib.pyplot as plt
-    import numpy as np
-
-    by_axis = {"strategy": [], "task": [], "role": []}
-    for r in rows:
-        if r["budget"] != 512:
-            continue
-        if r["axis"] not in by_axis:
-            continue
-        by_axis[r["axis"]].append(r["jaccard"])
-
-    axis_labels = ["strategy", "task", "role"]
-    means = [
-        sum(by_axis[a]) / max(len(by_axis[a]), 1) for a in axis_labels
-    ]
-    n_pairs = [len(by_axis[a]) for a in axis_labels]
-    stds = []
-    for a in axis_labels:
-        xs = by_axis[a]
-        if len(xs) >= 2:
-            mu = sum(xs) / len(xs)
-            v = sum((x - mu) ** 2 for x in xs) / (len(xs) - 1)
-            stds.append(v ** 0.5)
-        else:
-            stds.append(0.0)
-
-    fig, ax = plt.subplots(figsize=(6, 4))
-    x = np.arange(len(axis_labels))
-    bars = ax.bar(
-        x, means, yerr=stds, capsize=4,
-        color=["#69b3a2", "#f3b562", "#c44a4a"],
-        edgecolor="black",
-    )
-    for i, (m, n) in enumerate(zip(means, n_pairs)):
-        ax.text(i, m + 0.02, f"{m:.3f}\nn={n}",
-                ha="center", va="bottom", fontsize=9)
-    ax.set_xticks(x)
-    ax.set_xticklabels([f"{a}\n(varied)" for a in axis_labels])
-    ax.set_ylim(0, max(1.0, max(means) * 1.25))
-    ax.set_ylabel("Pair-wise Jaccard at B=512")
-    ax.set_title(f"Three-level memory divergence hierarchy — {executor}")
-    ax.axhline(y=0, color="gray", linewidth=0.5)
-    plt.tight_layout()
-    plt.savefig(out_path, format="pdf")
-    plt.close(fig)
-    print(f"[plot] wrote {out_path}")
 
 
 # ----------------------------------------------------------------------
@@ -266,27 +219,100 @@ def _plot_b512(rows: List[dict], out_path: Path, executor: str):
 
 
 def _aggregate(rows: List[dict]) -> List[dict]:
-    """Return one row per (axis, budget, executor) with full stats."""
-    bucket: Dict[Tuple[str, int, str], List[float]] = {}
+    """Return one row per (axis, budget, executor) with full stats for
+    both Jaccard variants."""
+    bucket: Dict[Tuple[str, int, str], Dict[str, List[float]]] = {}
     for r in rows:
         key = (r["axis"], r["budget"], r["executor"])
-        bucket.setdefault(key, []).append(r["jaccard"])
+        b = bucket.setdefault(key, {"token": [], "unit": []})
+        b["token"].append(r["jaccard_token"])
+        b["unit"].append(r["jaccard_unit"])
     out: List[dict] = []
-    for (axis, B, exe), xs in sorted(bucket.items()):
-        s = DistribStats.from_values(xs)
+    for (axis, B, exe), b in sorted(bucket.items()):
+        s_t = DistribStats.from_values(b["token"])
+        s_u = DistribStats.from_values(b["unit"])
         out.append({
             "experiment": "A_hierarchy",
             "executor": exe,
             "axis": axis,
             "budget": B,
-            "n_pairs": s.n,
-            "jaccard_mean": round(s.mean, 4),
-            "jaccard_std": round(s.std, 4),
-            "jaccard_median": round(s.median, 4),
-            "jaccard_min": round(s.min_, 4),
-            "jaccard_max": round(s.max_, 4),
+            "n_pairs": s_t.n,
+            "jaccard_token_mean":   round(s_t.mean,   4),
+            "jaccard_token_std":    round(s_t.std,    4),
+            "jaccard_token_median": round(s_t.median, 4),
+            "jaccard_token_min":    round(s_t.min_,   4),
+            "jaccard_token_max":    round(s_t.max_,   4),
+            "jaccard_unit_mean":    round(s_u.mean,   4),
+            "jaccard_unit_std":     round(s_u.std,    4),
+            "jaccard_unit_median":  round(s_u.median, 4),
+            "jaccard_unit_min":     round(s_u.min_,   4),
+            "jaccard_unit_max":     round(s_u.max_,   4),
         })
     return out
+
+
+# ----------------------------------------------------------------------
+# Plotting (matplotlib) — bar plot of mean Jaccard per axis at B=512
+# ----------------------------------------------------------------------
+
+
+def _plot_b512(rows: List[dict], out_path: Path, executor: str):
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    by_axis_token: Dict[str, List[float]] = {"strategy": [], "task": [], "role": []}
+    by_axis_unit:  Dict[str, List[float]] = {"strategy": [], "task": [], "role": []}
+    for r in rows:
+        if r["budget"] != 512 or r["axis"] not in by_axis_token:
+            continue
+        by_axis_token[r["axis"]].append(r["jaccard_token"])
+        by_axis_unit[r["axis"]].append(r["jaccard_unit"])
+
+    axis_labels = ["strategy", "task", "role"]
+    means_t = [
+        sum(by_axis_token[a]) / max(len(by_axis_token[a]), 1) for a in axis_labels
+    ]
+    means_u = [
+        sum(by_axis_unit[a]) / max(len(by_axis_unit[a]), 1) for a in axis_labels
+    ]
+    n_pairs = [len(by_axis_token[a]) for a in axis_labels]
+
+    def _std(xs):
+        if len(xs) < 2:
+            return 0.0
+        m = sum(xs) / len(xs)
+        return (sum((x - m) ** 2 for x in xs) / (len(xs) - 1)) ** 0.5
+
+    stds_t = [_std(by_axis_token[a]) for a in axis_labels]
+
+    fig, ax = plt.subplots(figsize=(7.0, 4.5))
+    x = np.arange(len(axis_labels))
+    width = 0.36
+    bars_t = ax.bar(
+        x - width / 2, means_t, width=width, yerr=stds_t, capsize=3,
+        color=["#1f77b4"] * 3, edgecolor="black", label="Entity-token Jaccard",
+    )
+    bars_u = ax.bar(
+        x + width / 2, means_u, width=width,
+        color=["#ff7f0e"] * 3, edgecolor="black", label="Unit-text Jaccard",
+    )
+    for i, (mt, mu, n) in enumerate(zip(means_t, means_u, n_pairs)):
+        ax.text(i - width / 2, mt + 0.015, f"{mt:.3f}",
+                ha="center", va="bottom", fontsize=8)
+        ax.text(i + width / 2, mu + 0.015, f"{mu:.3f}",
+                ha="center", va="bottom", fontsize=8)
+        ax.text(i, -0.07, f"n={n}", ha="center", va="top", fontsize=8, color="gray")
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"{a}\n(varied)" for a in axis_labels])
+    ax.set_ylim(-0.10, max(1.0, max(means_t + means_u) * 1.30))
+    ax.set_ylabel("Pair-wise Jaccard at B=512")
+    ax.set_title(f"Three-level memory divergence hierarchy — {executor}")
+    ax.axhline(y=0, color="gray", linewidth=0.5)
+    ax.legend(loc="upper right", fontsize=9)
+    plt.tight_layout()
+    plt.savefig(out_path, format="pdf")
+    plt.close(fig)
+    print(f"[plot] wrote {out_path}")
 
 
 # ----------------------------------------------------------------------
@@ -299,7 +325,7 @@ def main():
     parser.add_argument("--strategies", nargs="+", default=["direct", "verify", "explore"])
     parser.add_argument("--main_strategy", default="direct",
                         help="Strategy used for the role and task axes "
-                             "(strategy axis uses all three).")
+                             "(strategy axis uses all strategies).")
     parser.add_argument("--tag", default="mv2_pilot")
     parser.add_argument("--budgets", nargs="+", type=int, default=list(_BUDGETS_DEFAULT))
     parser.add_argument("--executor", default=_EXEC_DEFAULT)
@@ -312,29 +338,27 @@ def main():
         seed=42,
     )
 
-    # ----- Build per-axis token sets -----
-    print("[A] Building strategy-axis token sets...")
-    strat_sets, common_tids_strategy = _strategy_token_sets(
+    print("[A] Building strategy-axis token/unit sets...")
+    strat_tok, strat_unit, common_tids_strategy = _strategy_memory_sets(
         args.strategies, args.tag, tuple(args.budgets),
     )
     print(f"[A] strategy axis: {len(common_tids_strategy)} common tasks")
 
-    print("[A] Building role/task-axis token sets (strategy=%s)..." % args.main_strategy)
-    role_sets, all_tids = _role_token_sets(
+    print("[A] Building role/task-axis token/unit sets (strategy=%s)..." % args.main_strategy)
+    role_tok, role_unit, all_tids = _role_memory_sets(
         args.main_strategy, args.tag, tuple(args.budgets),
     )
     print(f"[A] role/task axes: {len(all_tids)} successful tasks at strategy='{args.main_strategy}'")
 
-    # ----- Emit raw cells -----
     rows: List[dict] = []
     for B in args.budgets:
-        for cell in _strategy_pairs(strat_sets, common_tids_strategy, args.strategies, B):
+        for cell in _strategy_pairs(strat_tok, strat_unit, common_tids_strategy, args.strategies, B):
             cell["executor"] = args.executor
             rows.append(cell)
-        for cell in _role_pairs(role_sets, all_tids, B):
+        for cell in _role_pairs(role_tok, role_unit, all_tids, B):
             cell["executor"] = args.executor
             rows.append(cell)
-        for cell in _task_pairs_per_role(role_sets, all_tids, B):
+        for cell in _task_pairs_per_role(role_tok, role_unit, all_tids, B):
             cell["executor"] = args.executor
             rows.append(cell)
 
@@ -347,11 +371,10 @@ def main():
     n_sum = write_csv(sum_path, summary)
     print(f"[A] wrote {n_sum} summary rows -> {sum_path}")
 
-    # ----- Print human-readable table -----
     print()
-    print("=== Three-level hierarchy (mean Jaccard, executor=%s) ===" % args.executor)
-    print(f"{'budget':>6} | {'strategy':>10}  | {'task':>10}  | {'role':>10}")
-    print("-" * 60)
+    print("=== Three-level hierarchy (mean entity-token Jaccard, executor=%s) ===" % args.executor)
+    print(f"{'budget':>6} | {'strategy':>20} | {'task':>20} | {'role':>20}")
+    print("-" * 80)
     by_axis_budget = {(r["axis"], r["budget"]): r for r in summary}
     for B in args.budgets:
         s = by_axis_budget.get(("strategy", B), {})
@@ -359,15 +382,25 @@ def main():
         r = by_axis_budget.get(("role", B), {})
         def _f(d):
             if not d: return "n/a"
-            return (f"{d['jaccard_mean']:.3f}±{d['jaccard_std']:.2f}"
-                    f" (n={d['n_pairs']})")
-        print(f"{B:>6} | {_f(s):>14}  | {_f(t):>14}  | {_f(r):>14}")
+            return (f"{d['jaccard_token_mean']:.3f}±{d['jaccard_token_std']:.2f} (n={d['n_pairs']})")
+        print(f"{B:>6} | {_f(s):>20} | {_f(t):>20} | {_f(r):>20}")
 
-    # ----- Plots -----
+    print()
+    print("=== Same table — unit-text Jaccard ===")
+    print(f"{'budget':>6} | {'strategy':>20} | {'task':>20} | {'role':>20}")
+    print("-" * 80)
+    for B in args.budgets:
+        s = by_axis_budget.get(("strategy", B), {})
+        t = by_axis_budget.get(("task", B), {})
+        r = by_axis_budget.get(("role", B), {})
+        def _f(d):
+            if not d: return "n/a"
+            return (f"{d['jaccard_unit_mean']:.3f}±{d['jaccard_unit_std']:.2f} (n={d['n_pairs']})")
+        print(f"{B:>6} | {_f(s):>20} | {_f(t):>20} | {_f(r):>20}")
+
     _plot_b512([{**r, "executor": args.executor} for r in rows],
                FIGURES_DIR / "hierarchy_b512.pdf",
                args.executor)
-    # by_executor: same plot for the only executor; placeholder for cross-executor.
     _plot_b512([{**r, "executor": args.executor} for r in rows],
                FIGURES_DIR / "hierarchy_by_executor.pdf",
                args.executor)
