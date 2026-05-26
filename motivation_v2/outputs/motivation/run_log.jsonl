@@ -1,0 +1,1 @@
+{"script": "canonicalize_hierarchy.py", "experiment": "A_hierarchy", "executor": "MiniMaxAI/MiniMax-M2.5", "benchmark": "appworld", "task_split": "train", "model_endpoint": "http://10.183.22.68:8005/v1", "seed": 42, "started_at": "2026-05-26T17:35:53.990147Z", "git_commit": "4c611eed81e35b26b6d804e08e14b9b4044bb58f"}
