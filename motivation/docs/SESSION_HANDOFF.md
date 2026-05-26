@@ -1,6 +1,11 @@
 # Session handoff — paste this into a new chat if context fills up
 
-> Updated: 2026-05-24 9:40 PM PT (overnight runs all complete; capped-budget capability cost + multi-stage role results landed)
+> Updated: 2026-05-26 10:25 AM PT (all overnight runs done since 2026-05-24 9:43 PM; no new work since; ready for direction-decision)
+>
+> **➡ Read this first if you're picking up in a fresh chat**:
+> [`motivation_v2/docs/05_results_summary.md`](../../motivation_v2/docs/05_results_summary.md)
+> — a 10-minute decision-ready snapshot with the 7-criterion scorecard
+> (6/7 fully achieved) and four next-step options A/B/C/D.
 >
 > **Active track**: `motivation_v2/` (AppWorld + role-conditional memory).
 > The old `motivation/` track was abandoned 2026-05-24; see §Abandoned-track
@@ -59,7 +64,8 @@ Cross-task efficiency cost (B=512, n=72):
    task success                      100% across all 72 cells
 ```
 
-**6 of 7 spotlight criteria fully achieved**:
+**6 of 7 spotlight criteria fully achieved** (full table + numbers in
+[`motivation_v2/docs/05_results_summary.md`](../../motivation_v2/docs/05_results_summary.md) §4):
 
 1. ✅ Cross-role Jaccard ≤ 0.10 at B=512 — achieved **0.036**.
 2. ✅ Cross-task within-role Jaccard ordered (code 0.41 vs others 0.07–0.11).
