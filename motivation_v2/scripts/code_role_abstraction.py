@@ -205,17 +205,19 @@ def _plot_abstraction_bar(summary: List[dict], out_path: Path, budget: int = 512
     rows.sort(key=lambda r: r["compressor"])
     conds = [r["compressor"] for r in rows]
     api_vals = [r["share_api_fact"] for r in rows]
-    cf_vals  = [r["share_control_flow"] for r in rows]
+    cp_vals  = [r["share_code_pattern"] for r in rows]
     ot_vals  = [r["share_other"] for r in rows]
 
     fig, ax = plt.subplots(figsize=(7.5, 4.5))
     x = np.arange(len(conds))
-    ax.bar(x, api_vals, label="API fact",      color="#d62728", edgecolor="black")
-    ax.bar(x, cf_vals,  bottom=api_vals,
-           label="Control-flow pattern", color="#2ca02c", edgecolor="black")
-    ax.bar(x, ot_vals,  bottom=[a + c for a, c in zip(api_vals, cf_vals)],
-           label="Other",          color="#7f7f7f", edgecolor="black")
-    for i, (a, c) in enumerate(zip(api_vals, cf_vals)):
+    ax.bar(x, api_vals, label="API fact (concrete args/IDs/tokens)",
+           color="#d62728", edgecolor="black")
+    ax.bar(x, cp_vals,  bottom=api_vals,
+           label="Code pattern (control-flow / assignment / print / comment)",
+           color="#2ca02c", edgecolor="black")
+    ax.bar(x, ot_vals,  bottom=[a + c for a, c in zip(api_vals, cp_vals)],
+           label="Other (prose / unrecognized)", color="#7f7f7f", edgecolor="black")
+    for i, (a, c) in enumerate(zip(api_vals, cp_vals)):
         ax.text(i, a / 2, f"{a*100:.0f}%", ha="center", va="center",
                 color="white", fontsize=9, fontweight="bold")
         ax.text(i, a + c / 2, f"{c*100:.0f}%", ha="center", va="center",
@@ -337,12 +339,12 @@ def main():
 
     print()
     print("=== Code-role memory composition ===")
-    print(f"  {'compressor':>22} | {'B':>4} | {'lines':>5} | {'api%':>5} | {'ctrlflow%':>9} | {'other%':>6}")
+    print(f"  {'compressor':>22} | {'B':>4} | {'lines':>5} | {'api%':>5} | {'code%':>5} | {'other%':>6}")
     print("-" * 70)
     for r in summary:
         print(f"  {r['compressor']:>22} | {r['budget']:>4} | {r['n_lines']:>5} | "
               f"{r['share_api_fact']*100:>4.0f}% | "
-              f"{r['share_control_flow']*100:>8.0f}% | "
+              f"{r['share_code_pattern']*100:>4.0f}% | "
               f"{r['share_other']*100:>5.0f}%")
 
     _plot_abstraction_bar(summary, FIGURES_DIR / "code_abstraction_share.pdf",
