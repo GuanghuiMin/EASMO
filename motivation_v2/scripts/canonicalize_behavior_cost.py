@@ -155,22 +155,19 @@ def _to_run_result(row: dict, max_iter: int, tag: str) -> dict:
     budget = row["budget"]
     cond_canonical = _CONDITION_REMAP.get(raw_cond, raw_cond)
 
-    api_metrics = {
-        "api_calls_total": 0,
-        "api_calls_unique": 0,
-        "wrong_endpoint_calls": 0,
-        "show_api_doc_calls": 0,
-    }
-    if source:
-        traj_dir = _trajectory_dir(
-            consumer_task=consumer,
-            condition=raw_cond,
-            source_task=source,
-            budget=budget,
-            tag=tag,
-        )
-        env_path = traj_dir / "env_history.json"
-        api_metrics = _extract_api_metrics(env_path)
+    # The runner uses 'from_none' in the directory name when source is
+    # empty (no_memory, generic_recent). Look up trajectory metrics
+    # whether or not source is provided.
+    source_dirname = source if source else "none"
+    traj_dir = _trajectory_dir(
+        consumer_task=consumer,
+        condition=raw_cond,
+        source_task=source_dirname,
+        budget=budget,
+        tag=tag,
+    )
+    env_path = traj_dir / "env_history.json"
+    api_metrics = _extract_api_metrics(env_path)
 
     run_id = (
         f"{tag}_{cond_canonical}_from_{source or 'none'}"
