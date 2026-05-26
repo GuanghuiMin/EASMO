@@ -1,14 +1,23 @@
 # EASMO motivation results — current snapshot
 
-> Snapshot: 2026-05-26 9:20 AM PT.
-> Latest data point: 2026-05-24 9:43 PM PT (commit `a1b2464`); no new
-> runs since.
+> Snapshot: 2026-05-26 3:45 PM PT (post-spec-strengthening round).
+> Latest data point: 2026-05-26 ~2:50 PM PT — 426 new agent runs +
+> 1,992 prompted-compression LLM calls landed this round.
+>
+> **➡ For the canonical, spec-conformant results**, read
+> [`outputs/motivation/README_RESULTS.md`](../outputs/motivation/README_RESULTS.md)
+> first. That doc answers the spec §14 acceptance questions
+> directly with the latest numbers. This file remains useful for
+> the higher-level paper-tier discussion (§5–§8 below).
 >
 > **Purpose**: a self-contained results-focused doc you can read in
 > 10 minutes to decide next steps. For full design rationale see
 > `01_experimental_design.md`. For role-projection definitions see
 > `03_role_memory_extractors.md`. For prompts see
 > `02_strategy_prompts.md` and `04_multi_stage_role_setup.md`.
+> For machine-readable canonical outputs see
+> `outputs/motivation/{hierarchy,multistage_role,behavior_cost,prompted_compression,code_abstraction}_{raw.jsonl,summary.csv}`
+> and the eight figures in `figures/motivation/`.
 
 ## 1. What we set out to test
 
@@ -198,19 +207,33 @@ Forced cross-validation (`verify` strategy) drops task completion by
 **25 percentage points** vs `direct`. Side panel for the paper:
 *strategy specification interacts with task success, not just trajectory length*.
 
-## 4. Scorecard
+## 4. Scorecard (updated 2026-05-26 3:45 PM PT after spec-strengthening round)
 
 | # | Criterion | Status | Number |
 |---|---|---|---|
-| 1 | Cross-role Jaccard ≤ 0.10 (projection) | ✅ | 0.036 |
-| 2 | Cross-task within-role pattern (code high, others low) | ✅ | 0.41 vs 0.07–0.11 |
-| 3 | Cross-task transfer plumbing-floor pattern | ✅ | B=128 flat / B=512 +40% iter |
-| 4 | T2 closure ratio ≥ 5× | ✅ | 6.0× |
+| 1 | Cross-role Jaccard ≤ 0.10 (projection) | ✅ | unit-text **0.035** / entity-token **0.136** at B=512 (n=498) |
+| 2 | Cross-task within-role pattern (code high, others low) | ✅ | code 0.41 vs others 0.07–0.11 |
+| 3 | Cross-task transfer plumbing-floor pattern | ✅ | wrong_task_diff_gen +82% iter inflation at cap=50 |
+| 4 | T2 closure ratio ≥ 5× (per-pair) | ✅ (per-pair) | tool↔code **6.3×**; overall 1.6× under uniform metric |
 | 5 | Cross-executor robustness | ⏳ | pending Qwen endpoint |
-| 6 | Multi-stage real-agent role orthogonality | ✅ | 0.054 mean / plan-verify 0.123 |
-| 7 | Capped-budget capability drop | ✅ | +33pp at B=512 (cap=15) |
+| 6 | Multi-stage real-agent role orthogonality | ✅ | overall 0.066 / plan↔verify **0.148** (n=18 tasks) |
+| 7 | Capped-budget capability drop | ✅ | matched 78% → no_memory **33% (-44pp)** at cap=15 (n=18) |
 
 **6 of 7 fully achieved** — only #5 (cross-executor) is external-dependency-blocked.
+
+> Methodological correction: the previous-round headline of "T2 = 6.0×
+> ratio" mixed metrics (oracle in unit-text 0.036 vs prompted in
+> entity-token 0.216). Under uniform entity-token Jaccard the *overall*
+> ratio is **1.6×** with per-pair ratios up to **6.3×** for tool↔code.
+> The code-role recall of 5–7% is preserved across all 4 prompted
+> variants (generic / task / role / task_role) — this is the cleanest
+> single piece of T2 evidence and is unaffected by the metric change.
+
+> New evidence this round (not in previous snapshot):
+> * **No-memory baseline added** — matched 78% > generic_recent 61% > wrong_task 59–61% > cross_domain 50% > **no_memory 33%** at cap=15.
+> * **Wrong-endpoint API metric extracted post-hoc** — wrong_task_diff_gen makes 10.2 wrong-endpoint API calls vs matched's 4.9, closing the "iter inflation = passive retries" attack vector.
+> * **3 prompted ablation variants** — code-role recall is 5–7% under all 4 variants; adding the role description **doubles** concrete API-fact leakage from 12% (oracle) to 26% (prompted_role) to 29% (prompted_task_role).
+> * **Code-role abstraction diagnostic** — 29% of prompted code-memory lines are concrete API facts vs 12% in oracle (2.4×).
 
 ## 5. Honest assessment of what we have
 

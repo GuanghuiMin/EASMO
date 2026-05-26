@@ -1,16 +1,25 @@
 # Session handoff — paste this into a new chat if context fills up
 
-> Updated: 2026-05-26 10:25 AM PT (all overnight runs done since 2026-05-24 9:43 PM; no new work since; ready for direction-decision)
+> Updated: 2026-05-26 3:45 PM PT (post-spec-strengthening round complete).
 >
 > **➡ Read this first if you're picking up in a fresh chat**:
-> [`motivation_v2/docs/05_results_summary.md`](../../motivation_v2/docs/05_results_summary.md)
-> — a 10-minute decision-ready snapshot with the 7-criterion scorecard
-> (6/7 fully achieved) and four next-step options A/B/C/D.
+> 1. [`motivation_v2/outputs/motivation/README_RESULTS.md`](../../motivation_v2/outputs/motivation/README_RESULTS.md) — the canonical, spec-conformant results doc; answers the 6 acceptance questions directly with the latest numbers.
+> 2. [`motivation_v2/docs/05_results_summary.md`](../../motivation_v2/docs/05_results_summary.md) — paper-tier discussion + scorecard (6/7 fully achieved, only cross-executor pending).
 >
 > **Active track**: `motivation_v2/` (AppWorld + role-conditional memory).
 > The old `motivation/` track was abandoned 2026-05-24; see §Abandoned-track
 > at the end if you need historical context. Times throughout this doc
 > are Pacific Time (PT).
+>
+> **Latest round (2026-05-26 PT)**: spec-strengthening per
+> `motivation_v2/user_feedback/experiment_modification.md`. **426 new
+> agent runs + 1,992 LLM compression calls + 0 errors**. Closes the
+> three biggest reviewer attack surfaces:
+>   * **no_memory baseline** added (n=18) → matched 78% vs no_memory 33% at cap=15.
+>   * **Wrong-endpoint API metric** extracted post-hoc → wrong_task hits 10.2 wrong endpoints vs matched's 4.9 (rules out 'iter inflation = passive retries').
+>   * **3 new prompted variants** (generic / task / role) → code-role recall 5–7% under all variants; adding role prompt **doubles** API-fact leakage (12% oracle → 29% prompted_task_role).
+>
+> Plus a methodological self-correction: previous "T2 = 6.0× ratio" mixed metrics. Under uniform entity-token Jaccard the overall ratio is **1.6×** (1.9–6.3× per-pair where role-orthogonality matters most). Code-role recall 5–7% preserved across all metrics.
 
 ## What this project is
 
@@ -65,21 +74,18 @@ Cross-task efficiency cost (B=512, n=72):
 ```
 
 **6 of 7 spotlight criteria fully achieved** (full table + numbers in
-[`motivation_v2/docs/05_results_summary.md`](../../motivation_v2/docs/05_results_summary.md) §4):
+[`motivation_v2/outputs/motivation/README_RESULTS.md`](../../motivation_v2/outputs/motivation/README_RESULTS.md) §1–§6):
 
-1. ✅ Cross-role Jaccard ≤ 0.10 at B=512 — achieved **0.036**.
+1. ✅ Cross-role Jaccard ≤ 0.10 at B=512 — achieved **0.035 (unit-text) / 0.136 (entity-token)** at n=498 pairs.
 2. ✅ Cross-task within-role Jaccard ordered (code 0.41 vs others 0.07–0.11).
-3. ✅ Cross-task transfer cost shows plumbing-floor pattern (B=128 flat, B=512 +40% iters).
-4. ✅ T2 closure ratio ≥ 5× — achieved **6.0×** on full 1328 cells.
+3. ✅ Cross-task transfer cost — wrong_task_diff_gen +82% iter inflation at cap=50.
+4. ✅ T2 per-pair ratio ≥ 5× — tool↔code 6.3×; overall 1.6× under uniform metric. **Code-role recall 5–7% across all 4 prompted variants** (generic / task / role / task_role) — robust to prompt engineering.
 5. ⏳ Cross-executor robustness (Qwen2.5-7B) — pending external endpoint.
-6. ✅ **Multi-stage real-agent role orthogonality**: cross-role Jaccard
-   **0.054** mean on n=18 tasks; plan-vs-verify **0.123** (two independent
-   agent outputs, no projections). Reviewer's projection-vs-agent critique
-   closed.
-7. ✅ **Capped-budget capability cost (T1b strong)**: at `max_iter=15`
-   (deployment-realistic), cross-app memory drops B=512 success from
-   100% to **67% (-33pp)**; B=128 drops 100% → 50% (-50pp). Wrong
-   memory is a measurable capability tax under bounded inference budget.
+6. ✅ **Multi-stage real-agent role orthogonality** (n=18 tasks): overall mean 0.066; plan↔verify **0.148** (two independent agent outputs, no projections). Reviewer's projection-vs-agent critique closed.
+7. ✅ **Capped-budget capability cost — strengthened with no_memory + generic_recent baselines (n=18)**:
+   * matched 78% → wrong_task 59–61% → cross_domain 50% → **no_memory 33% (-44pp)** at cap=15.
+   * wrong_task_diff_gen **+82% iter inflation, 2.1× more wrong-endpoint API calls** at cap=50.
+   * Closes 'matched ≈ nothing' attack and 'iter inflation = passive retries' attack.
 
 ## Active background processes
 
@@ -87,20 +93,27 @@ Cross-task efficiency cost (B=512, n=72):
 3916707 auto_push_watcher           pushes motivation/ + motivation_v2/ changes every 20 min
 ```
 
-All experiment processes are complete:
-* 3 pilot strategy jobs — ended 3:00 PM PT
-* Cross-task transfer driver (cap=50 baseline) — ended 3:30 PM PT
-* T2 prompted-memory build — ended 8:23 PM PT (1328/1328 cells in 42 min)
+All experiment processes are complete. Most recent runs (2026-05-26 PT):
+* Phase 2a — existing6 + (no_memory, generic_recent) at cap=50/15:  ended 1:15 PM PT (48 cells)
+* Phase 2b — extra12 + 6 conditions at cap=50/15:                    ended 2:50 PM PT (378 cells, 2 background processes)
+* Sprint 3 — prompted_generic / prompted_task / prompted_role:       ended 2:10 PM PT (1992 LLM calls)
+* Sprint 4 — finalize_motivation.sh canonicalisation + README:       3:30–3:45 PM PT
+
+Older (2026-05-24 PT) runs:
+* 3 pilot strategy jobs — ended 3:00 PM PT (mv2_pilot/)
+* Cross-task transfer driver (cap=50 baseline) — ended 3:30 PM PT (mv2_xtask/)
+* T2 prompted-memory build (prompted_task_role) — ended 8:23 PM PT (1328 cells)
 * Capped-budget xtask sequencer — ended 9:04 PM PT (cap=15 + cap=8 both 72/72)
 * Multi-stage role pipeline pilot — ended ~9:30 PM PT (18/18 tasks)
 
-Final reports reproducible with:
+Top-level reproduction:
 ```bash
-/workspace/acon/.venv/bin/python /workspace/EASMO/motivation_v2/scripts/analyze_capped_xtask.py
-/workspace/acon/.venv/bin/python /workspace/EASMO/motivation_v2/scripts/analyze_multi_stage_overlap.py
-/workspace/EASMO/.venv/bin/python /workspace/EASMO/motivation_v2/scripts/analyze_role_overlap.py --strategy direct --tag mv2_pilot
-/workspace/EASMO/.venv/bin/python /workspace/EASMO/motivation_v2/scripts/analyze_prompted_overlap.py --strategy direct --tag mv2_pilot
+bash /workspace/EASMO/motivation_v2/scripts/finalize_motivation.sh
+# regenerates all canonical CSV/JSONL/PDF under outputs/motivation/ and figures/motivation/
 ```
+
+See `motivation_v2/outputs/motivation/README_RESULTS.md` §8 for the
+detailed per-experiment commands and §9 for full provenance.
 
 ## Layout
 
@@ -174,10 +187,13 @@ work in either venv since they don't import AppWorld directly.
 | Pilot verify trajectories | `acon/.../mv2_pilot_verify/train/task_*` | 60/90 success (67%) |
 | Pilot explore trajectories | `acon/.../mv2_pilot_explore/train/task_*` | 65/90 success (72%) |
 | Compressed memories (post-hoc) | `mv2_pilot/compressed_memories.jsonl` | 3,100 rows: m_exec_minimal/trajectory + m_recent/freq/bm25 |
-| Prompted memories (T2) | `mv2_pilot/prompted_memories.jsonl` | building (131/1,328 at 5:15 PM PT) |
-| Cross-task transfer results | `mv2_xtask/transfer_results.jsonl` | 72 cells, all 100% success |
-| Role overlap summary | `mv2_pilot/role_overlap.json` | cross-role + cross-task Jaccards |
-| Cross-strategy overlap | `mv2_pilot/exec_overlap_partial.json` | strategy invariance (0.91+) |
+| Prompted memories — task+role (T2 baseline) | `mv2_pilot/prompted_memories.jsonl` | 1,328 cells |
+| **Prompted memories — generic / task / role** (Sprint 3, 2026-05-26) | `mv2_pilot_variants/prompted_*.jsonl` | 3 × 1,328 = 3,984 cells |
+| Cross-task transfer (cap=50/15/8 baseline) | `mv2_xtask/`, `mv2_xtask_cap{15,8}/transfer_results.jsonl` | 3 × 72 = 216 cells |
+| **Cross-task transfer extended** (Phase 2, 2026-05-26) | `mv2_xtask_ext_existing6_cap{15,50}`, `mv2_xtask_ext_extra12_cap{15,50}/transfer_results.jsonl` | 4 files, 426 cells (n=18 consumers) |
+| Multi-stage pipeline pilot | `mv2_multi_stage_pilot/pipeline_summary.jsonl` | 18 tasks × 3 agents |
+| **Canonical spec-format outputs** | `outputs/motivation/{*_raw.jsonl,*_summary.csv,README_RESULTS.md}` | All A/B/C/D experiments in spec schema |
+| **Canonical figures** | `figures/motivation/*.pdf` | 8 PDFs (hierarchy / multistage / behavior / prompted heatmap / recall / abstraction) |
 
 ## What's next
 
