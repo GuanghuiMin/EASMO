@@ -208,7 +208,13 @@ def _to_run_result(row: dict, max_iter: int, tag: str) -> dict:
 def _aggregate(rows: List[dict]) -> List[dict]:
     """Aggregate by (memory_condition, budget, max_iter), and compute
     efficiency_tax_iters / efficiency_tax_tokens / capability_drop
-    against matched within the same (budget, max_iter) cell."""
+    against matched within the same (budget, max_iter) cell.
+
+    Special case: ``no_memory`` lives at budget=0 (memory is empty,
+    budget axis is meaningless). We compare it against matched at
+    B=512 (the main budget) for the cap_drop / eff_tax columns so
+    the row isn't a NaN island.
+    """
     by_cbm: Dict[Tuple[str, int, int], List[dict]] = defaultdict(list)
     for r in rows:
         by_cbm[(r["memory_condition"], r["budget"], r["max_iter"])].append(r)
@@ -237,7 +243,11 @@ def _aggregate(rows: List[dict]) -> List[dict]:
         wrong_endpoint_s = DistribStats.from_values([r["wrong_endpoint_calls"] for r in xs])
         show_doc_s = DistribStats.from_values([r["show_api_doc_calls"] for r in xs])
 
+        # Compare against matched at the same (B, cap) when possible;
+        # for no_memory (B=0) compare against matched at B=512.
         matched_ref = matched_means.get((B, cap))
+        if matched_ref is None and cond == "no_memory":
+            matched_ref = matched_means.get((512, cap))
         eff_iters = (iters_s.mean - matched_ref["iters"]) if matched_ref else None
         eff_tokens = (toks_s.mean - matched_ref["tokens"]) if matched_ref else None
         capability_drop = (matched_ref["success"] - success) if matched_ref else None
@@ -278,23 +288,23 @@ def _plot_success_at_cap15(summary: List[dict], out_path: Path):
     import matplotlib.pyplot as plt
     import numpy as np
 
-    cond_order = ["matched", "wrong_task_same_gen", "wrong_task_diff_gen",
-                  "cross_domain", "generic_recent", "no_memory"]
+    # Budget-axis conditions (B=128, 256, 512 columns)
+    budgeted = ["matched", "wrong_task_same_gen", "wrong_task_diff_gen",
+                "cross_domain", "generic_recent"]
+    budgets = [128, 256, 512]
     by_cb = {(r["memory_condition"], r["budget"]): r for r in summary
              if r["max_iter"] == 15}
-    budgets = sorted({r["budget"] for r in summary if r["max_iter"] == 15})
-    if not budgets:
-        print(f"[plot] no max_iter=15 data; skipping {out_path}")
-        return
+    no_mem = next((r for r in summary
+                   if r["max_iter"] == 15 and r["memory_condition"] == "no_memory"),
+                  None)
 
-    fig, ax = plt.subplots(figsize=(8.0, 4.5))
-    width = 0.13
-    x = np.arange(len(budgets))
-    palette = [
-        "#1f77b4", "#ff7f0e", "#d62728", "#9467bd", "#8c564b", "#7f7f7f",
-    ]
+    fig, ax = plt.subplots(figsize=(9.0, 4.5))
+    palette = ["#1f77b4", "#ff7f0e", "#d62728", "#9467bd", "#8c564b"]
+    width = 0.16
+    n_groups = len(budgets) + (1 if no_mem else 0)
+    x_budgets = np.arange(len(budgets))
     plotted = 0
-    for i, cond in enumerate(cond_order):
+    for i, cond in enumerate(budgeted):
         ys, ns = [], []
         for B in budgets:
             r = by_cb.get((cond, B))
@@ -302,17 +312,24 @@ def _plot_success_at_cap15(summary: List[dict], out_path: Path):
             ns.append(r["n_runs"] if r else 0)
         if all(n == 0 for n in ns):
             continue
-        ax.bar(x + (plotted - len(cond_order) / 2) * width, ys, width=width,
-               label=f"{cond} (n={max(ns)})", color=palette[i % len(palette)],
-               edgecolor="black")
+        ax.bar(x_budgets + (plotted - len(budgeted) / 2) * width, ys,
+               width=width, label=f"{cond} (n={max(ns)})",
+               color=palette[i % len(palette)], edgecolor="black")
         plotted += 1
+    if no_mem:
+        x_no = np.array([len(budgets) + 0.5])
+        ax.bar(x_no, [no_mem["success_rate"]], width=width * len(budgeted) * 0.7,
+               label=f"no_memory (B=0, n={no_mem['n_runs']})",
+               color="#7f7f7f", edgecolor="black")
 
-    ax.set_xticks(x)
-    ax.set_xticklabels([f"B={B}" for B in budgets])
+    xticks = list(x_budgets) + ([float(len(budgets) + 0.5)] if no_mem else [])
+    xtick_labels = [f"B={B}" for B in budgets] + (["B=0\n(no memory)"] if no_mem else [])
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(xtick_labels)
     ax.set_ylim(0.0, 1.05)
     ax.set_ylabel("Success rate")
     ax.set_title("Behavioral cost under bounded inference (max_iter=15)")
-    ax.legend(loc="lower right", fontsize=8, framealpha=0.95)
+    ax.legend(loc="lower left", fontsize=8, framealpha=0.95)
     plt.tight_layout()
     plt.savefig(out_path, format="pdf")
     plt.close(fig)
@@ -422,14 +439,19 @@ def main():
     print(f"[C] wrote {n_sum} summary rows -> {sum_path}")
 
     print()
-    print("=== Behavioral cost summary (B=512) ===")
+    print("=== Behavioral cost summary (B=512 main; no_memory at B=0) ===")
     print(f"{'condition':>22} | {'cap':>4} | {'n':>3} | "
           f"{'success%':>8} | {'iters':>6} | {'tokens':>7} | "
           f"{'wrong_ep':>8} | {'doc_calls':>9} | {'eff_tax_it':>10} | "
           f"{'cap_drop':>8}")
     print("-" * 110)
+    # Show B=512 rows for normal conditions and B=0 for no_memory.
+    def _keep(r):
+        if r["memory_condition"] == "no_memory":
+            return r["budget"] == 0
+        return r["budget"] == 512
     for r in summary:
-        if r["budget"] != 512:
+        if not _keep(r):
             continue
         eff = "" if r["efficiency_tax_iters"] is None else f"{r['efficiency_tax_iters']:+.1f}"
         cap_drop = "" if r["capability_drop"] is None else f"{r['capability_drop']*100:+.0f}pp"
