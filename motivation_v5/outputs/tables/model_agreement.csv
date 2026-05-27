@@ -1,0 +1,5 @@
+metric,value,n_total_verified
+qwen_minimax_primary_mode_agreement,0.4167,24
+qwen_minimax_compression_causality_agreement,0.5,24
+qwen_minimax_recovered_then_dropped_agreement,0.375,24
+rule_based_mean_grounding_score,0.4444,24
