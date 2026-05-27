@@ -1,0 +1,4 @@
+method,n_tasks,avg_tokens,avg_ids_preserved,avg_bindings_preserved,avg_constraints_preserved,avg_action_outcomes_preserved,avg_ids_total,avg_bindings_total,avg_constraints_total,avg_action_outcomes_total
+task_aware_summary,30,314.6,3.8,0.5,0,0,31.9,17.6,0.4,17.4
+acon_style_summary,30,554.3,4.67,0.4,0,0,31.9,17.6,0.4,17.4
+symbolic_evidence,30,433.5,2.57,0.6,0,0,31.9,17.6,0.4,17.4

@@ -1,0 +1,605 @@
+{"task_id": "57c3486_3", "unit_id": "u0000", "unit_type": "api_argument", "text": "spotify.login(username='ed_wilson@gmail.com', password='p_rHtax')", "source_step": 5, "supporting_quote": "apis.spotify.login(username='ed_wilson@gmail.com', password='p_rHtax')"}
+{"task_id": "57c3486_3", "unit_id": "u0001", "unit_type": "variable_value", "text": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzcG90aWZ5K2VkX3dpbHNvbkBnbWFpbC5jb20iLCJleHAiOjE2ODQ0MTIwOTh9.QjAbSyDmn7zTQ8tvJF35cDK3yigoFdjRaqpqia6QjSA", "source_step": 5, "supporting_quote": "access_token"}
+{"task_id": "57c3486_3", "unit_id": "u0002", "unit_type": "object_id", "text": "artist_id=2(Phoenix Rivers)", "source_step": 6, "supporting_quote": "artist_id"}
+{"task_id": "57c3486_3", "unit_id": "u0003", "unit_type": "object_id", "text": "artist_id=13(Luna Starlight)", "source_step": 6, "supporting_quote": "artist_id"}
+{"task_id": "57c3486_3", "unit_id": "u0004", "unit_type": "object_id", "text": "artist_id=14(Grace Harrison)", "source_step": 6, "supporting_quote": "artist_id"}
+{"task_id": "57c3486_3", "unit_id": "u0005", "unit_type": "object_id", "text": "artist_id=16(Apollo Serenade)", "source_step": 6, "supporting_quote": "artist_id"}
+{"task_id": "57c3486_3", "unit_id": "u0006", "unit_type": "object_id", "text": "artist_id=20(Emily Rivers)", "source_step": 6, "supporting_quote": "artist_id"}
+{"task_id": "57c3486_3", "unit_id": "u0007", "unit_type": "action_outcome", "text": "liked_songs=[11,12,13,14,15,88,89,90,91,92] for artist_id=2", "source_step": 10, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_3", "unit_id": "u0008", "unit_type": "action_outcome", "text": "liked_songs=[155,156,157,158,159,160,161] for artist_id=13", "source_step": 12, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_3", "unit_id": "u0009", "unit_type": "action_outcome", "text": "liked_songs=[162,163,164,165,166,167,168] for artist_id=14", "source_step": 14, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_3", "unit_id": "u0010", "unit_type": "error_fix", "text": "error=already_liked(songs 11-15), fix=skip already liked, continue with remaining songs 176-185", "source_step": 16, "supporting_quote": "You have already liked this song in the past."}
+{"task_id": "57c3486_3", "unit_id": "u0011", "unit_type": "action_outcome", "text": "liked_songs=[176,177,178,179,180,181,182,183,184,185] for artist_id=16", "source_step": 17, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_3", "unit_id": "u0012", "unit_type": "unresolved_subgoal", "text": "like all songs from artist_id=20(Emily Rivers)", "source_step": 6, "supporting_quote": "artist_id"}
+{"task_id": "530b157_3", "unit_id": "u0000", "unit_type": "entity_binding", "text": "payer=Jeremy Calhoun", "source_step": 4, "supporting_quote": "first_name: Jeremy, last_name: Calhoun"}
+{"task_id": "530b157_3", "unit_id": "u0001", "unit_type": "entity_binding", "text": "recipient=Robert Martinez", "source_step": 10, "supporting_quote": "first_name: Robert, last_name: Martinez"}
+{"task_id": "530b157_3", "unit_id": "u0002", "unit_type": "object_id", "text": "contact_id=929", "source_step": 10, "supporting_quote": "contact_id: 929"}
+{"task_id": "530b157_3", "unit_id": "u0003", "unit_type": "variable_value", "text": "robert_phone_number=7195945426", "source_step": 10, "supporting_quote": "phone_number: 7195945426"}
+{"task_id": "530b157_3", "unit_id": "u0004", "unit_type": "variable_value", "text": "robert_email=robertmartinez@gmail.com", "source_step": 10, "supporting_quote": "email: robertmartinez@gmail.com"}
+{"task_id": "530b157_3", "unit_id": "u0005", "unit_type": "amount_quantity", "text": "owed_amount=37 USD", "source_step": 13, "supporting_quote": "I paid $37 for your groceries"}
+{"task_id": "530b157_3", "unit_id": "u0006", "unit_type": "variable_value", "text": "venmo_note=Thanks for the groceries!", "source_step": 21, "supporting_quote": "description: Thanks for the groceries!"}
+{"task_id": "530b157_3", "unit_id": "u0007", "unit_type": "action_outcome", "text": "venmo_transaction=8216 SUCCESS", "source_step": 21, "supporting_quote": "transaction_id: 8216"}
+{"task_id": "530b157_3", "unit_id": "u0008", "unit_type": "variable_value", "text": "text_message=Done. Thanks!", "source_step": 22, "supporting_quote": "message: Done. Thanks!"}
+{"task_id": "530b157_3", "unit_id": "u0009", "unit_type": "error_fix", "text": "send_text_message failed 409 - parameter issue", "source_step": 22, "supporting_quote": "Response status code is 409"}
+{"task_id": "530b157_3", "unit_id": "u0010", "unit_type": "unresolved_subgoal", "text": "send text message to Robert", "source_step": 22, "supporting_quote": "send_text_message failed"}
+{"task_id": "4fab96f_1", "unit_id": "u0000", "unit_type": "entity_binding", "text": "user=lindseysimpson@gmail.com", "source_step": 5, "supporting_quote": "lindseysimpson@gmail.com"}
+{"task_id": "4fab96f_1", "unit_id": "u0001", "unit_type": "entity_binding", "text": "relation(Chris Mccoy, roommate)", "source_step": 17, "supporting_quote": "relationships: [roommate]"}
+{"task_id": "4fab96f_1", "unit_id": "u0002", "unit_type": "entity_binding", "text": "relation(Jose Harrison, roommate)", "source_step": 17, "supporting_quote": "relationships: [roommate]"}
+{"task_id": "4fab96f_1", "unit_id": "u0003", "unit_type": "entity_binding", "text": "relation(Paul Miller, roommate)", "source_step": 17, "supporting_quote": "relationships: [roommate]"}
+{"task_id": "4fab96f_1", "unit_id": "u0004", "unit_type": "date_time", "text": "current_date=May 18, 2023", "source_step": 10, "supporting_quote": "date: Thursday, May 18, 2023"}
+{"task_id": "4fab96f_1", "unit_id": "u0005", "unit_type": "variable_value", "text": "venmo_access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2ZW5tbytsaW5kc2V5c2ltcHNvbkBnbWFpbC5jb20iLCJleHAiOjE2ODQ0MTE5Nzh9.jZQ3GKb3rER-e-f2CwLS8HGPEZrBmvPTiYx0MBYWhD0", "source_step": 5, "supporting_quote": "access_token"}
+{"task_id": "4fab96f_1", "unit_id": "u0006", "unit_type": "variable_value", "text": "phone_access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwaG9uZSszNTY3ODAxOTI0IiwiZXhwIjoxNjg0NDEyNjIxfQ.7QPXdK_PWR8E2rE7AIf33_ujl-cSialafffB74eTAQw", "source_step": 14, "supporting_quote": "access_token"}
+{"task_id": "4fab96f_1", "unit_id": "u0007", "unit_type": "object_id", "text": "payment_request_id=3464", "source_step": 18, "supporting_quote": "payment_request_id: 3462"}
+{"task_id": "4fab96f_1", "unit_id": "u0008", "unit_type": "object_id", "text": "payment_request_id=3457", "source_step": 20, "supporting_quote": "payment_request_id: 3457"}
+{"task_id": "4fab96f_1", "unit_id": "u0009", "unit_type": "object_id", "text": "payment_request_id=3455", "source_step": 20, "supporting_quote": "payment_request_id: 3455"}
+{"task_id": "4fab96f_1", "unit_id": "u0010", "unit_type": "object_id", "text": "payment_request_id=3463", "source_step": 20, "supporting_quote": "payment_request_id: 3463"}
+{"task_id": "4fab96f_1", "unit_id": "u0011", "unit_type": "object_id", "text": "payment_request_id=3470", "source_step": 24, "supporting_quote": "payment_request_id: 3470"}
+{"task_id": "4fab96f_1", "unit_id": "u0012", "unit_type": "object_id", "text": "payment_request_id=3456", "source_step": 24, "supporting_quote": "payment_request_id: 3456"}
+{"task_id": "4fab96f_1", "unit_id": "u0013", "unit_type": "amount_quantity", "text": "payment_request_3464_amount=19.0", "source_step": 18, "supporting_quote": "amount: 19.0"}
+{"task_id": "4fab96f_1", "unit_id": "u0014", "unit_type": "amount_quantity", "text": "payment_request_3457_amount=17.0", "source_step": 20, "supporting_quote": "amount: 17.0"}
+{"task_id": "4fab96f_1", "unit_id": "u0015", "unit_type": "amount_quantity", "text": "payment_request_3455_amount=29.0", "source_step": 20, "supporting_quote": "amount: 29.0"}
+{"task_id": "4fab96f_1", "unit_id": "u0016", "unit_type": "amount_quantity", "text": "payment_request_3463_amount=62.0", "source_step": 20, "supporting_quote": "amount: 62.0"}
+{"task_id": "4fab96f_1", "unit_id": "u0017", "unit_type": "amount_quantity", "text": "payment_request_3470_amount=21.0", "source_step": 24, "supporting_quote": "amount: 21.0"}
+{"task_id": "4fab96f_1", "unit_id": "u0018", "unit_type": "amount_quantity", "text": "payment_request_3456_amount=62.0", "source_step": 24, "supporting_quote": "amount: 62.0"}
+{"task_id": "4fab96f_1", "unit_id": "u0019", "unit_type": "date_time", "text": "payment_request_3464_created=2023-04-15", "source_step": 18, "supporting_quote": "created_at: 2023-04-15T08:02:02"}
+{"task_id": "4fab96f_1", "unit_id": "u0020", "unit_type": "date_time", "text": "payment_request_3457_created=2023-03-07", "source_step": 20, "supporting_quote": "created_at: 2023-03-07T10:10:05"}
+{"task_id": "4fab96f_1", "unit_id": "u0021", "unit_type": "date_time", "text": "payment_request_3455_created=2023-02-27", "source_step": 20, "supporting_quote": "created_at: 2023-02-27T05:16:56"}
+{"task_id": "4fab96f_1", "unit_id": "u0022", "unit_type": "date_time", "text": "payment_request_3463_created=2023-01-25", "source_step": 20, "supporting_quote": "created_at: 2023-01-25"}
+{"task_id": "4fab96f_1", "unit_id": "u0023", "unit_type": "date_time", "text": "payment_request_3470_created=2023-01-20", "source_step": 24, "supporting_quote": "created_at: 2023-01-20T22:41:22"}
+{"task_id": "4fab96f_1", "unit_id": "u0024", "unit_type": "date_time", "text": "payment_request_3456_created=2022-12-17", "source_step": 24, "supporting_quote": "created_at: 2022-12-17T21:06:12"}
+{"task_id": "4fab96f_1", "unit_id": "u0025", "unit_type": "entity_binding", "text": "payment_request_3464_receiver=Paul Miller", "source_step": 18, "supporting_quote": "receiver: {name: Paul Miller}"}
+{"task_id": "4fab96f_1", "unit_id": "u0026", "unit_type": "entity_binding", "text": "payment_request_3457_receiver=Jose Harrison", "source_step": 20, "supporting_quote": "receiver: {name: Jose Harrison}"}
+{"task_id": "4fab96f_1", "unit_id": "u0027", "unit_type": "entity_binding", "text": "payment_request_3455_receiver=Jose Harrison", "source_step": 20, "supporting_quote": "receiver: {name: Jose Harrison}"}
+{"task_id": "4fab96f_1", "unit_id": "u0028", "unit_type": "entity_binding", "text": "payment_request_3463_receiver=Paul Miller", "source_step": 20, "supporting_quote": "receiver: {name: Paul Miller}"}
+{"task_id": "4fab96f_1", "unit_id": "u0029", "unit_type": "entity_binding", "text": "payment_request_3470_receiver=Paul Miller", "source_step": 24, "supporting_quote": "receiver: {name: Paul Miller}"}
+{"task_id": "4fab96f_1", "unit_id": "u0030", "unit_type": "entity_binding", "text": "payment_request_3456_receiver=Jose Harrison", "source_step": 24, "supporting_quote": "receiver: {name: Jose Harrison}"}
+{"task_id": "4fab96f_1", "unit_id": "u0031", "unit_type": "action_outcome", "text": "reminder_sent(payment_request_id=3464)", "source_step": 19, "supporting_quote": "Payment request reminder sent."}
+{"task_id": "4fab96f_1", "unit_id": "u0032", "unit_type": "action_outcome", "text": "reminder_sent(payment_request_id=3457)", "source_step": 21, "supporting_quote": "Payment request reminder sent."}
+{"task_id": "4fab96f_1", "unit_id": "u0033", "unit_type": "action_outcome", "text": "reminder_sent(payment_request_id=3455)", "source_step": 22, "supporting_quote": "Payment request reminder sent."}
+{"task_id": "4fab96f_1", "unit_id": "u0034", "unit_type": "action_outcome", "text": "reminder_sent(payment_request_id=3463)", "source_step": 23, "supporting_quote": "Payment request reminder sent."}
+{"task_id": "4fab96f_1", "unit_id": "u0035", "unit_type": "unresolved_subgoal", "text": "send_reminder(payment_request_id=3470)", "source_step": 24, "supporting_quote": "payment_request_id: 3470"}
+{"task_id": "4fab96f_1", "unit_id": "u0036", "unit_type": "unresolved_subgoal", "text": "send_reminder(payment_request_id=3456)", "source_step": 24, "supporting_quote": "payment_request_id: 3456"}
+{"task_id": "4fab96f_1", "unit_id": "u0037", "unit_type": "api_argument", "text": "api=venmo.remind_payment_request", "source_step": 19, "supporting_quote": "apis.venmo.remind_payment_request"}
+{"task_id": "4fab96f_1", "unit_id": "u0038", "unit_type": "api_argument", "text": "api=venmo.show_sent_payment_requests", "source_step": 18, "supporting_quote": "apis.venmo.show_sent_payment_requests"}
+{"task_id": "4fab96f_1", "unit_id": "u0039", "unit_type": "constraint", "text": "reminder_eligible: pending AND 30+ days AND roommate", "source_step": 1, "supporting_quote": "30+ days and send reminders"}
+{"task_id": "0d8a4ee_2", "unit_id": "u0000", "unit_type": "entity_binding", "text": "relation(Adam Blackburn, user)", "source_step": 5, "supporting_quote": "first_name: Adam, last_name: Blackburn"}
+{"task_id": "0d8a4ee_2", "unit_id": "u0001", "unit_type": "variable_value", "text": "phone_number=8944155247", "source_step": 5, "supporting_quote": "phone_number: 8944155247"}
+{"task_id": "0d8a4ee_2", "unit_id": "u0002", "unit_type": "variable_value", "text": "phone_password=FiMwOzk", "source_step": 6, "supporting_quote": "account_name: phone, password: FiMwOzk"}
+{"task_id": "0d8a4ee_2", "unit_id": "u0003", "unit_type": "variable_value", "text": "venmo_password=J*(xh*P", "source_step": 6, "supporting_quote": "account_name: venmo, password: J*(xh*P"}
+{"task_id": "0d8a4ee_2", "unit_id": "u0004", "unit_type": "error_fix", "text": "login requires username not phone_number", "source_step": 8, "supporting_quote": "username: field required"}
+{"task_id": "0d8a4ee_2", "unit_id": "u0005", "unit_type": "api_argument", "text": "phone.login requires username and password", "source_step": 8, "supporting_quote": "username: Your account phone_number"}
+{"task_id": "0d8a4ee_2", "unit_id": "u0006", "unit_type": "variable_value", "text": "phone_access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwaG9uZSs4OTQ0MTU1MjQ3IiwiZXhwIjoxNjg0NDEyMDk4fQ.-cDqHbXwaI9jwlQz2rezQotRqganrbArSzDMia4obsw", "source_step": 9, "supporting_quote": "access_token returned"}
+{"task_id": "0d8a4ee_2", "unit_id": "u0007", "unit_type": "api_argument", "text": "show_contact_relationships requires access_token", "source_step": 11, "supporting_quote": "access_token: Access token obtained from phone app login"}
+{"task_id": "0d8a4ee_2", "unit_id": "u0008", "unit_type": "variable_value", "text": "relationships=[brother,coworker,father,friend,manager,mother,parent,roommate,sibling]", "source_step": 12, "supporting_quote": "output from show_contact_relationships"}
+{"task_id": "0d8a4ee_2", "unit_id": "u0009", "unit_type": "entity_binding", "text": "contact_id=802 relation(Kevin Blackburn, sibling)", "source_step": 13, "supporting_quote": "contact_id: 802, first_name: Kevin, relationships: [sibling, brother]"}
+{"task_id": "0d8a4ee_2", "unit_id": "u0010", "unit_type": "entity_binding", "text": "contact_id=801 relation(Martin Blackburn, sibling)", "source_step": 13, "supporting_quote": "contact_id: 801, first_name: Martin, relationships: [sibling, brother]"}
+{"task_id": "0d8a4ee_2", "unit_id": "u0011", "unit_type": "entity_binding", "text": "contact_id=807 relation(Carl Brown, roommate)", "source_step": 14, "supporting_quote": "contact_id: 807, first_name: Carl, relationships: [roommate]"}
+{"task_id": "0d8a4ee_2", "unit_id": "u0012", "unit_type": "entity_binding", "text": "contact_id=808 relation(Jeremy Calhoun, roommate)", "source_step": 14, "supporting_quote": "contact_id: 808, first_name: Jeremy, relationships: [roommate]"}
+{"task_id": "0d8a4ee_2", "unit_id": "u0013", "unit_type": "variable_value", "text": "venmo_access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2ZW5tbythZC5ibGFja2J1cm5AZ21haWwuY29tIiwiZXhwIjoxNjg0NDEyNzQxfQ.E_TutiP9rwPnE_Qbx9f4ba13yMqEsE0WNt-wgiJn8SQ", "source_step": 17, "supporting_quote": "access_token returned"}
+{"task_id": "0d8a4ee_2", "unit_id": "u0014", "unit_type": "status", "text": "Kevin Blackburn has venmo account", "source_step": 18, "supporting_quote": "first_name: Kevin, last_name: Blackburn, email: kevin.blac@gmail.com"}
+{"task_id": "0d8a4ee_2", "unit_id": "u0015", "unit_type": "status", "text": "Martin Blackburn has NO venmo account", "source_step": 19, "supporting_quote": "no match for mar_blac@gmail.com"}
+{"task_id": "0d8a4ee_2", "unit_id": "u0016", "unit_type": "status", "text": "Matthew Blackburn has venmo account", "source_step": 20, "supporting_quote": "first_name: Matthew, last_name: Blackburn, email: matthew.blac@gmail.com"}
+{"task_id": "0d8a4ee_2", "unit_id": "u0017", "unit_type": "unresolved_subgoal", "text": "check remaining roommates (Carl Brown, Jeremy Calhoun) for venmo accounts", "source_step": 20, "supporting_quote": "trajectory truncated"}
+{"task_id": "0d8a4ee_2", "unit_id": "u0018", "unit_type": "unresolved_subgoal", "text": "send phone message to siblings/roommates without venmo", "source_step": 20, "supporting_quote": "trajectory truncated"}
+{"task_id": "b119b1f_2", "unit_id": "u0000", "unit_type": "entity_binding", "text": "spotify_account=an-harrison@gmail.com", "source_step": 5, "supporting_quote": "username=\"an-harrison@gmail.com\""}
+{"task_id": "b119b1f_2", "unit_id": "u0001", "unit_type": "entity_binding", "text": "spotify_password==oskMku", "source_step": 3, "supporting_quote": "\"spotify\", \"password\": \"=oskMku\""}
+{"task_id": "b119b1f_2", "unit_id": "u0002", "unit_type": "api_argument", "text": "next_song requires access_token parameter", "source_step": 17, "supporting_quote": "\"parameters\": [{\"name\": \"access_token\", \"type\": \"string\", \"required\": true"}
+{"task_id": "b119b1f_2", "unit_id": "u0003", "unit_type": "error_fix", "text": "APIs return 401 unless access_token passed as parameter", "source_step": 19, "supporting_quote": "apis.spotify.play_music(song_id=1, access_token=access_token)"}
+{"task_id": "b119b1f_2", "unit_id": "u0004", "unit_type": "variable_value", "text": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzcG90aWZ5K2FuLWhhcnJpc29uQGdtYWlsLmNvbSIsImV4cCI6MTY4NDQxMjczMX0.oJSxfMZTBDm6xjUjK-PvWOXzczLsBwK3xm0iOeW-BV4", "source_step": 18, "supporting_quote": "access_token = result[\"access_token\"]"}
+{"task_id": "b119b1f_2", "unit_id": "u0005", "unit_type": "action_outcome", "text": "play_music(song_id=1) success - song playing", "source_step": 19, "supporting_quote": "{\"message\": \"Song (Painting Shadows on the Wall) is now playing.\", \"song_id\": 1}"}
+{"task_id": "b119b1f_2", "unit_id": "u0006", "unit_type": "action_outcome", "text": "next_song moved to song_id=240", "source_step": 21, "supporting_quote": "{\"message\": \"Moved to the next song in the queue.\", \"song_id\": 240}"}
+{"task_id": "b119b1f_2", "unit_id": "u0007", "unit_type": "action_outcome", "text": "next_song moved to song_id=311", "source_step": 23, "supporting_quote": "{\"message\": \"Moved to the next song in the queue.\", \"song_id\": 311}"}
+{"task_id": "b119b1f_2", "unit_id": "u0008", "unit_type": "object_id", "text": "song_id=311 is Lily Moon - Infinite Dreams", "source_step": 24, "supporting_quote": "\"song_id\": 311, \"title\": \"Infinite Dreams\", \"artists\": [{\"id\": 34, \"name\": \"Lily Moon\"}]"}
+{"task_id": "b119b1f_2", "unit_id": "u0009", "unit_type": "object_id", "text": "artist_id=34 is Lily Moon", "source_step": 14, "supporting_quote": "\"artist_id\": 34, \"name\": \"Lily Moon\""}
+{"task_id": "b119b1f_2", "unit_id": "u0010", "unit_type": "status", "text": "task_completed - found Lily Moon song", "source_step": 25, "supporting_quote": "Execution successful."}
+{"task_id": "37a8675_2", "unit_id": "u0000", "unit_type": "api_argument", "text": "receiver_email=connorbrow@gmail.com", "source_step": 15, "supporting_quote": "receiver_email='connorbrow@gmail.com'"}
+{"task_id": "37a8675_2", "unit_id": "u0001", "unit_type": "api_argument", "text": "amount=100", "source_step": 15, "supporting_quote": "amount=100"}
+{"task_id": "37a8675_2", "unit_id": "u0002", "unit_type": "api_argument", "text": "private=False", "source_step": 15, "supporting_quote": "private=False"}
+{"task_id": "37a8675_2", "unit_id": "u0003", "unit_type": "variable_value", "text": "venmo_access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2ZW5tbytzcGVuY2VyLnBvd2VsbEBnbWFpbC5jb20iLCJleHAiOjE2ODQ0MTIwOTh9.xsPh_MsvpTpZaVlostl641gTwTg-cUDYYH5qMasQzDA", "source_step": 6, "supporting_quote": "access_token"}
+{"task_id": "37a8675_2", "unit_id": "u0004", "unit_type": "variable_value", "text": "phone_access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwaG9uZSs4MjY3Mjc5MzU4IiwiZXhwIjoxNjg0NDEyNzQxfQ.zl1qx03UcV61QPSZUTwy5npSzsmsmU2SReC5HxbHxL4", "source_step": 11, "supporting_quote": "access_token"}
+{"task_id": "37a8675_2", "unit_id": "u0005", "unit_type": "entity_binding", "text": "target_user=Connor Brown", "source_step": 14, "supporting_quote": "first_name"}
+{"task_id": "37a8675_2", "unit_id": "u0006", "unit_type": "entity_binding", "text": "target_email=connorbrow@gmail.com", "source_step": 14, "supporting_quote": "email"}
+{"task_id": "37a8675_2", "unit_id": "u0007", "unit_type": "entity_binding", "text": "target_phone=5734599766", "source_step": 14, "supporting_quote": "phone_number"}
+{"task_id": "37a8675_2", "unit_id": "u0008", "unit_type": "entity_binding", "text": "payer=Spencer Powell", "source_step": 6, "supporting_quote": "username='spencer.powell@gmail.com'"}
+{"task_id": "37a8675_2", "unit_id": "u0009", "unit_type": "entity_binding", "text": "venmo_password=O_8T=iu", "source_step": 5, "supporting_quote": "account_name"}
+{"task_id": "37a8675_2", "unit_id": "u0010", "unit_type": "entity_binding", "text": "phone_password=e9(lh6J", "source_step": 10, "supporting_quote": "account_name"}
+{"task_id": "37a8675_2", "unit_id": "u0011", "unit_type": "object_id", "text": "contact_id=498", "source_step": 14, "supporting_quote": "contact_id"}
+{"task_id": "37a8675_2", "unit_id": "u0012", "unit_type": "object_id", "text": "payment_card_id=115", "source_step": 19, "supporting_quote": "payment_card_id"}
+{"task_id": "37a8675_2", "unit_id": "u0013", "unit_type": "object_id", "text": "payment_card_id=116", "source_step": 19, "supporting_quote": "payment_card_id"}
+{"task_id": "37a8675_2", "unit_id": "u0014", "unit_type": "object_id", "text": "payment_card_id=117", "source_step": 19, "supporting_quote": "payment_card_id"}
+{"task_id": "37a8675_2", "unit_id": "u0015", "unit_type": "object_id", "text": "payment_card_id=118", "source_step": 19, "supporting_quote": "payment_card_id"}
+{"task_id": "37a8675_2", "unit_id": "u0016", "unit_type": "amount_quantity", "text": "venmo_balance=0.0", "source_step": 16, "supporting_quote": "venmo_balance"}
+{"task_id": "37a8675_2", "unit_id": "u0017", "unit_type": "amount_quantity", "text": "transaction_amount=100", "source_step": 1, "supporting_quote": "send $100"}
+{"task_id": "37a8675_2", "unit_id": "u0018", "unit_type": "status", "text": "transaction_failed=insufficient_funds", "source_step": 15, "supporting_quote": "Your Venmo balance does not have $100.00"}
+{"task_id": "37a8675_2", "unit_id": "u0019", "unit_type": "status", "text": "phone_api_requires_access_token", "source_step": 9, "supporting_quote": "access token is missing, invalid or expired"}
+{"task_id": "37a8675_2", "unit_id": "u0020", "unit_type": "error_fix", "text": "add_to_venmo_balance requires payment_card_id", "source_step": 17, "supporting_quote": "payment_card_id"}
+{"task_id": "37a8675_2", "unit_id": "u0021", "unit_type": "unresolved_subgoal", "text": "add_money_to_venmo_balance", "source_step": 17, "supporting_quote": "Add money to your Venmo balance"}
+{"task_id": "37a8675_2", "unit_id": "u0022", "unit_type": "unresolved_subgoal", "text": "retry_create_transaction", "source_step": 15, "supporting_quote": "Execution failed"}
+{"task_id": "37a8675_2", "unit_id": "u0023", "unit_type": "other", "text": "venmo.create_transaction", "source_step": 2, "supporting_quote": "create_transaction"}
+{"task_id": "37a8675_2", "unit_id": "u0024", "unit_type": "other", "text": "venmo.search_users", "source_step": 3, "supporting_quote": "search_users"}
+{"task_id": "37a8675_2", "unit_id": "u0025", "unit_type": "other", "text": "venmo.login", "source_step": 4, "supporting_quote": "login"}
+{"task_id": "37a8675_2", "unit_id": "u0026", "unit_type": "other", "text": "venmo.add_to_venmo_balance", "source_step": 17, "supporting_quote": "add_to_venmo_balance"}
+{"task_id": "37a8675_2", "unit_id": "u0027", "unit_type": "other", "text": "venmo.show_venmo_balance", "source_step": 16, "supporting_quote": "show_venmo_balance"}
+{"task_id": "37a8675_2", "unit_id": "u0028", "unit_type": "other", "text": "phone.search_contacts", "source_step": 13, "supporting_quote": "search_contacts"}
+{"task_id": "37a8675_2", "unit_id": "u0029", "unit_type": "other", "text": "phone.login", "source_step": 11, "supporting_quote": "phone.login"}
+{"task_id": "37a8675_2", "unit_id": "u0030", "unit_type": "constraint", "text": "public_transaction=True", "source_step": 1, "supporting_quote": "send $100 publicly"}
+{"task_id": "37a8675_1", "unit_id": "u0000", "unit_type": "variable_value", "text": "target_phone_number=2192158297", "source_step": 1, "supporting_quote": "2192158297"}
+{"task_id": "37a8675_1", "unit_id": "u0001", "unit_type": "amount_quantity", "text": "transaction_amount=91", "source_step": 1, "supporting_quote": "$91 privately"}
+{"task_id": "37a8675_1", "unit_id": "u0002", "unit_type": "api_argument", "text": "receiver_email=thomas.solomon@gmail.com", "source_step": 15, "supporting_quote": "email"}
+{"task_id": "37a8675_1", "unit_id": "u0003", "unit_type": "entity_binding", "text": "contact(phone=2192158297, name=Thomas Solomon, relation=coworker)", "source_step": 15, "supporting_quote": "first_name"}
+{"task_id": "37a8675_1", "unit_id": "u0004", "unit_type": "variable_value", "text": "venmo_access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2ZW5tbytqZXMubWlsbEBnbWFpbC5jb20iLCJleHAiOjE2ODQ0MTIwOTh9.GFy9FN5TEgbUopBFeuqdEnTZYmN4i3IMczDtfnDLSa0", "source_step": 11, "supporting_quote": "access_token"}
+{"task_id": "37a8675_1", "unit_id": "u0005", "unit_type": "variable_value", "text": "phone_access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwaG9uZSszODA4NzE5NDkyIiwiZXhwIjoxNjg0NDEyNzQxfQ.yNVZGQk6_8fI180VZpMt9JY0QIpZvr6jw9sXxGW562w", "source_step": 14, "supporting_quote": "access_token"}
+{"task_id": "37a8675_1", "unit_id": "u0006", "unit_type": "status", "text": "venmo_balance=0.0", "source_step": 17, "supporting_quote": "venmo_balance"}
+{"task_id": "37a8675_1", "unit_id": "u0007", "unit_type": "error_fix", "text": "insufficient_funds: need to add money to Venmo balance before transaction", "source_step": 16, "supporting_quote": "Your Venmo balance does not have $91.00"}
+{"task_id": "37a8675_1", "unit_id": "u0008", "unit_type": "api_argument", "text": "venmo_login_username=jes.mill@gmail.com", "source_step": 11, "supporting_quote": "username='jes.mill@gmail.com'"}
+{"task_id": "37a8675_1", "unit_id": "u0009", "unit_type": "api_argument", "text": "venmo_login_password=*mR5XTY", "source_step": 11, "supporting_quote": "password='*mR5XTY'"}
+{"task_id": "37a8675_1", "unit_id": "u0010", "unit_type": "api_argument", "text": "phone_login_username=3808719492", "source_step": 14, "supporting_quote": "username='3808719492'"}
+{"task_id": "37a8675_1", "unit_id": "u0011", "unit_type": "api_argument", "text": "phone_login_password=5!Dkf5d", "source_step": 14, "supporting_quote": "password='5!Dkf5d'"}
+{"task_id": "37a8675_1", "unit_id": "u0012", "unit_type": "object_id", "text": "contact_id=407", "source_step": 15, "supporting_quote": "contact_id"}
+{"task_id": "37a8675_1", "unit_id": "u0013", "unit_type": "unresolved_subgoal", "text": "add_money_to_venmo: need to fund Venmo account with at least $91", "source_step": 18, "supporting_quote": "show_payment_cards()"}
+{"task_id": "3ab5b8b_1", "unit_id": "u0000", "unit_type": "entity_binding", "text": "spotify_username=normansmit@gmail.com", "source_step": 5, "supporting_quote": "username='normansmit@gmail.com'"}
+{"task_id": "3ab5b8b_1", "unit_id": "u0001", "unit_type": "entity_binding", "text": "spotify_password=faiyuvb", "source_step": 4, "supporting_quote": "account_name: spotify, password: faiyuvb"}
+{"task_id": "3ab5b8b_1", "unit_id": "u0002", "unit_type": "variable_value", "text": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzcG90aWZ5K25vcm1hbnNtaXRAZ21haWwuY29tIiwiZXhwIjoxNjg0NDEyMDk4fQ.LHWKt8f986A9ZCHDXYCkiqVtnxAHRLWxpPu5dV0l1jw", "source_step": 5, "supporting_quote": "access_token"}
+{"task_id": "3ab5b8b_1", "unit_id": "u0003", "unit_type": "api_argument", "text": "show_liked_songs: page_index, page_limit, sort_by", "source_step": 2, "supporting_quote": "parameters: [access_token, page_index, page_limit, sort_by]"}
+{"task_id": "3ab5b8b_1", "unit_id": "u0004", "unit_type": "api_argument", "text": "download_song: song_id, access_token", "source_step": 9, "supporting_quote": "parameters: [song_id, access_token]"}
+{"task_id": "3ab5b8b_1", "unit_id": "u0005", "unit_type": "object_id", "text": "liked_song_ids=[2,11,14,15,21,27,30,31,34,35,48,80,81,82,94,99,100,117,119,131,135,142,147,173,182,190,192,197,229,233,235,251,289,297,303,320,324]", "source_step": 8, "supporting_quote": "37 liked songs across pages 0,1,2"}
+{"task_id": "3ab5b8b_1", "unit_id": "u0006", "unit_type": "object_id", "text": "total_liked_songs=37", "source_step": 8, "supporting_quote": "Now I have all 37 liked songs"}
+{"task_id": "3ab5b8b_1", "unit_id": "u0007", "unit_type": "date_time", "text": "liked_at=2023-05-18T12:00:00", "source_step": 6, "supporting_quote": "liked_at: 2023-05-18T12:00:00"}
+{"task_id": "3ab5b8b_1", "unit_id": "u0008", "unit_type": "error_fix", "text": "download_song returns 422 if already downloaded - must check show_downloaded_songs first", "source_step": 10, "supporting_quote": "Exception: Response status code is 422: The song is already downloaded."}
+{"task_id": "3ab5b8b_1", "unit_id": "u0009", "unit_type": "api_argument", "text": "show_downloaded_songs: access_token, page_index, page_limit", "source_step": 11, "supporting_quote": "show_downloaded_songs(access_token=access_token)"}
+{"task_id": "3ab5b8b_1", "unit_id": "u0010", "unit_type": "object_id", "text": "downloaded_song_ids_page0=[2,11,14,15,21]", "source_step": 11, "supporting_quote": "Already downloaded: {2, 11, 14, 15, 21}"}
+{"task_id": "3ab5b8b_1", "unit_id": "u0011", "unit_type": "object_id", "text": "downloaded_song_ids_page1=[135]", "source_step": 18, "supporting_quote": "Page 1: song_id: 135"}
+{"task_id": "3ab5b8b_1", "unit_id": "u0012", "unit_type": "object_id", "text": "all_downloaded_ids={2,11,14,15,21,27,30,31,34,35,48,80,81,82,94,99,100,117,119,131,135}", "source_step": 19, "supporting_quote": "All downloaded: {2, 131, 135, 11, 14, 15, 21, 27, 30, 31, 34, 35, 48, 80, 81, 82, 94, 99, 100, 117, 119}"}
+{"task_id": "3ab5b8b_1", "unit_id": "u0013", "unit_type": "object_id", "text": "remaining_to_download=[142,147,173,182,190,192,197,229,233,235,251,289,297,303,320,324]", "source_step": 21, "supporting_quote": "Remaining to download: [142, 147, 173, 182, 190, 192, 197, 229, 233, 235, 251, 289, 297, 303, 320, 324]"}
+{"task_id": "3ab5b8b_1", "unit_id": "u0014", "unit_type": "amount_quantity", "text": "songs_remaining_count=16", "source_step": 21, "supporting_quote": "Count: 16"}
+{"task_id": "3ab5b8b_1", "unit_id": "u0015", "unit_type": "action_outcome", "text": "download_song success message=Song downloaded", "source_step": 22, "supporting_quote": "Song 142: {'message': 'Song downloaded.'}"}
+{"task_id": "3ab5b8b_1", "unit_id": "u0016", "unit_type": "status", "text": "task_completed=all_37_liked_songs_downloaded", "source_step": 22, "supporting_quote": "16 songs downloaded successfully"}
+{"task_id": "37a8675_3", "unit_id": "u0000", "unit_type": "entity_binding", "text": "payer=Jared Calhoun", "source_step": 6, "supporting_quote": "first_name: Jared, last_name: Calhoun, email: jar_calhoun@gmail.com"}
+{"task_id": "37a8675_3", "unit_id": "u0001", "unit_type": "entity_binding", "text": "receiver(phone=2114992604)=Sherry Smith", "source_step": 13, "supporting_quote": "first_name: Sherry, last_name: Smith, email: she_bailey@gmail.com, phone_number: 2114992604"}
+{"task_id": "37a8675_3", "unit_id": "u0002", "unit_type": "variable_value", "text": "receiver_email=she_bailey@gmail.com", "source_step": 13, "supporting_quote": "email: she_bailey@gmail.com"}
+{"task_id": "37a8675_3", "unit_id": "u0003", "unit_type": "variable_value", "text": "venmo_password=QUr=X+j", "source_step": 5, "supporting_quote": "account_name: venmo, password: QUr=X+j"}
+{"task_id": "37a8675_3", "unit_id": "u0004", "unit_type": "variable_value", "text": "phone_password=xSqhPEu", "source_step": 5, "supporting_quote": "account_name: phone, password: xSqhPEu"}
+{"task_id": "37a8675_3", "unit_id": "u0005", "unit_type": "variable_value", "text": "venmo_access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2ZW5tbytqYXJfY2FsaG91bkBnbWFpbC5jb20iLCJleHAiOjE2ODQ0MTIwOTh9.tcMfQ2B8KvMtXUa_dFOsNZiS30sxvs00yRPE6VYMyGU", "source_step": 7, "supporting_quote": "access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}
+{"task_id": "37a8675_3", "unit_id": "u0006", "unit_type": "variable_value", "text": "phone_access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwaG9uZSszMDE2OTQ3Njg2IiwiZXhwIjoxNjg0NDEyNzQxfQ.ua0xhI-Ig22umnMhCMY90JQHThw38XGvZatnHrJnRVc", "source_step": 12, "supporting_quote": "access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}
+{"task_id": "37a8675_3", "unit_id": "u0007", "unit_type": "amount_quantity", "text": "amount=68", "source_step": 14, "supporting_quote": "amount=68"}
+{"task_id": "37a8675_3", "unit_id": "u0008", "unit_type": "constraint", "text": "transaction_type=private", "source_step": 14, "supporting_quote": "private=True"}
+{"task_id": "37a8675_3", "unit_id": "u0009", "unit_type": "api_argument", "text": "create_transaction requires receiver_email, amount, access_token, private", "source_step": 2, "supporting_quote": "parameters: receiver_email, amount, access_token, description, private"}
+{"task_id": "37a8675_3", "unit_id": "u0010", "unit_type": "api_argument", "text": "add_to_venmo_balance requires amount, payment_card_id, access_token", "source_step": 15, "supporting_quote": "parameters: amount, payment_card_id, access_token"}
+{"task_id": "37a8675_3", "unit_id": "u0011", "unit_type": "api_argument", "text": "add_payment_card requires card_name, owner_name, card_number, expiry_year, expiry_month, cvv_number, access_token", "source_step": 17, "supporting_quote": "parameters: card_name, owner_name, card_number, expiry_year, expiry_month, cvv_number, access_token"}
+{"task_id": "37a8675_3", "unit_id": "u0012", "unit_type": "error_fix", "text": "insufficient_venmo_balance - need to add money first", "source_step": 14, "supporting_quote": "Your Venmo balance does not have $68.00 to make this transaction"}
+{"task_id": "37a8675_3", "unit_id": "u0013", "unit_type": "error_fix", "text": "add_payment_card_failed - need valid payment card", "source_step": 18, "supporting_quote": "Execution failed. Response status code..."}
+{"task_id": "37a8675_3", "unit_id": "u0014", "unit_type": "unresolved_subgoal", "text": "add_payment_card to Venmo", "source_step": 18, "supporting_quote": "add_payment_card failed"}
+{"task_id": "37a8675_3", "unit_id": "u0015", "unit_type": "unresolved_subgoal", "text": "add_to_venmo_balance >= 68", "source_step": 14, "supporting_quote": "insufficient balance error"}
+{"task_id": "37a8675_3", "unit_id": "u0016", "unit_type": "unresolved_subgoal", "text": "send $68 to she_bailey@gmail.com privately", "source_step": 14, "supporting_quote": "create_transaction failed"}
+{"task_id": "37a8675_3", "unit_id": "u0017", "unit_type": "status", "text": "task_incomplete", "source_step": 18, "supporting_quote": "trajectory truncated"}
+{"task_id": "383cbac_1", "unit_id": "u0000", "unit_type": "entity_binding", "text": "manager=Spencer Powell", "source_step": 11, "supporting_quote": "receiver: {name: Spencer Powell, email: spencer.powell@gmail.com}"}
+{"task_id": "383cbac_1", "unit_id": "u0001", "unit_type": "entity_binding", "text": "user=Ashlee Martinez", "source_step": 11, "supporting_quote": "sender: {name: Ashlee Martinez, email: ashlee_martinez@gmail.com}"}
+{"task_id": "383cbac_1", "unit_id": "u0002", "unit_type": "entity_binding", "text": "manager_email=spencer.powell@gmail.com", "source_step": 11, "supporting_quote": "spencer.powell@gmail.com"}
+{"task_id": "383cbac_1", "unit_id": "u0003", "unit_type": "entity_binding", "text": "user_email=ashlee_martinez@gmail.com", "source_step": 5, "supporting_quote": "ashlee_martinez@gmail.com"}
+{"task_id": "383cbac_1", "unit_id": "u0004", "unit_type": "date_time", "text": "yesterday=2023-05-17", "source_step": 10, "supporting_quote": "2023-05-17"}
+{"task_id": "383cbac_1", "unit_id": "u0005", "unit_type": "date_time", "text": "dinner_transaction_time=2023-05-17T14:46:15", "source_step": 11, "supporting_quote": "created_at: 2023-05-17T14:46:15"}
+{"task_id": "383cbac_1", "unit_id": "u0006", "unit_type": "amount_quantity", "text": "user_share=38.0", "source_step": 11, "supporting_quote": "amount: 38.0"}
+{"task_id": "383cbac_1", "unit_id": "u0007", "unit_type": "object_id", "text": "transaction_id=8222", "source_step": 11, "supporting_quote": "transaction_id: 8222"}
+{"task_id": "383cbac_1", "unit_id": "u0008", "unit_type": "variable_value", "text": "venue=Azure Harbor Bistro", "source_step": 11, "supporting_quote": "description: Dinner at Azure Harbor Bistro"}
+{"task_id": "383cbac_1", "unit_id": "u0009", "unit_type": "api_argument", "text": "venmo_login_username=ashlee_martinez@gmail.com", "source_step": 5, "supporting_quote": "username: ashlee_martinez@gmail.com"}
+{"task_id": "383cbac_1", "unit_id": "u0010", "unit_type": "api_argument", "text": "venmo_login_password=F4s1Idj", "source_step": 5, "supporting_quote": "password: F4s1Idj"}
+{"task_id": "383cbac_1", "unit_id": "u0011", "unit_type": "action_outcome", "text": "venmo_login_success", "source_step": 5, "supporting_quote": "access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}
+{"task_id": "383cbac_1", "unit_id": "u0012", "unit_type": "action_outcome", "text": "user_transaction_to_manager=38.0", "source_step": 11, "supporting_quote": "transaction_id 8222: Ashlee Martinez paid Spencer Powell $38.0 for Dinner at Azure Harbor Bistro"}
+{"task_id": "383cbac_1", "unit_id": "u0013", "unit_type": "status", "text": "social_feed_missing_manager_transactions", "source_step": 18, "supporting_quote": "Only transaction 8222 found; other coworkers' venmo payments to manager not visible"}
+{"task_id": "383cbac_1", "unit_id": "u0014", "unit_type": "unresolved_subgoal", "text": "find_all_coworker_transactions_to_manager_for_dinner", "source_step": 18, "supporting_quote": "Only user's $38 transaction found; need other coworkers' transactions to calculate total manager paid"}
+{"task_id": "383cbac_1", "unit_id": "u0015", "unit_type": "constraint", "text": "social_feed_excludes_user_transaction", "source_step": 2, "supporting_quote": "Everyones' transactions except mine should be on my social feed"}
+{"task_id": "383cbac_1", "unit_id": "u0016", "unit_type": "error_fix", "text": "show_social_feed_requires_access_token", "source_step": 13, "supporting_quote": "Added access_token parameter to show_social_feed call"}
+{"task_id": "6c2c621_1", "unit_id": "u0000", "unit_type": "entity_binding", "text": "simple_note_user=anita.burch@gmail.com", "source_step": 5, "supporting_quote": "username=\"anita.burch@gmail.com\""}
+{"task_id": "6c2c621_1", "unit_id": "u0001", "unit_type": "variable_value", "text": "simple_note_password=]ic5XP5", "source_step": 5, "supporting_quote": "account_name: simple_note, password: \"]ic5XP5\""}
+{"task_id": "6c2c621_1", "unit_id": "u0002", "unit_type": "variable_value", "text": "file_system_password=tXQIUXl", "source_step": 5, "supporting_quote": "account_name: file_system, password: \"tXQIUXl\""}
+{"task_id": "6c2c621_1", "unit_id": "u0003", "unit_type": "api_argument", "text": "login_api=simple_note.login(username,password)", "source_step": 4, "supporting_quote": "show_api_doc(app_name='simple_note', api_name='login')"}
+{"task_id": "6c2c621_1", "unit_id": "u0004", "unit_type": "action_outcome", "text": "simple_note_login=success", "source_step": 6, "supporting_quote": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}
+{"task_id": "6c2c621_1", "unit_id": "u0005", "unit_type": "object_id", "text": "simple_note_access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzaW1wbGVfbm90ZSthbml0YS5idXJjaEBnbWFpbC5jb20iLCJleHAiOjE2ODQ0MTIwOTh9.BcqGexnTM2USLhfytrj7wVY_f_rbkEz-uEwohT7Sl9E", "source_step": 6, "supporting_quote": "access_token returned from login"}
+{"task_id": "6c2c621_1", "unit_id": "u0006", "unit_type": "api_argument", "text": "search_notes_api=simple_note.search_notes(access_token,query,tags,page_index,page_limit)", "source_step": 3, "supporting_quote": "show_api_doc(app_name='simple_note', api_name='search_notes')"}
+{"task_id": "6c2c621_1", "unit_id": "u0007", "unit_type": "object_id", "text": "note_ids=1066,1067,1068,1069,1070,1071,1072,1073,1074,1075,1076,1077,1078,1079,1080,1081,1082,1083", "source_step": 7, "supporting_quote": "search_notes output with note_id fields"}
+{"task_id": "6c2c621_1", "unit_id": "u0008", "unit_type": "object_id", "text": "note_ids_page1=1065,1062,1057,1060,...", "source_step": 8, "supporting_quote": "search_notes page_index=1 output"}
+{"task_id": "6c2c621_1", "unit_id": "u0009", "unit_type": "api_argument", "text": "show_note_api=simple_note.show_note(note_id,access_token)", "source_step": 9, "supporting_quote": "show_api_doc(app_name='simple_note', api_name='show_note')"}
+{"task_id": "6c2c621_1", "unit_id": "u0010", "unit_type": "error_fix", "text": "file_system_create_folder_not_found->use create_directory", "source_step": 10, "supporting_quote": "No API named 'create_folder' found in the file_system app"}
+{"task_id": "6c2c621_1", "unit_id": "u0011", "unit_type": "error_fix", "text": "file_system_401_unauthorized->login_required", "source_step": 12, "supporting_quote": "Response status code is 401: unauthorized"}
+{"task_id": "6c2c621_1", "unit_id": "u0012", "unit_type": "action_outcome", "text": "file_system_login=success", "source_step": 13, "supporting_quote": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}
+{"task_id": "6c2c621_1", "unit_id": "u0013", "unit_type": "object_id", "text": "file_system_access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmaWxlX3N5c3RlbSthbml0YS5idXJjaEBnbWFpbC5jb20iLCJleHAiOjE2ODQ0MTI3NDF9.0UtiJ7eFhvGm6g4Gn8b92I08iCpp6sdLwKiiwgIwDCk", "source_step": 13, "supporting_quote": "access_token returned from file_system login"}
+{"task_id": "6c2c621_1", "unit_id": "u0014", "unit_type": "error_fix", "text": "422_validation_error->parameter_is_directory_path_not_path", "source_step": 14, "supporting_quote": "directory_path: field required"}
+{"task_id": "6c2c621_1", "unit_id": "u0015", "unit_type": "api_argument", "text": "create_directory_api=file_system.create_directory(directory_path,access_token,recursive)", "source_step": 15, "supporting_quote": "show_api_doc(app_name='file_system', api_name='create_directory')"}
+{"task_id": "6c2c621_1", "unit_id": "u0016", "unit_type": "action_outcome", "text": "create_directory_success", "source_step": 16, "supporting_quote": "Directory created."}
+{"task_id": "6c2c621_1", "unit_id": "u0017", "unit_type": "constraint", "text": "backup_path=~/backups/simple_note/", "source_step": 16, "supporting_quote": "directory_path=\"~/backups/simple_note\""}
+{"task_id": "6c2c621_1", "unit_id": "u0018", "unit_type": "constraint", "text": "filename_format=title_with_underscores.md", "source_step": 0, "supporting_quote": "files should be named according to the note title, replacing white space with \"_\", and the extension should be \".md\""}
+{"task_id": "6c2c621_1", "unit_id": "u0019", "unit_type": "object_id", "text": "note_titles=Book Reading Lists,Movie Recommendations,Grocery List,Gift Ideas for Various Occasions,Weekly Workout Plan,Food Recipes,Inspirational Quotes Collection,Funny Quotes Collection,Movie Quotes Collection,My Bucket List,...", "source_step": 17, "supporting_quote": "Got note 1056: Book Reading Lists..."}
+{"task_id": "6c2c621_1", "unit_id": "u0020", "unit_type": "object_id", "text": "note_titles_habit=Habit Tracking Log for 2023-05-17,...,Habit Tracking Log for 2023-05-02", "source_step": 18, "supporting_quote": "Got note 1066: Habit Tracking Log for 2023-05-17..."}
+{"task_id": "6c2c621_1", "unit_id": "u0021", "unit_type": "unresolved_subgoal", "text": "save_note_content_to_file_system", "source_step": 18, "supporting_quote": "trajectory truncated - notes retrieved but not yet saved to files"}
+{"task_id": "4fab96f_2", "unit_id": "u0000", "unit_type": "entity_binding", "text": "user=kia_bailey@gmail.com", "source_step": 5, "supporting_quote": "kia_bailey@gmail.com"}
+{"task_id": "4fab96f_2", "unit_id": "u0001", "unit_type": "api_argument", "text": "venmo_access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2ZW5tbytraWFfYmFpbGV5QGdtYWlsLmNvbSIsImV4cCI6MTY4NDQxMTk3OH0.Q8BggbMMl14UW7XbDZH5K6z5-zx8hbsWUN4VJAFpHWE", "source_step": 5, "supporting_quote": "access_token"}
+{"task_id": "4fab96f_2", "unit_id": "u0002", "unit_type": "date_time", "text": "current_date=2023-05-18", "source_step": 9, "supporting_quote": "Current date: 2023-05-18 11:58:00"}
+{"task_id": "4fab96f_2", "unit_id": "u0003", "unit_type": "date_time", "text": "forty_days_ago=2023-04-08", "source_step": 12, "supporting_quote": "forty_days_ago = current_date - timedelta(days=40)"}
+{"task_id": "4fab96f_2", "unit_id": "u0004", "unit_type": "object_id", "text": "payment_request_id=4556", "source_step": 12, "supporting_quote": "ID: 4556"}
+{"task_id": "4fab96f_2", "unit_id": "u0005", "unit_type": "object_id", "text": "payment_request_id=4590", "source_step": 12, "supporting_quote": "ID: 4590"}
+{"task_id": "4fab96f_2", "unit_id": "u0006", "unit_type": "object_id", "text": "payment_request_id=4555", "source_step": 12, "supporting_quote": "ID: 4555"}
+{"task_id": "4fab96f_2", "unit_id": "u0007", "unit_type": "object_id", "text": "payment_request_id=4583", "source_step": 12, "supporting_quote": "ID: 4583"}
+{"task_id": "4fab96f_2", "unit_id": "u0008", "unit_type": "object_id", "text": "payment_request_id=4512", "source_step": 12, "supporting_quote": "ID: 4512"}
+{"task_id": "4fab96f_2", "unit_id": "u0009", "unit_type": "object_id", "text": "payment_request_id=4571", "source_step": 12, "supporting_quote": "ID: 4571"}
+{"task_id": "4fab96f_2", "unit_id": "u0010", "unit_type": "object_id", "text": "payment_request_id=4576", "source_step": 12, "supporting_quote": "ID: 4576"}
+{"task_id": "4fab96f_2", "unit_id": "u0011", "unit_type": "object_id", "text": "payment_request_id=4511", "source_step": 12, "supporting_quote": "ID: 4511"}
+{"task_id": "4fab96f_2", "unit_id": "u0012", "unit_type": "object_id", "text": "payment_request_id=4523", "source_step": 12, "supporting_quote": "ID: 4523"}
+{"task_id": "4fab96f_2", "unit_id": "u0013", "unit_type": "entity_binding", "text": "receiver=Angela Riddle email=angriddle@gmail.com", "source_step": 12, "supporting_quote": "Angela Riddle (angriddle@gmail.com)"}
+{"task_id": "4fab96f_2", "unit_id": "u0014", "unit_type": "entity_binding", "text": "receiver=Dillon Wilson email=diwils@gmail.com", "source_step": 12, "supporting_quote": "Dillon Wilson (diwils@gmail.com)"}
+{"task_id": "4fab96f_2", "unit_id": "u0015", "unit_type": "entity_binding", "text": "receiver=Denise Maldonado email=deniseburch@gmail.com", "source_step": 12, "supporting_quote": "Denise Maldonado (deniseburch@gmail.com)"}
+{"task_id": "4fab96f_2", "unit_id": "u0016", "unit_type": "entity_binding", "text": "receiver=Jeffery Simpson email=je.simpson@gmail.com", "source_step": 12, "supporting_quote": "Jeffery Simpson (je.simpson@gmail.com)"}
+{"task_id": "4fab96f_2", "unit_id": "u0017", "unit_type": "entity_binding", "text": "receiver=Matthew Blackburn email=matthew.blac@gmail.com", "source_step": 12, "supporting_quote": "Matthew Blackburn (matthew.blac@gmail.com)"}
+{"task_id": "4fab96f_2", "unit_id": "u0018", "unit_type": "entity_binding", "text": "receiver=Catherine Smith email=ca-smit@gmail.com", "source_step": 12, "supporting_quote": "Catherine Smith (ca-smit@gmail.com)"}
+{"task_id": "4fab96f_2", "unit_id": "u0019", "unit_type": "status", "text": "payment_request_status=pending", "source_step": 12, "supporting_quote": "approved_at"}
+{"task_id": "4fab96f_2", "unit_id": "u0020", "unit_type": "api_argument", "text": "phone_access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwaG9uZSs4OTA5ODI4NjI0IiwiZXhwIjoxNjg0NDEyNjIxfQ.NSODZvB2R5usDnHo33nr3qHkxzXVQgPmkqeNVNJ3Qpk", "source_step": 16, "supporting_quote": "access_token"}
+{"task_id": "4fab96f_2", "unit_id": "u0021", "unit_type": "entity_binding", "text": "contact_id=1629 relationship=coworker email=angelica.wils@gmail.com", "source_step": 19, "supporting_quote": "contact_id\\"}
+{"task_id": "4fab96f_2", "unit_id": "u0022", "unit_type": "unresolved_subgoal", "text": "identify_coworkers_from_pending_requests", "source_step": 19, "supporting_quote": "Search for coworkers"}
+{"task_id": "4fab96f_2", "unit_id": "u0023", "unit_type": "api_argument", "text": "venmo_api=send_payment_request_reminder", "source_step": 0, "supporting_quote": "show_api_descriptions(app_name='venmo')"}
+{"task_id": "4fab96f_2", "unit_id": "u0024", "unit_type": "error_fix", "text": "missing_access_token_argument", "source_step": 7, "supporting_quote": "access_token is required"}
+{"task_id": "4fab96f_2", "unit_id": "u0025", "unit_type": "error_fix", "text": "missing_timedelta_import", "source_step": 11, "supporting_quote": "NameError: name 'timedelta' is not defined"}
+{"task_id": "6c2c621_2", "unit_id": "u0000", "unit_type": "entity_binding", "text": "user_email=spencer.powell@gmail.com", "source_step": 6, "supporting_quote": "spencer.powell@gmail.com"}
+{"task_id": "6c2c621_2", "unit_id": "u0001", "unit_type": "api_argument", "text": "simple_note_password=!y^6{9Q", "source_step": 5, "supporting_quote": "simple_note"}
+{"task_id": "6c2c621_2", "unit_id": "u0002", "unit_type": "api_argument", "text": "file_system_password=P}OX+bi", "source_step": 13, "supporting_quote": "file_system"}
+{"task_id": "6c2c621_2", "unit_id": "u0003", "unit_type": "object_id", "text": "simple_note_access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzaW1wbGVfbm90ZStzcGVuY2VyLnBvd2VsbEBnbWFpbC5jb20iLCJleHAiOjE2ODQ0MTIwOTh9.AfBM-VkyKHhe7SNluw_vVBMH7B5zvw-guAKQc_ojej4", "source_step": 6, "supporting_quote": "access_token"}
+{"task_id": "6c2c621_2", "unit_id": "u0004", "unit_type": "object_id", "text": "file_system_access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmaWxlX3N5c3RlbStzcGVuY2VyLnBvd2VsbEBnbWFpbC5jb20iLCJleHAiOjE2ODQ0MTI3NDF9.NZAgkcZe5UyZTFBFn_Afoc-ENcxuyUdXAadwmpGS3e8", "source_step": 15, "supporting_quote": "access_token"}
+{"task_id": "6c2c621_2", "unit_id": "u0005", "unit_type": "object_id", "text": "note_ids=[726,727,728,729,730,731,732,733,734,735,736,737,738,739,740,741,722,716,719,720,725,723,724,721,717,718]", "source_step": 7, "supporting_quote": "note_id"}
+{"task_id": "6c2c621_2", "unit_id": "u0006", "unit_type": "other", "text": "simple_note.search_notes", "source_step": 3, "supporting_quote": "/notes"}
+{"task_id": "6c2c621_2", "unit_id": "u0007", "unit_type": "other", "text": "simple_note.show_note", "source_step": 9, "supporting_quote": "/notes/{note_id}"}
+{"task_id": "6c2c621_2", "unit_id": "u0008", "unit_type": "other", "text": "file_system.create_directory", "source_step": 11, "supporting_quote": "/directory"}
+{"task_id": "6c2c621_2", "unit_id": "u0009", "unit_type": "other", "text": "file_system.create_file", "source_step": 12, "supporting_quote": "/file"}
+{"task_id": "6c2c621_2", "unit_id": "u0010", "unit_type": "action_outcome", "text": "directory_created=~/backups/notes/", "source_step": 16, "supporting_quote": "Directory created."}
+{"task_id": "6c2c621_2", "unit_id": "u0011", "unit_type": "constraint", "text": "backup_path=~/backups/notes/", "source_step": 16, "supporting_quote": "directory_path"}
+{"task_id": "6c2c621_2", "unit_id": "u0012", "unit_type": "constraint", "text": "file_naming=title.replace(\" \",\"_\")+\".md\"", "source_step": 1, "supporting_quote": "named according to the note title, replacing white space with \"_\""}
+{"task_id": "6c2c621_2", "unit_id": "u0013", "unit_type": "unresolved_subgoal", "text": "export_26_notes_to_files=incomplete", "source_step": 18, "supporting_quote": "trajectory truncated"}
+{"task_id": "57c3486_2", "unit_id": "u0000", "unit_type": "entity_binding", "text": "spotify_user=jamie-solomon@gmail.com", "source_step": 5, "supporting_quote": "username='jamie-solomon@gmail.com'"}
+{"task_id": "57c3486_2", "unit_id": "u0001", "unit_type": "variable_value", "text": "spotify_password=+z{GwxS", "source_step": 3, "supporting_quote": "account_name: spotify, password: +z{GwxS"}
+{"task_id": "57c3486_2", "unit_id": "u0002", "unit_type": "variable_value", "text": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzcG90aWZ5K2phbWllLXNvbG9tb25AZ21haWwuY29tIiwiZXhwIjoxNjg0NDEyMDk4fQ.pS7me_sK6hHC4YbJ-hRUgKLHaHb6q_s2K2i4JbTWI6g", "source_step": 5, "supporting_quote": "access_token"}
+{"task_id": "57c3486_2", "unit_id": "u0003", "unit_type": "object_id", "text": "artist_id=5", "source_step": 6, "supporting_quote": "artist_id"}
+{"task_id": "57c3486_2", "unit_id": "u0004", "unit_type": "object_id", "text": "artist_id=16", "source_step": 6, "supporting_quote": "artist_id"}
+{"task_id": "57c3486_2", "unit_id": "u0005", "unit_type": "object_id", "text": "artist_id=17", "source_step": 6, "supporting_quote": "artist_id"}
+{"task_id": "57c3486_2", "unit_id": "u0006", "unit_type": "object_id", "text": "artist_id=24", "source_step": 6, "supporting_quote": "artist_id"}
+{"task_id": "57c3486_2", "unit_id": "u0007", "unit_type": "object_id", "text": "artist_id=28", "source_step": 6, "supporting_quote": "artist_id"}
+{"task_id": "57c3486_2", "unit_id": "u0008", "unit_type": "api_argument", "text": "api=show_following_artists(access_token,page_index=0,page_limit=20)", "source_step": 2, "supporting_quote": "show_following_artists"}
+{"task_id": "57c3486_2", "unit_id": "u0009", "unit_type": "api_argument", "text": "api=search_songs(artist_id,page_index,page_limit,access_token)", "source_step": 7, "supporting_quote": "search_songs"}
+{"task_id": "57c3486_2", "unit_id": "u0010", "unit_type": "api_argument", "text": "api=like_song(song_id,access_token)", "source_step": 8, "supporting_quote": "like_song"}
+{"task_id": "57c3486_2", "unit_id": "u0011", "unit_type": "object_id", "text": "song_id=54", "source_step": 9, "supporting_quote": "song_id"}
+{"task_id": "57c3486_2", "unit_id": "u0012", "unit_type": "object_id", "text": "song_id=55", "source_step": 9, "supporting_quote": "song_id"}
+{"task_id": "57c3486_2", "unit_id": "u0013", "unit_type": "object_id", "text": "song_id=56", "source_step": 9, "supporting_quote": "song_id"}
+{"task_id": "57c3486_2", "unit_id": "u0014", "unit_type": "object_id", "text": "song_id=57", "source_step": 9, "supporting_quote": "song_id"}
+{"task_id": "57c3486_2", "unit_id": "u0015", "unit_type": "object_id", "text": "song_id=11", "source_step": 11, "supporting_quote": "song_id"}
+{"task_id": "57c3486_2", "unit_id": "u0016", "unit_type": "object_id", "text": "song_id=12", "source_step": 11, "supporting_quote": "song_id"}
+{"task_id": "57c3486_2", "unit_id": "u0017", "unit_type": "object_id", "text": "song_id=13", "source_step": 11, "supporting_quote": "song_id"}
+{"task_id": "57c3486_2", "unit_id": "u0018", "unit_type": "object_id", "text": "song_id=14", "source_step": 11, "supporting_quote": "song_id"}
+{"task_id": "57c3486_2", "unit_id": "u0019", "unit_type": "object_id", "text": "song_id=186", "source_step": 13, "supporting_quote": "song_id"}
+{"task_id": "57c3486_2", "unit_id": "u0020", "unit_type": "object_id", "text": "song_id=187", "source_step": 13, "supporting_quote": "song_id"}
+{"task_id": "57c3486_2", "unit_id": "u0021", "unit_type": "object_id", "text": "song_id=188", "source_step": 13, "supporting_quote": "song_id"}
+{"task_id": "57c3486_2", "unit_id": "u0022", "unit_type": "object_id", "text": "song_id=189", "source_step": 13, "supporting_quote": "song_id"}
+{"task_id": "57c3486_2", "unit_id": "u0023", "unit_type": "object_id", "text": "song_id=234", "source_step": 15, "supporting_quote": "song_id"}
+{"task_id": "57c3486_2", "unit_id": "u0024", "unit_type": "object_id", "text": "song_id=235", "source_step": 15, "supporting_quote": "song_id"}
+{"task_id": "57c3486_2", "unit_id": "u0025", "unit_type": "object_id", "text": "song_id=236", "source_step": 15, "supporting_quote": "song_id"}
+{"task_id": "57c3486_2", "unit_id": "u0026", "unit_type": "object_id", "text": "song_id=237", "source_step": 15, "supporting_quote": "song_id"}
+{"task_id": "57c3486_2", "unit_id": "u0027", "unit_type": "action_outcome", "text": "like_song(song_id=54)=success", "source_step": 10, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_2", "unit_id": "u0028", "unit_type": "action_outcome", "text": "like_song(song_id=55)=success", "source_step": 10, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_2", "unit_id": "u0029", "unit_type": "action_outcome", "text": "like_song(song_id=56)=success", "source_step": 10, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_2", "unit_id": "u0030", "unit_type": "action_outcome", "text": "like_song(song_id=57)=success", "source_step": 10, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_2", "unit_id": "u0031", "unit_type": "action_outcome", "text": "like_song(Apollo_Serenade_songs)=success", "source_step": 12, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_2", "unit_id": "u0032", "unit_type": "action_outcome", "text": "like_song(Dylan_Stone_songs)=success", "source_step": 14, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_2", "unit_id": "u0033", "unit_type": "action_outcome", "text": "like_song(Liam_Palmer_songs)=success", "source_step": 16, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_2", "unit_id": "u0034", "unit_type": "unresolved_subgoal", "text": "like_songs_from_artist_id=28", "source_step": 6, "supporting_quote": "artist_id"}
+{"task_id": "57c3486_2", "unit_id": "u0035", "unit_type": "constraint", "text": "task=like_all_songs_from_followed_artists", "source_step": 1, "supporting_quote": "Like all the songs from the artists I follow on Spotify"}
+{"task_id": "b119b1f_1", "unit_id": "u0000", "unit_type": "entity_binding", "text": "spotify_account=mir-powe@gmail.com", "source_step": 3, "supporting_quote": "mir-powe@gmail.com"}
+{"task_id": "b119b1f_1", "unit_id": "u0001", "unit_type": "variable_value", "text": "spotify_password=^Z0F4hT", "source_step": 3, "supporting_quote": "^Z0F4hT"}
+{"task_id": "b119b1f_1", "unit_id": "u0002", "unit_type": "api_argument", "text": "spotify.login(username, password)", "source_step": 5, "supporting_quote": "login(username='mir-powe@gmail.com', password='^Z0F4hT')"}
+{"task_id": "b119b1f_1", "unit_id": "u0003", "unit_type": "variable_value", "text": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzcG90aWZ5K21pci1wb3dlQGdtYWlsLmNvbSIsImV4cCI6MTY4NDQxMjA5OH0.vG33TLWlgHBVQDNd0XMjWqXDZT3YM7LqCtdSbdMeqV8", "source_step": 5, "supporting_quote": "access_token"}
+{"task_id": "b119b1f_1", "unit_id": "u0004", "unit_type": "api_argument", "text": "show_current_song(access_token)", "source_step": 11, "supporting_quote": "show_current_song(access_token=access_token)"}
+{"task_id": "b119b1f_1", "unit_id": "u0005", "unit_type": "api_argument", "text": "previous_song(access_token)", "source_step": 12, "supporting_quote": "previous_song(access_token=access_token)"}
+{"task_id": "b119b1f_1", "unit_id": "u0006", "unit_type": "action_outcome", "text": "current_song_id=210 artist=Emily Rivers", "source_step": 11, "supporting_quote": "song_id: 210, artists: [{name: Emily Rivers}]"}
+{"task_id": "b119b1f_1", "unit_id": "u0007", "unit_type": "action_outcome", "text": "previous_song song_id=103", "source_step": 12, "supporting_quote": "song_id: 103"}
+{"task_id": "b119b1f_1", "unit_id": "u0008", "unit_type": "action_outcome", "text": "current_song_id=103 artist=Marigold Muse", "source_step": 13, "supporting_quote": "song_id: 103, artists: [{name: Marigold Muse}]"}
+{"task_id": "b119b1f_1", "unit_id": "u0009", "unit_type": "action_outcome", "text": "previous_song song_id=291", "source_step": 14, "supporting_quote": "song_id: 291"}
+{"task_id": "b119b1f_1", "unit_id": "u0010", "unit_type": "action_outcome", "text": "current_song_id=291 artist=Hazel Winter", "source_step": 15, "supporting_quote": "song_id: 291, artists: [{name: Hazel Winter}]"}
+{"task_id": "b119b1f_1", "unit_id": "u0011", "unit_type": "action_outcome", "text": "previous_song song_id=58", "source_step": 16, "supporting_quote": "song_id: 58"}
+{"task_id": "b119b1f_1", "unit_id": "u0012", "unit_type": "action_outcome", "text": "current_song_id=58 artist=Zoey James", "source_step": 17, "supporting_quote": "song_id: 58, artists: [{name: Zoey James}]"}
+{"task_id": "b119b1f_1", "unit_id": "u0013", "unit_type": "action_outcome", "text": "previous_song song_id=158", "source_step": 18, "supporting_quote": "song_id: 158"}
+{"task_id": "b119b1f_1", "unit_id": "u0014", "unit_type": "action_outcome", "text": "current_song_id=158 artist=Luna Starlight", "source_step": 19, "supporting_quote": "song_id: 158, artists: [{name: Luna Starlight}]"}
+{"task_id": "b119b1f_1", "unit_id": "u0015", "unit_type": "status", "text": "task_completed=true", "source_step": 20, "supporting_quote": "Execution successful."}
+{"task_id": "b119b1f_1", "unit_id": "u0016", "unit_type": "constraint", "text": "spotify_apis_require_access_token_parameter", "source_step": 9, "supporting_quote": "access_token: Access token obtained from spotify app login."}
+{"task_id": "b119b1f_1", "unit_id": "u0017", "unit_type": "error_fix", "text": "401_error_fixed_by_passing_access_token_to_api_calls", "source_step": 11, "supporting_quote": "Response status code is 401"}
+{"task_id": "4ec8de5_3", "unit_id": "u0000", "unit_type": "entity_binding", "text": "user=Chad Brown", "source_step": 4, "supporting_quote": "first_name: Chad, last_name: Brown"}
+{"task_id": "4ec8de5_3", "unit_id": "u0001", "unit_type": "entity_binding", "text": "spotify_username=ch.brow@gmail.com", "source_step": 4, "supporting_quote": "email: ch.brow@gmail.com"}
+{"task_id": "4ec8de5_3", "unit_id": "u0002", "unit_type": "object_id", "text": "spotify_password=qMQyD0J", "source_step": 5, "supporting_quote": "account_name: spotify, password: qMQyD0J"}
+{"task_id": "4ec8de5_3", "unit_id": "u0003", "unit_type": "variable_value", "text": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzcG90aWZ5K2NoLmJyb3dAZ21haWwuY29tIiwiZXhwIjoxNjg0NDEyMDk4fQ.g0p-kWss8sbDAJapeFSy2y-Z3KSuJnC0B0VMpnLWeCg", "source_step": 8, "supporting_quote": "access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}
+{"task_id": "4ec8de5_3", "unit_id": "u0004", "unit_type": "date_time", "text": "current_year=2023", "source_step": 12, "supporting_quote": "Current year: 2023"}
+{"task_id": "4ec8de5_3", "unit_id": "u0005", "unit_type": "amount_quantity", "text": "song_library_count=20", "source_step": 11, "supporting_quote": "Page 0: 20 songs"}
+{"task_id": "4ec8de5_3", "unit_id": "u0006", "unit_type": "amount_quantity", "text": "album_library_count=18", "source_step": 14, "supporting_quote": "Number of albums: 18"}
+{"task_id": "4ec8de5_3", "unit_id": "u0007", "unit_type": "amount_quantity", "text": "songs_before_2023_from_library=12", "source_step": 14, "supporting_quote": "Songs from song library released before 2023: 12"}
+{"task_id": "4ec8de5_3", "unit_id": "u0008", "unit_type": "object_id", "text": "albums_before_2023=[1,2,3,5,6,7,8,10,13,15,16,18]", "source_step": 17, "supporting_quote": "albums_before_2023_ids = [1, 2, 3, 5, 6, 7, 8, 10, 13, 15, 16, 18]"}
+{"task_id": "4ec8de5_3", "unit_id": "u0009", "unit_type": "amount_quantity", "text": "songs_from_albums_before_2023=57", "source_step": 17, "supporting_quote": "Total songs from albums released before 2023: 57"}
+{"task_id": "4ec8de5_3", "unit_id": "u0010", "unit_type": "api_argument", "text": "api=show_song_library(page_index, page_limit)", "source_step": 2, "supporting_quote": "show_song_library"}
+{"task_id": "4ec8de5_3", "unit_id": "u0011", "unit_type": "api_argument", "text": "api=show_album_library(page_index, page_limit)", "source_step": 14, "supporting_quote": "show_album_library"}
+{"task_id": "4ec8de5_3", "unit_id": "u0012", "unit_type": "api_argument", "text": "api=show_song(song_id)", "source_step": 10, "supporting_quote": "show_song"}
+{"task_id": "4ec8de5_3", "unit_id": "u0013", "unit_type": "api_argument", "text": "api=show_album(album_id)", "source_step": 16, "supporting_quote": "show_album"}
+{"task_id": "4ec8de5_3", "unit_id": "u0014", "unit_type": "error_fix", "text": "login_requires_username_and_password", "source_step": 6, "supporting_quote": "username: field required"}
+{"task_id": "4ec8de5_3", "unit_id": "u0015", "unit_type": "action_outcome", "text": "login_success", "source_step": 8, "supporting_quote": "access_token returned successfully"}
+{"task_id": "4ec8de5_3", "unit_id": "u0016", "unit_type": "constraint", "text": "release_year<2023", "source_step": 14, "supporting_quote": "release_year < 2023"}
+{"task_id": "6171bbc_2", "unit_id": "u0000", "unit_type": "entity_binding", "text": "user=ashlee_martinez@gmail.com", "source_step": 5, "supporting_quote": "username=\"ashlee_martinez@gmail.com\""}
+{"task_id": "6171bbc_2", "unit_id": "u0001", "unit_type": "variable_value", "text": "spotify_password=N(y4vRP", "source_step": 3, "supporting_quote": "\"account_name\": \"spotify\", \"password\": \"N(y4vRP\""}
+{"task_id": "6171bbc_2", "unit_id": "u0002", "unit_type": "variable_value", "text": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzcG90aWZ5K2FzaGxlZV9tYXJ0aW5lekBnbWFpbC5jb20iLCJleHAiOjE2ODQ0MTIwOTh9.juQf1ydIn1fRU_e5x53Ijah64EoueUJwlHRMFtkKbQM", "source_step": 6, "supporting_quote": "\"access_token\": \"eyJhbGci...\""}
+{"task_id": "6171bbc_2", "unit_id": "u0003", "unit_type": "object_id", "text": "playlist_id=457", "source_step": 9, "supporting_quote": "\"playlist_id\": 457"}
+{"task_id": "6171bbc_2", "unit_id": "u0004", "unit_type": "object_id", "text": "playlist_id=458", "source_step": 9, "supporting_quote": "\"playlist_id\": 458"}
+{"task_id": "6171bbc_2", "unit_id": "u0005", "unit_type": "object_id", "text": "playlist_id=459", "source_step": 9, "supporting_quote": "\"playlist_id\": 459"}
+{"task_id": "6171bbc_2", "unit_id": "u0006", "unit_type": "object_id", "text": "playlist_id=460", "source_step": 9, "supporting_quote": "\"playlist_id\": 460"}
+{"task_id": "6171bbc_2", "unit_id": "u0007", "unit_type": "object_id", "text": "playlist_id=461", "source_step": 9, "supporting_quote": "\"playlist_id\": 461"}
+{"task_id": "6171bbc_2", "unit_id": "u0008", "unit_type": "object_id", "text": "new_playlist_id=654", "source_step": 16, "supporting_quote": "\"playlist_id\": 654"}
+{"task_id": "6171bbc_2", "unit_id": "u0009", "unit_type": "object_id", "text": "highest_rated_song_ids=[164,58,209,146,36]", "source_step": 15, "supporting_quote": "highest_rated_song_ids = [164, 58, 209, 146, 36]"}
+{"task_id": "6171bbc_2", "unit_id": "u0010", "unit_type": "api_argument", "text": "playlist_title=My Highest Rated Playlist Songs", "source_step": 16, "supporting_quote": "title=\"My Highest Rated Playlist Songs\""}
+{"task_id": "6171bbc_2", "unit_id": "u0011", "unit_type": "action_outcome", "text": "login=success", "source_step": 6, "supporting_quote": "\"access_token\": \"eyJhbGci...\""}
+{"task_id": "6171bbc_2", "unit_id": "u0012", "unit_type": "action_outcome", "text": "create_playlist=success", "source_step": 16, "supporting_quote": "{\"message\": \"Playlist created.\", \"playlist_id\": 654}"}
+{"task_id": "6171bbc_2", "unit_id": "u0013", "unit_type": "action_outcome", "text": "add_song_to_playlist=success", "source_step": 18, "supporting_quote": "{\"message\": \"Song added to the playlist.\"}"}
+{"task_id": "6171bbc_2", "unit_id": "u0014", "unit_type": "error_fix", "text": "401_error_fixed_by_using_access_token", "source_step": 9, "supporting_quote": "show_playlist_library(access_token=access_token)"}
+{"task_id": "6171bbc_2", "unit_id": "u0015", "unit_type": "error_fix", "text": "syntax_error_fixed_by_removing_closing_paren_in_password", "source_step": 6, "supporting_quote": "password=\"N(y4vRP\""}
+{"task_id": "6171bbc_2", "unit_id": "u0016", "unit_type": "status", "text": "task_completed", "source_step": 20, "supporting_quote": "Execution successful."}
+{"task_id": "6171bbc_2", "unit_id": "u0017", "unit_type": "constraint", "text": "playlist_contains_only_highest_rated_song_per_playlist", "source_step": 15, "supporting_quote": "highest-rated song from each playlist"}
+{"task_id": "50e1ac9_1", "unit_id": "u0000", "unit_type": "entity_binding", "text": "spotify_user=glenn.burton@gmail.com", "source_step": 7, "supporting_quote": "username='glenn.burton@gmail.com'"}
+{"task_id": "50e1ac9_1", "unit_id": "u0001", "unit_type": "variable_value", "text": "spotify_password=EbhXe%D", "source_step": 5, "supporting_quote": "account_name: spotify"}
+{"task_id": "50e1ac9_1", "unit_id": "u0002", "unit_type": "api_argument", "text": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzcG90aWZ5K2dsZW5uLmJ1cnRvbkBnbWFpbC5jb20iLCJleHAiOjE2ODQ0MTIwOTh9.ZfYQhLH5HAUhTGeoP9Sil5Smkby8zvIfSpm2gzMvmWk", "source_step": 7, "supporting_quote": "access_token"}
+{"task_id": "50e1ac9_1", "unit_id": "u0003", "unit_type": "api_argument", "text": "api=show_song_library", "source_step": 8, "supporting_quote": "show_song_library"}
+{"task_id": "50e1ac9_1", "unit_id": "u0004", "unit_type": "api_argument", "text": "api=show_song", "source_step": 10, "supporting_quote": "show_song"}
+{"task_id": "50e1ac9_1", "unit_id": "u0005", "unit_type": "api_argument", "text": "api=show_album_library", "source_step": 14, "supporting_quote": "show_album_library"}
+{"task_id": "50e1ac9_1", "unit_id": "u0006", "unit_type": "api_argument", "text": "api=show_playlist_library", "source_step": 16, "supporting_quote": "show_playlist_library"}
+{"task_id": "50e1ac9_1", "unit_id": "u0007", "unit_type": "object_id", "text": "song_ids=[33,44,56,92,109,114,135,137,156,159,202,225,226,241,265,302,303,308,324]", "source_step": 8, "supporting_quote": "song_ids"}
+{"task_id": "50e1ac9_1", "unit_id": "u0008", "unit_type": "object_id", "text": "album_id=2,album_id=3", "source_step": 14, "supporting_quote": "album_id: 2, album_id: 3"}
+{"task_id": "50e1ac9_1", "unit_id": "u0009", "unit_type": "object_id", "text": "playlist_id=621,playlist_id=622,playlist_id=623", "source_step": 16, "supporting_quote": "playlist_id"}
+{"task_id": "50e1ac9_1", "unit_id": "u0010", "unit_type": "variable_value", "text": "available_genres=[EDM,R&B,indie,hip-hop,jazz,rock,pop,classical,reggae,country]", "source_step": 9, "supporting_quote": "show_genres"}
+{"task_id": "50e1ac9_1", "unit_id": "u0011", "unit_type": "action_outcome", "text": "top_4_rb_songs=[Mysteries of the Silent Sea(990),Crimson Veil(972),Haunted Memories(965),Fire and Ice(926)]", "source_step": 18, "supporting_quote": "top_4"}
+{"task_id": "50e1ac9_1", "unit_id": "u0012", "unit_type": "action_outcome", "text": "answer=Mysteries of the Silent Sea, Crimson Veil, Haunted Memories, Fire and Ice", "source_step": 19, "supporting_quote": "answer"}
+{"task_id": "6c2c621_3", "unit_id": "u0000", "unit_type": "api_argument", "text": "simple_note.login(username, password)", "source_step": 4, "supporting_quote": "login API requires username and password parameters"}
+{"task_id": "6c2c621_3", "unit_id": "u0001", "unit_type": "entity_binding", "text": "simple_note.username=pa_ritter@gmail.com", "source_step": 6, "supporting_quote": "username=\"pa_ritter@gmail.com\""}
+{"task_id": "6c2c621_3", "unit_id": "u0002", "unit_type": "variable_value", "text": "simple_note.password=F%rYCAJ", "source_step": 5, "supporting_quote": "account_name: simple_note, password: F%rYCAJ"}
+{"task_id": "6c2c621_3", "unit_id": "u0003", "unit_type": "variable_value", "text": "simple_note.access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzaW1wbGVfbm90ZStwYV9yaXR0ZXJAZ21haWwuY29tIiwiZXhwIjoxNjg0NDEyMDk4fQ.VOdFsVEQ6DGe-SRt7xVQ-TO3BYzQIgjS8-hgk_bteMk", "source_step": 6, "supporting_quote": "access_token returned from login"}
+{"task_id": "6c2c621_3", "unit_id": "u0004", "unit_type": "constraint", "text": "search_notes.page_limit<=20", "source_step": 7, "supporting_quote": "page_limit: ensure this value is less than or equal to 20"}
+{"task_id": "6c2c621_3", "unit_id": "u0005", "unit_type": "api_argument", "text": "search_notes(access_token, page_index, page_limit)", "source_step": 8, "supporting_quote": "search_notes API with page_index for pagination"}
+{"task_id": "6c2c621_3", "unit_id": "u0006", "unit_type": "api_argument", "text": "show_note(note_id, access_token)", "source_step": 10, "supporting_quote": "show_note API returns note content by note_id"}
+{"task_id": "6c2c621_3", "unit_id": "u0007", "unit_type": "entity_binding", "text": "file_system.username=pa_ritter@gmail.com", "source_step": 13, "supporting_quote": "file_system.login username"}
+{"task_id": "6c2c621_3", "unit_id": "u0008", "unit_type": "variable_value", "text": "file_system.password={R0sv}t", "source_step": 5, "supporting_quote": "file_system password from supervisor"}
+{"task_id": "6c2c621_3", "unit_id": "u0009", "unit_type": "variable_value", "text": "file_system.access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmaWxlX3N5c3RlbStwYV9yaXR0ZXJAZ21haWwuY29tIiwiZXhwIjoxNjg0NDEyNzQxfQ.ivMDS-jOT4kwk3pDzxAdzPIGkqEjNvVT7Vmw1pwBemI", "source_step": 13, "supporting_quote": "file_system access_token returned"}
+{"task_id": "6c2c621_3", "unit_id": "u0010", "unit_type": "error_fix", "text": "create_directory uses parameter directory_path not path", "source_step": 14, "supporting_quote": "directory_path: field required"}
+{"task_id": "6c2c621_3", "unit_id": "u0011", "unit_type": "action_outcome", "text": "directory_created=~/backups/simple_notes/", "source_step": 16, "supporting_quote": "Directory created."}
+{"task_id": "6c2c621_3", "unit_id": "u0012", "unit_type": "variable_value", "text": "total_notes=38", "source_step": 17, "supporting_quote": "Total notes: 38"}
+{"task_id": "6c2c621_3", "unit_id": "u0013", "unit_type": "action_outcome", "text": "note_files_created=Habit_Tracking_Log_for_2023-05-*.md", "source_step": 18, "supporting_quote": "Created: Habit_Tracking_Log_for_2023-05-17.md (and 37 more)"}
+{"task_id": "6c2c621_3", "unit_id": "u0014", "unit_type": "unresolved_subgoal", "text": "verify_all_38_notes_exported_successfully", "source_step": 18, "supporting_quote": "trajectory truncated - need to verify completion"}
+{"task_id": "57c3486_1", "unit_id": "u0000", "unit_type": "api_argument", "text": "spotify.login(username, password)", "source_step": 4, "supporting_quote": "apis.spotify.login(username=\\"}
+{"task_id": "57c3486_1", "unit_id": "u0001", "unit_type": "variable_value", "text": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzcG90aWZ5K2phc29uc2ltcEBnbWFpbC5jb20iLCJleHAiOjE2ODQ0MTIwOTh9.x6X7-XCQ1YvS9_rs89G2soshA6EtuqGTMhFb-jJUSrU", "source_step": 4, "supporting_quote": "access_token"}
+{"task_id": "57c3486_1", "unit_id": "u0002", "unit_type": "error_fix", "text": "fix: pass access_token explicitly to API calls", "source_step": 8, "supporting_quote": "show_following_artists(access_token=...)"}
+{"task_id": "57c3486_1", "unit_id": "u0003", "unit_type": "object_id", "text": "artist_id=3", "source_step": 8, "supporting_quote": "artist_id"}
+{"task_id": "57c3486_1", "unit_id": "u0004", "unit_type": "object_id", "text": "artist_id=4", "source_step": 8, "supporting_quote": "artist_id"}
+{"task_id": "57c3486_1", "unit_id": "u0005", "unit_type": "object_id", "text": "artist_id=7", "source_step": 8, "supporting_quote": "artist_id"}
+{"task_id": "57c3486_1", "unit_id": "u0006", "unit_type": "object_id", "text": "artist_id=13", "source_step": 8, "supporting_quote": "artist_id"}
+{"task_id": "57c3486_1", "unit_id": "u0007", "unit_type": "object_id", "text": "artist_id=14", "source_step": 8, "supporting_quote": "artist_id"}
+{"task_id": "57c3486_1", "unit_id": "u0008", "unit_type": "entity_binding", "text": "followed_artist=Jasper Skye", "source_step": 8, "supporting_quote": "name"}
+{"task_id": "57c3486_1", "unit_id": "u0009", "unit_type": "entity_binding", "text": "followed_artist=Marigold Muse", "source_step": 8, "supporting_quote": "name"}
+{"task_id": "57c3486_1", "unit_id": "u0010", "unit_type": "entity_binding", "text": "followed_artist=Orion Steele", "source_step": 8, "supporting_quote": "name"}
+{"task_id": "57c3486_1", "unit_id": "u0011", "unit_type": "entity_binding", "text": "followed_artist=Luna Starlight", "source_step": 8, "supporting_quote": "name"}
+{"task_id": "57c3486_1", "unit_id": "u0012", "unit_type": "entity_binding", "text": "followed_artist=Grace Harrison", "source_step": 8, "supporting_quote": "name"}
+{"task_id": "57c3486_1", "unit_id": "u0013", "unit_type": "object_id", "text": "song_id=95", "source_step": 9, "supporting_quote": "song_id"}
+{"task_id": "57c3486_1", "unit_id": "u0014", "unit_type": "object_id", "text": "song_id=100", "source_step": 9, "supporting_quote": "song_id"}
+{"task_id": "57c3486_1", "unit_id": "u0015", "unit_type": "object_id", "text": "song_id=93", "source_step": 9, "supporting_quote": "song_id"}
+{"task_id": "57c3486_1", "unit_id": "u0016", "unit_type": "object_id", "text": "song_id=94", "source_step": 9, "supporting_quote": "song_id"}
+{"task_id": "57c3486_1", "unit_id": "u0017", "unit_type": "action_outcome", "text": "liked song_id=95 success", "source_step": 10, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_1", "unit_id": "u0018", "unit_type": "action_outcome", "text": "liked song_id=100 success", "source_step": 10, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_1", "unit_id": "u0019", "unit_type": "action_outcome", "text": "liked song_id=93 success", "source_step": 10, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_1", "unit_id": "u0020", "unit_type": "action_outcome", "text": "liked song_id=94 success", "source_step": 10, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_1", "unit_id": "u0021", "unit_type": "object_id", "text": "song_id=101", "source_step": 11, "supporting_quote": "song_id"}
+{"task_id": "57c3486_1", "unit_id": "u0022", "unit_type": "object_id", "text": "song_id=102", "source_step": 11, "supporting_quote": "song_id"}
+{"task_id": "57c3486_1", "unit_id": "u0023", "unit_type": "object_id", "text": "song_id=104", "source_step": 11, "supporting_quote": "song_id"}
+{"task_id": "57c3486_1", "unit_id": "u0024", "unit_type": "object_id", "text": "song_id=103", "source_step": 11, "supporting_quote": "song_id"}
+{"task_id": "57c3486_1", "unit_id": "u0025", "unit_type": "action_outcome", "text": "liked song_id=101 success", "source_step": 12, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_1", "unit_id": "u0026", "unit_type": "action_outcome", "text": "liked song_id=102 success", "source_step": 12, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_1", "unit_id": "u0027", "unit_type": "action_outcome", "text": "liked song_id=104 success", "source_step": 12, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_1", "unit_id": "u0028", "unit_type": "action_outcome", "text": "liked song_id=103 success", "source_step": 12, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_1", "unit_id": "u0029", "unit_type": "object_id", "text": "song_id=118", "source_step": 13, "supporting_quote": "song_id"}
+{"task_id": "57c3486_1", "unit_id": "u0030", "unit_type": "object_id", "text": "song_id=119", "source_step": 13, "supporting_quote": "song_id"}
+{"task_id": "57c3486_1", "unit_id": "u0031", "unit_type": "object_id", "text": "song_id=120", "source_step": 13, "supporting_quote": "song_id"}
+{"task_id": "57c3486_1", "unit_id": "u0032", "unit_type": "object_id", "text": "song_id=121", "source_step": 13, "supporting_quote": "song_id"}
+{"task_id": "57c3486_1", "unit_id": "u0033", "unit_type": "action_outcome", "text": "liked song_id=118 success", "source_step": 14, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_1", "unit_id": "u0034", "unit_type": "action_outcome", "text": "liked song_id=119 success", "source_step": 14, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_1", "unit_id": "u0035", "unit_type": "action_outcome", "text": "liked song_id=120 success", "source_step": 14, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_1", "unit_id": "u0036", "unit_type": "action_outcome", "text": "liked song_id=121 success", "source_step": 14, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_1", "unit_id": "u0037", "unit_type": "object_id", "text": "song_id=160", "source_step": 15, "supporting_quote": "song_id"}
+{"task_id": "57c3486_1", "unit_id": "u0038", "unit_type": "object_id", "text": "song_id=158", "source_step": 15, "supporting_quote": "song_id"}
+{"task_id": "57c3486_1", "unit_id": "u0039", "unit_type": "object_id", "text": "song_id=156", "source_step": 15, "supporting_quote": "song_id"}
+{"task_id": "57c3486_1", "unit_id": "u0040", "unit_type": "object_id", "text": "song_id=157", "source_step": 15, "supporting_quote": "song_id"}
+{"task_id": "57c3486_1", "unit_id": "u0041", "unit_type": "action_outcome", "text": "liked song_id=160 success", "source_step": 16, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_1", "unit_id": "u0042", "unit_type": "action_outcome", "text": "liked song_id=158 success", "source_step": 16, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_1", "unit_id": "u0043", "unit_type": "action_outcome", "text": "liked song_id=156 success", "source_step": 16, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_1", "unit_id": "u0044", "unit_type": "action_outcome", "text": "liked song_id=157 success", "source_step": 16, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_1", "unit_id": "u0045", "unit_type": "object_id", "text": "song_id=163", "source_step": 17, "supporting_quote": "song_id"}
+{"task_id": "57c3486_1", "unit_id": "u0046", "unit_type": "object_id", "text": "song_id=165", "source_step": 17, "supporting_quote": "song_id"}
+{"task_id": "57c3486_1", "unit_id": "u0047", "unit_type": "object_id", "text": "song_id=164", "source_step": 17, "supporting_quote": "song_id"}
+{"task_id": "57c3486_1", "unit_id": "u0048", "unit_type": "object_id", "text": "song_id=166", "source_step": 17, "supporting_quote": "song_id"}
+{"task_id": "57c3486_1", "unit_id": "u0049", "unit_type": "action_outcome", "text": "liked song_id=163 success", "source_step": 18, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_1", "unit_id": "u0050", "unit_type": "action_outcome", "text": "liked song_id=165 success", "source_step": 18, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_1", "unit_id": "u0051", "unit_type": "action_outcome", "text": "liked song_id=164 success", "source_step": 18, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_1", "unit_id": "u0052", "unit_type": "action_outcome", "text": "liked song_id=166 success", "source_step": 18, "supporting_quote": "Song liked."}
+{"task_id": "57c3486_1", "unit_id": "u0053", "unit_type": "status", "text": "task_completed: all songs from followed artists liked", "source_step": 18, "supporting_quote": "Song liked."}
+{"task_id": "6171bbc_3", "unit_id": "u0000", "unit_type": "object_id", "text": "playlist_id=654", "source_step": 15, "supporting_quote": "playlist_id: 654"}
+{"task_id": "6171bbc_3", "unit_id": "u0001", "unit_type": "object_id", "text": "playlist_ids=[172,173,174,175,176]", "source_step": 8, "supporting_quote": "playlist_id"}
+{"task_id": "6171bbc_3", "unit_id": "u0002", "unit_type": "object_id", "text": "most_played_song_ids=[27,21,304,162,185]", "source_step": 13, "supporting_quote": "most_played_song_ids: [27, 21, 304, 162, 185]"}
+{"task_id": "6171bbc_3", "unit_id": "u0003", "unit_type": "api_argument", "text": "create_playlist title=Most Listened Playlist Songs", "source_step": 15, "supporting_quote": "title"}
+{"task_id": "6171bbc_3", "unit_id": "u0004", "unit_type": "api_argument", "text": "add_song_to_playlist playlist_id=654", "source_step": 17, "supporting_quote": "playlist_id=654"}
+{"task_id": "6171bbc_3", "unit_id": "u0005", "unit_type": "variable_value", "text": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzcG90aWZ5K2plcG93ZWxsQGdtYWlsLmNvbSIsImV4cCI6MTY4NDQxMjA5OH0.6tmqUk6eEMc8TyoOB4MsiF7JyTu-H284i754TJ6_rsQ", "source_step": 5, "supporting_quote": "access_token"}
+{"task_id": "6171bbc_3", "unit_id": "u0006", "unit_type": "entity_binding", "text": "user_email=jepowell@gmail.com", "source_step": 5, "supporting_quote": "username"}
+{"task_id": "6171bbc_3", "unit_id": "u0007", "unit_type": "entity_binding", "text": "owner=Jennifer Powell", "source_step": 8, "supporting_quote": "name"}
+{"task_id": "6171bbc_3", "unit_id": "u0008", "unit_type": "action_outcome", "text": "login=success", "source_step": 5, "supporting_quote": "access_token"}
+{"task_id": "6171bbc_3", "unit_id": "u0009", "unit_type": "action_outcome", "text": "create_playlist=success playlist_id=654", "source_step": 15, "supporting_quote": "Playlist created."}
+{"task_id": "6171bbc_3", "unit_id": "u0010", "unit_type": "action_outcome", "text": "add_song_to_playlist=success for songs [27,21,304,162,185]", "source_step": 17, "supporting_quote": "Song added to the playlist."}
+{"task_id": "6171bbc_3", "unit_id": "u0011", "unit_type": "error_fix", "text": "show_playlist_library requires access_token parameter", "source_step": 7, "supporting_quote": "access_token obtained from spotify app login"}
+{"task_id": "6171bbc_3", "unit_id": "u0012", "unit_type": "error_fix", "text": "401 error fixed by passing access_token to API call", "source_step": 8, "supporting_quote": "Response status code is 401"}
+{"task_id": "6171bbc_3", "unit_id": "u0013", "unit_type": "status", "text": "task_completed", "source_step": 18, "supporting_quote": "Execution successful."}
+{"task_id": "6171bbc_3", "unit_id": "u0014", "unit_type": "amount_quantity", "text": "playlist_172_song_27_play_count=472", "source_step": 13, "supporting_quote": "play count: 472"}
+{"task_id": "6171bbc_3", "unit_id": "u0015", "unit_type": "amount_quantity", "text": "playlist_173_song_21_play_count=926", "source_step": 13, "supporting_quote": "play count: 926"}
+{"task_id": "6171bbc_3", "unit_id": "u0016", "unit_type": "amount_quantity", "text": "playlist_174_song_304_play_count=877", "source_step": 13, "supporting_quote": "play count: 877"}
+{"task_id": "6171bbc_3", "unit_id": "u0017", "unit_type": "amount_quantity", "text": "playlist_175_song_162_play_count=967", "source_step": 13, "supporting_quote": "play count: 967"}
+{"task_id": "6171bbc_3", "unit_id": "u0018", "unit_type": "amount_quantity", "text": "playlist_176_song_185_play_count=990", "source_step": 13, "supporting_quote": "play count: 990"}
+{"task_id": "df61dc5_2", "unit_id": "u0000", "unit_type": "entity_binding", "text": "user=joseharr@gmail.com", "source_step": 6, "supporting_quote": "email: joseharr@gmail.com"}
+{"task_id": "df61dc5_2", "unit_id": "u0001", "unit_type": "entity_binding", "text": "user_name=Jose Harrison", "source_step": 6, "supporting_quote": "first_name: Jose, last_name: Harrison"}
+{"task_id": "df61dc5_2", "unit_id": "u0002", "unit_type": "entity_binding", "text": "friend=Bradley Ball(email=bradley_ball@gmail.com)", "source_step": 13, "supporting_quote": "first_name: Bradley, last_name: Ball, email: bradley_ball@gmail.com"}
+{"task_id": "df61dc5_2", "unit_id": "u0003", "unit_type": "entity_binding", "text": "friend=Katherine Smith(email=ka_ball@gmail.com)", "source_step": 13, "supporting_quote": "first_name: Katherine, last_name: Smith, email: ka_ball@gmail.com"}
+{"task_id": "df61dc5_2", "unit_id": "u0004", "unit_type": "entity_binding", "text": "friend=Michael Burch(email=mi.burch@gmail.com)", "source_step": 13, "supporting_quote": "first_name: Michael, last_name: Burch, email: mi.burch@gmail.com"}
+{"task_id": "df61dc5_2", "unit_id": "u0005", "unit_type": "entity_binding", "text": "friend=Tammy Weaver(email=ta.weav@gmail.com)", "source_step": 13, "supporting_quote": "first_name: Tammy, last_name: Weaver, email: ta.weav@gmail.com"}
+{"task_id": "df61dc5_2", "unit_id": "u0006", "unit_type": "entity_binding", "text": "friend=Jason Simpson(email=jasonsimp@gmail.com)", "source_step": 13, "supporting_quote": "email: jasonsimp@gmail.com"}
+{"task_id": "df61dc5_2", "unit_id": "u0007", "unit_type": "api_argument", "text": "venmo.login(username,password)", "source_step": 9, "supporting_quote": "apis.venmo.login(username='joseharr@gmail.com', password='uNK8[nt')"}
+{"task_id": "df61dc5_2", "unit_id": "u0008", "unit_type": "api_argument", "text": "venmo.search_friends(access_token,query)", "source_step": 13, "supporting_quote": "apis.venmo.search_friends(access_token=access_token, query='')"}
+{"task_id": "df61dc5_2", "unit_id": "u0009", "unit_type": "api_argument", "text": "venmo.show_transactions(access_token,min_created_at,max_created_at,page_index,page_limit)", "source_step": 15, "supporting_quote": "apis.venmo.show_transactions(access_token=access_token, min_created_at='2023-05-01', max_created_at='2023-05-31', page_index=0, page_limit=20)"}
+{"task_id": "df61dc5_2", "unit_id": "u0010", "unit_type": "api_argument", "text": "venmo.like_transaction(access_token,transaction_id)", "source_step": 17, "supporting_quote": "apis.venmo.like_transaction(access_token=access_token, transaction_id=txn_id)"}
+{"task_id": "df61dc5_2", "unit_id": "u0011", "unit_type": "date_time", "text": "current_date=May 18, 2023", "source_step": 5, "supporting_quote": "date: Thursday, May 18, 2023"}
+{"task_id": "df61dc5_2", "unit_id": "u0012", "unit_type": "date_time", "text": "query_month=May 2023", "source_step": 15, "supporting_quote": "min_created_at='2023-05-01', max_created_at='2023-05-31'"}
+{"task_id": "df61dc5_2", "unit_id": "u0013", "unit_type": "object_id", "text": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2ZW5tbytqb3NlaGFyckBnbWFpbC5jb20iLCJleHAiOjE2ODQ0MTI3MzF9.N16_63rC-5gVZ9flB2zvmADWL6uYVPOs2ABs9poGB9U", "source_step": 13, "supporting_quote": "access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}
+{"task_id": "df61dc5_2", "unit_id": "u0014", "unit_type": "object_id", "text": "transaction_id=1082", "source_step": 16, "supporting_quote": "transaction_id: 1082, amount: 19.0, sender: Jose Harrison, receiver: Bradley Ball"}
+{"task_id": "df61dc5_2", "unit_id": "u0015", "unit_type": "object_id", "text": "transaction_id=1086", "source_step": 16, "supporting_quote": "transaction_id: 1086, amount: 39.0, sender: Jose Harrison, receiver: Tammy Weaver"}
+{"task_id": "df61dc5_2", "unit_id": "u0016", "unit_type": "object_id", "text": "transaction_id=1087", "source_step": 16, "supporting_quote": "transaction_id: 1087, amount: 15.0, sender: Jose Harrison, receiver: Tammy Weaver"}
+{"task_id": "df61dc5_2", "unit_id": "u0017", "unit_type": "object_id", "text": "transaction_id=1107", "source_step": 16, "supporting_quote": "transaction_id: 1107, amount: 40.0, sender: Katherine Smith, receiver: Jose Harrison"}
+{"task_id": "df61dc5_2", "unit_id": "u0018", "unit_type": "object_id", "text": "transaction_id=1108", "source_step": 16, "supporting_quote": "transaction_id: 1108, amount: 23.0, sender: Leslie Ball, receiver: Jose Harrison"}
+{"task_id": "df61dc5_2", "unit_id": "u0019", "unit_type": "object_id", "text": "transaction_id=1115", "source_step": 16, "supporting_quote": "transaction_id: 1115, amount: 50.0, sender: Jose Harrison, receiver: Jason Simpson"}
+{"task_id": "df61dc5_2", "unit_id": "u0020", "unit_type": "object_id", "text": "transaction_id=1120", "source_step": 16, "supporting_quote": "transaction_id: 1120, amount: 12.0, sender: Jason Simpson, receiver: Jose Harrison"}
+{"task_id": "df61dc5_2", "unit_id": "u0021", "unit_type": "object_id", "text": "transaction_id=1122", "source_step": 16, "supporting_quote": "transaction_id: 1122, amount: 30.0, sender: Jason Simpson, receiver: Jose Harrison"}
+{"task_id": "df61dc5_2", "unit_id": "u0022", "unit_type": "amount_quantity", "text": "friend_transaction_count=8", "source_step": 16, "supporting_quote": "transaction_ids_to_like = [1082, 1086, 1087, 1107, 1108, 1115, 1120, 1122]"}
+{"task_id": "df61dc5_2", "unit_id": "u0023", "unit_type": "action_outcome", "text": "liked_transaction(1082)=success", "source_step": 17, "supporting_quote": "Liked transaction 1082: {'message': 'Liked transaction.'}"}
+{"task_id": "df61dc5_2", "unit_id": "u0024", "unit_type": "action_outcome", "text": "liked_transaction(1086)=success", "source_step": 17, "supporting_quote": "Liked transaction 1086: {'message': 'Liked transaction.'}"}
+{"task_id": "df61dc5_2", "unit_id": "u0025", "unit_type": "action_outcome", "text": "liked_transaction(1087)=success", "source_step": 17, "supporting_quote": "Liked transaction 1087: {'message': 'Liked transaction.'}"}
+{"task_id": "df61dc5_2", "unit_id": "u0026", "unit_type": "action_outcome", "text": "liked_transaction(1107)=success", "source_step": 17, "supporting_quote": "Liked transaction 1107: {'message': 'Liked transaction.'}"}
+{"task_id": "df61dc5_2", "unit_id": "u0027", "unit_type": "action_outcome", "text": "liked_transaction(1108)=success", "source_step": 17, "supporting_quote": "Liked transaction 1108: {'message': 'Liked transaction.'}"}
+{"task_id": "df61dc5_2", "unit_id": "u0028", "unit_type": "action_outcome", "text": "liked_transaction(1115)=success", "source_step": 17, "supporting_quote": "Liked transaction 1115: {'message': 'Liked transaction.'}"}
+{"task_id": "df61dc5_2", "unit_id": "u0029", "unit_type": "action_outcome", "text": "liked_transaction(1120)=success", "source_step": 17, "supporting_quote": "Liked transaction 1120: {'message': 'Liked transaction.'}"}
+{"task_id": "df61dc5_2", "unit_id": "u0030", "unit_type": "action_outcome", "text": "liked_transaction(1122)=success", "source_step": 17, "supporting_quote": "Liked transaction 1122: {'message': 'Liked transaction.'}"}
+{"task_id": "df61dc5_2", "unit_id": "u0031", "unit_type": "error_fix", "text": "login_requires_username_not_email", "source_step": 8, "supporting_quote": "username: field required -> username parameter needed"}
+{"task_id": "df61dc5_2", "unit_id": "u0032", "unit_type": "error_fix", "text": "api_requires_access_token_parameter", "source_step": 12, "supporting_quote": "access_token: Access token obtained from venmo app login (required: true)"}
+{"task_id": "df61dc5_2", "unit_id": "u0033", "unit_type": "status", "text": "task_completed=8_transactions_liked", "source_step": 18, "supporting_quote": "apis.supervisor.complete_task(answer=8)"}
+{"task_id": "d4e9306_1", "unit_id": "u0000", "unit_type": "api_argument", "text": "spotify.login: username=aa_burt@gmail.com, password=)FLGE$6", "source_step": 8, "supporting_quote": "apis.spotify.login(username=\\"}
+{"task_id": "d4e9306_1", "unit_id": "u0001", "unit_type": "action_outcome", "text": "login_success: access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzcG90aWZ5K2FhX2J1cnRAZ21haWwuY29tIiwiZXhwIjoxNjg0NDEyMDk4fQ.R7Uxd1oWt2ug95qXpHPQDP4BbnRDMR_04tJMmWqL3aY", "source_step": 8, "supporting_quote": "access_token"}
+{"task_id": "d4e9306_1", "unit_id": "u0002", "unit_type": "error_fix", "text": "fix_login_param: changed email->username based on API docs", "source_step": 7, "supporting_quote": "username: field required"}
+{"task_id": "d4e9306_1", "unit_id": "u0003", "unit_type": "api_argument", "text": "show_liked_songs: access_token required", "source_step": 10, "supporting_quote": "access_token: Access token obtained from spotify app login"}
+{"task_id": "d4e9306_1", "unit_id": "u0004", "unit_type": "object_id", "text": "liked_songs_artist_ids={4,8,9,11,12,18,19,21,22,25,26,27,28,30,32,33,34,35,36}", "source_step": 14, "supporting_quote": "Unique artist IDs to follow: {4, 8, 9, 11, 12, 18, 19, 21, 22, 25, 26, 27, 28, 30, 32, 33, 34, 35, 36}"}
+{"task_id": "d4e9306_1", "unit_id": "u0005", "unit_type": "object_id", "text": "song_ids_from_liked_songs=59,307,44,222,123,282,264", "source_step": 11, "supporting_quote": "song_id: 59, 307, 44, 222, 123, 282, 264"}
+{"task_id": "d4e9306_1", "unit_id": "u0006", "unit_type": "object_id", "text": "album_ids_from_liked_albums=14,6", "source_step": 13, "supporting_quote": "album_id: 14, 6"}
+{"task_id": "d4e9306_1", "unit_id": "u0007", "unit_type": "entity_binding", "text": "user=aaron_burton, email=aa_burt@gmail.com", "source_step": 5, "supporting_quote": "first_name: Aaron, last_name: Burton, email: aa_burt@gmail.com"}
+{"task_id": "d4e9306_1", "unit_id": "u0008", "unit_type": "api_argument", "text": "follow_artist: artist_id, access_token", "source_step": 15, "supporting_quote": "follow_artist(artist_id=artist_id, access_token=access_token)"}
+{"task_id": "d4e9306_1", "unit_id": "u0009", "unit_type": "action_outcome", "text": "followed_all_19_artists: success", "source_step": 16, "supporting_quote": "Artist followed."}
+{"task_id": "d4e9306_1", "unit_id": "u0010", "unit_type": "amount_quantity", "text": "artists_followed_count=19", "source_step": 17, "supporting_quote": "complete_task(answer=19)"}
+{"task_id": "d4e9306_1", "unit_id": "u0011", "unit_type": "error_fix", "text": "fix_missing_token: added access_token to show_liked_songs call", "source_step": 11, "supporting_quote": "show_liked_songs(access_token=access_token)"}
+{"task_id": "d4e9306_1", "unit_id": "u0012", "unit_type": "status", "text": "task_completed: successful", "source_step": 17, "supporting_quote": "Execution successful."}
+{"task_id": "4ec8de5_1", "unit_id": "u0000", "unit_type": "entity_binding", "text": "user_email=cheweber@gmail.com", "source_step": 4, "supporting_quote": "\\"}
+{"task_id": "4ec8de5_1", "unit_id": "u0001", "unit_type": "entity_binding", "text": "spotify_password=YJh}7_a", "source_step": 3, "supporting_quote": "\\"}
+{"task_id": "4ec8de5_1", "unit_id": "u0002", "unit_type": "error_fix", "text": "login_param_fix: email->username", "source_step": 6, "supporting_quote": "username: field required"}
+{"task_id": "4ec8de5_1", "unit_id": "u0003", "unit_type": "api_argument", "text": "spotify.login(username, password)", "source_step": 7, "supporting_quote": "apis.spotify.login(username='cheweber@gmail.com', password='YJh}7_a')"}
+{"task_id": "4ec8de5_1", "unit_id": "u0004", "unit_type": "action_outcome", "text": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...", "source_step": 7, "supporting_quote": "access_token"}
+{"task_id": "4ec8de5_1", "unit_id": "u0005", "unit_type": "error_fix", "text": "show_song_library requires access_token", "source_step": 9, "supporting_quote": "access_token: Access token obtained from spotify app login."}
+{"task_id": "4ec8de5_1", "unit_id": "u0006", "unit_type": "variable_value", "text": "song_library_total=22", "source_step": 13, "supporting_quote": "Total songs: 22"}
+{"task_id": "4ec8de5_1", "unit_id": "u0007", "unit_type": "date_time", "text": "current_year=2023", "source_step": 14, "supporting_quote": "Current year: 2023, Last year: 2022"}
+{"task_id": "4ec8de5_1", "unit_id": "u0008", "unit_type": "date_time", "text": "last_year=2022", "source_step": 14, "supporting_quote": "Current year: 2023, Last year: 2022"}
+{"task_id": "4ec8de5_1", "unit_id": "u0009", "unit_type": "variable_value", "text": "song_library_2022_2023_count=11", "source_step": 14, "supporting_quote": "11 songs released in 2022 or 2023"}
+{"task_id": "4ec8de5_1", "unit_id": "u0010", "unit_type": "variable_value", "text": "album_songs_2022_2023_count=30", "source_step": 16, "supporting_quote": "Total songs from albums released in 2022 or 2023: 30"}
+{"task_id": "4ec8de5_1", "unit_id": "u0011", "unit_type": "variable_value", "text": "unique_song_ids=[1,2,3,4,5,6,7,8,9,10,16,17,18,19,20,21,22,23,24,25,26,27,28,33,34,35,36,67,68,69,87,155,161,165,182,209,237,263,264,267]", "source_step": 17, "supporting_quote": "Unique song IDs from both libraries: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 33, 34, 35, 36, 67, 68, 69, 87, 155, 161, 165, 182, 209, 237, 263, 264, 267]"}
+{"task_id": "4ec8de5_1", "unit_id": "u0012", "unit_type": "action_outcome", "text": "total_unique_songs_2022_2023=40", "source_step": 17, "supporting_quote": "Total unique songs: 40"}
+{"task_id": "4ec8de5_1", "unit_id": "u0013", "unit_type": "api_argument", "text": "show_song_library(access_token, page_index, page_limit)", "source_step": 10, "supporting_quote": "apis.spotify.show_song_library(access_token=access_token, page_limit=20)"}
+{"task_id": "4ec8de5_1", "unit_id": "u0014", "unit_type": "api_argument", "text": "show_album_library(access_token, page_limit)", "source_step": 15, "supporting_quote": "apis.spotify.show_album_library(access_token=access_token, page_limit=20)"}
+{"task_id": "4ec8de5_1", "unit_id": "u0015", "unit_type": "api_argument", "text": "show_song(song_id) returns release_date", "source_step": 11, "supporting_quote": "release_date: 2019-01-01T00:00:00"}
+{"task_id": "396c5a2_1", "unit_id": "u0000", "unit_type": "object_id", "text": "artist_id=34", "source_step": 2, "supporting_quote": "artist_id\": 34, \"name\": \"Lily Moon\""}
+{"task_id": "396c5a2_1", "unit_id": "u0001", "unit_type": "object_id", "text": "song_id=311", "source_step": 4, "supporting_quote": "song_id\": 311, \"title\": \"Infinite Dreams\""}
+{"task_id": "396c5a2_1", "unit_id": "u0002", "unit_type": "object_id", "text": "song_id=309", "source_step": 4, "supporting_quote": "song_id\": 309, \"title\": \"Final Act\""}
+{"task_id": "396c5a2_1", "unit_id": "u0003", "unit_type": "variable_value", "text": "play_count=990", "source_step": 4, "supporting_quote": "play_count\": 990"}
+{"task_id": "396c5a2_1", "unit_id": "u0004", "unit_type": "variable_value", "text": "play_count=520", "source_step": 4, "supporting_quote": "play_count\": 520"}
+{"task_id": "396c5a2_1", "unit_id": "u0005", "unit_type": "constraint", "text": "filter: play_count>980", "source_step": 5, "supporting_quote": "play_count > 980"}
+{"task_id": "396c5a2_1", "unit_id": "u0006", "unit_type": "entity_binding", "text": "spotify_password=%CCvl8v", "source_step": 6, "supporting_quote": "account_name\": \"spotify\", \"password\": \"%CCvl8v\""}
+{"task_id": "396c5a2_1", "unit_id": "u0007", "unit_type": "entity_binding", "text": "spotify_user=susanmiller@gmail.com", "source_step": 9, "supporting_quote": "email\": \"susanmiller@gmail.com\""}
+{"task_id": "396c5a2_1", "unit_id": "u0008", "unit_type": "api_argument", "text": "login requires username and password", "source_step": 11, "supporting_quote": "username: field required"}
+{"task_id": "396c5a2_1", "unit_id": "u0009", "unit_type": "variable_value", "text": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzcG90aWZ5K3N1c2FubWlsbGVyQGdtYWlsLmNvbSIsImV4cCI6MTY4NDQxMjA5OH0.m4wB6arhYsGO1RMQZ2J0nULg2azl89U0vwa-3BYhWno", "source_step": 12, "supporting_quote": "access_token\": \"eyJhbGci...\""}
+{"task_id": "396c5a2_1", "unit_id": "u0010", "unit_type": "api_argument", "text": "add_to_queue requires access_token and song_id", "source_step": 14, "supporting_quote": "access_token: Access token obtained from spotify app login"}
+{"task_id": "396c5a2_1", "unit_id": "u0011", "unit_type": "error_fix", "text": "add_to_queue failed 401 - added access_token parameter", "source_step": 15, "supporting_quote": "Response status code is 401"}
+{"task_id": "396c5a2_1", "unit_id": "u0012", "unit_type": "action_outcome", "text": "song_id=311 added to queue", "source_step": 15, "supporting_quote": "Song added to the queue."}
+{"task_id": "396c5a2_1", "unit_id": "u0013", "unit_type": "status", "text": "task completed", "source_step": 17, "supporting_quote": "Execution successful."}
+{"task_id": "fac291d_1", "unit_id": "u0000", "unit_type": "entity_binding", "text": "spotify_user=de_ritt@gmail.com", "source_step": 6, "supporting_quote": "de_ritt@gmail.com"}
+{"task_id": "fac291d_1", "unit_id": "u0001", "unit_type": "variable_value", "text": "spotify_password=7s7!cA8", "source_step": 3, "supporting_quote": "spotify\",\"password\": \"7s7!cA8\""}
+{"task_id": "fac291d_1", "unit_id": "u0002", "unit_type": "api_argument", "text": "login_param=username (not email)", "source_step": 8, "supporting_quote": "username: field required"}
+{"task_id": "fac291d_1", "unit_id": "u0003", "unit_type": "variable_value", "text": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzcG90aWZ5K2RlX3JpdHRAZ21haWwuY29tIiwiZXhwIjoxNjg0NDEyMDk4fQ.H6H5gXC79617H0gi_Su2six-3gydnfFJPcMT5711Flo", "source_step": 9, "supporting_quote": "access_token"}
+{"task_id": "fac291d_1", "unit_id": "u0004", "unit_type": "api_argument", "text": "show_song_library_requires_access_token", "source_step": 11, "supporting_quote": "access_token: Access token obtained from spotify app login"}
+{"task_id": "fac291d_1", "unit_id": "u0005", "unit_type": "action_outcome", "text": "song_library_count=16", "source_step": 12, "supporting_quote": "Song library count: 16"}
+{"task_id": "fac291d_1", "unit_id": "u0006", "unit_type": "action_outcome", "text": "album_library_count=8", "source_step": 13, "supporting_quote": "Album library count: 8"}
+{"task_id": "fac291d_1", "unit_id": "u0007", "unit_type": "action_outcome", "text": "playlist_library_count=5", "source_step": 14, "supporting_quote": "Playlist library count: 5"}
+{"task_id": "fac291d_1", "unit_id": "u0008", "unit_type": "action_outcome", "text": "unique_song_count=81", "source_step": 15, "supporting_quote": "Unique song count: 81"}
+{"task_id": "fac291d_1", "unit_id": "u0009", "unit_type": "status", "text": "task_completed=81", "source_step": 16, "supporting_quote": "Execution successful"}
+{"task_id": "fac291d_1", "unit_id": "u0010", "unit_type": "error_fix", "text": "401_error_fixed_by_passing_access_token", "source_step": 12, "supporting_quote": "Response status code is 401"}
+{"task_id": "fac291d_1", "unit_id": "u0011", "unit_type": "error_fix", "text": "422_error_fixed_by_using_username_param", "source_step": 9, "supporting_quote": "username: field required"}
+{"task_id": "d4e9306_2", "unit_id": "u0000", "unit_type": "entity_binding", "text": "user_email=alexwhite@gmail.com", "source_step": 6, "supporting_quote": "\\"}
+{"task_id": "d4e9306_2", "unit_id": "u0001", "unit_type": "entity_binding", "text": "spotify_password==ql86Wp", "source_step": 3, "supporting_quote": "\\"}
+{"task_id": "d4e9306_2", "unit_id": "u0002", "unit_type": "api_argument", "text": "login_username_field=username", "source_step": 8, "supporting_quote": "username: field required"}
+{"task_id": "d4e9306_2", "unit_id": "u0003", "unit_type": "api_argument", "text": "login_params=username,password", "source_step": 8, "supporting_quote": "name: username...required: true"}
+{"task_id": "d4e9306_2", "unit_id": "u0004", "unit_type": "variable_value", "text": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzcG90aWZ5K2FsZXh3aGl0ZUBnbWFpbC5jb20iLCJleHAiOjE2ODQ0MTIwOTh9.y5M8tc78MO8xEeKMiXXLHWOGAE20yV89jAg4B3j7Qhc", "source_step": 9, "supporting_quote": "access_token"}
+{"task_id": "d4e9306_2", "unit_id": "u0005", "unit_type": "api_argument", "text": "show_liked_songs_requires=access_token", "source_step": 11, "supporting_quote": "access_token...required: true"}
+{"task_id": "d4e9306_2", "unit_id": "u0006", "unit_type": "object_id", "text": "artist_ids={1,2,3,5,6,7,8,9,11,15,24,25,26,29,30,31,32,33,34,36}", "source_step": 14, "supporting_quote": "Unique artist IDs to follow: {1, 2, 3, 5, 6, 7, 8, 9, 11, 15, 24, 25, 26, 29, 30, 31, 32, 33, 34, 36}"}
+{"task_id": "d4e9306_2", "unit_id": "u0007", "unit_type": "error_fix", "text": "401_error_fix=add_access_token_param", "source_step": 10, "supporting_quote": "You are either not authorized to access this spotify API endpoint or your access token is missing, invalid or expired."}
+{"task_id": "d4e9306_2", "unit_id": "u0008", "unit_type": "error_fix", "text": "422_error_fix=use_username_not_email", "source_step": 7, "supporting_quote": "username: field required"}
+{"task_id": "d4e9306_2", "unit_id": "u0009", "unit_type": "action_outcome", "text": "followed_20_artists=success", "source_step": 15, "supporting_quote": "Artist followed."}
+{"task_id": "d4e9306_2", "unit_id": "u0010", "unit_type": "status", "text": "task_completed=followed_all_liked_artists", "source_step": 16, "supporting_quote": "Followed 20 artists from liked songs and albums"}
+{"task_id": "383cbac_2", "unit_id": "u0000", "unit_type": "entity_binding", "text": "manager=Jamie Solomon", "source_step": 14, "supporting_quote": "receiver: Jamie Solomon"}
+{"task_id": "383cbac_2", "unit_id": "u0001", "unit_type": "entity_binding", "text": "user_share=20", "source_step": 0, "supporting_quote": "My share was $20"}
+{"task_id": "383cbac_2", "unit_id": "u0002", "unit_type": "date_time", "text": "lunch_date=2023-05-17", "source_step": 14, "supporting_quote": "created_at: 2023-05-17T17:53:07"}
+{"task_id": "383cbac_2", "unit_id": "u0003", "unit_type": "object_id", "text": "transaction_id=8217", "source_step": 14, "supporting_quote": "transaction_id: 8217"}
+{"task_id": "383cbac_2", "unit_id": "u0004", "unit_type": "object_id", "text": "transaction_id=8218", "source_step": 14, "supporting_quote": "transaction_id: 8218"}
+{"task_id": "383cbac_2", "unit_id": "u0005", "unit_type": "amount_quantity", "text": "coworkers_total_venmo=376", "source_step": 15, "supporting_quote": "Total = 25 + 40 + 47 + 42 + 30 + 49 + 43 + 38 + 31 + 31 = 376"}
+{"task_id": "383cbac_2", "unit_id": "u0006", "unit_type": "constraint", "text": "user_transaction_not_on_social_feed", "source_step": 0, "supporting_quote": "Everyones' transactions except mine should be on my social feed"}
+{"task_id": "383cbac_2", "unit_id": "u0007", "unit_type": "variable_value", "text": "total_lunch_cost=396", "source_step": 15, "supporting_quote": "376 + 20 = 396"}
+{"task_id": "383cbac_2", "unit_id": "u0008", "unit_type": "action_outcome", "text": "task_completed", "source_step": 16, "supporting_quote": "Marked the active task complete."}
+{"task_id": "383cbac_2", "unit_id": "u0009", "unit_type": "api_argument", "text": "venmo_login_credentials", "source_step": 7, "supporting_quote": "username: anita.burch@gmail.com, password: UIK!=rI"}
+{"task_id": "383cbac_2", "unit_id": "u0010", "unit_type": "api_argument", "text": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2ZW5tbythbml0YS5idXJjaEBnbWFpbC5jb20iLCJleHAiOjE2ODQ0MTIwOTh9.JKwGbfljsL4mmw6kO_S53HKGKTJMVnJBPktH75PkrIk", "source_step": 7, "supporting_quote": "access_token returned from login"}
+{"task_id": "68ee2c9_2", "unit_id": "u0000", "unit_type": "api_argument", "text": "login(username='jer.calhoun@gmail.com', password='wSDeBSu')", "source_step": 5, "supporting_quote": "apis.file_system.login(username='jer.calhoun@gmail.com', password='wSDeBSu')"}
+{"task_id": "68ee2c9_2", "unit_id": "u0001", "unit_type": "variable_value", "text": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmaWxlX3N5c3RlbStqZXIuY2FsaG91bkBnbWFpbC5jb20iLCJleHAiOjE2ODQ0MTIwOTh9.wgS8UyybObGvf0YJLVgMpTZ-pIsMEljX0prBtnuoIr0", "source_step": 5, "supporting_quote": "access_token"}
+{"task_id": "68ee2c9_2", "unit_id": "u0002", "unit_type": "api_argument", "text": "show_directory(directory_path='~/downloaded_files/', recursive=True)", "source_step": 6, "supporting_quote": "directory_path='~/downloaded_files/', recursive=True"}
+{"task_id": "68ee2c9_2", "unit_id": "u0003", "unit_type": "date_time", "text": "current_date=2023-05-18", "source_step": 9, "supporting_quote": "date: Thursday, May 18, 2023"}
+{"task_id": "68ee2c9_2", "unit_id": "u0004", "unit_type": "date_time", "text": "current_year=2023", "source_step": 10, "supporting_quote": "The current year is 2023"}
+{"task_id": "68ee2c9_2", "unit_id": "u0005", "unit_type": "object_id", "text": "file_id=25859", "source_step": 10, "supporting_quote": "file_id"}
+{"task_id": "68ee2c9_2", "unit_id": "u0006", "unit_type": "date_time", "text": "DIY_home_improvement_guide.docx created_at=2021-09-27", "source_step": 10, "supporting_quote": "created_at"}
+{"task_id": "68ee2c9_2", "unit_id": "u0007", "unit_type": "api_argument", "text": "directory_exists(directory_path='~/recycle_bin/')", "source_step": 11, "supporting_quote": "directory_path='~/recycle_bin/'"}
+{"task_id": "68ee2c9_2", "unit_id": "u0008", "unit_type": "variable_value", "text": "recycle_bin_exists=true", "source_step": 11, "supporting_quote": "exists"}
+{"task_id": "68ee2c9_2", "unit_id": "u0009", "unit_type": "api_argument", "text": "move_file(source_file_path=?, destination_file_path=?)", "source_step": 13, "supporting_quote": "apis.file_system.move_file"}
+{"task_id": "68ee2c9_2", "unit_id": "u0010", "unit_type": "error_fix", "text": "parameter_names_fixed: source_file_path, destination_file_path", "source_step": 14, "supporting_quote": "source_file_path: field required\\ndestination_file_path: field required"}
+{"task_id": "68ee2c9_2", "unit_id": "u0011", "unit_type": "api_argument", "text": "move_file(source_file_path=path, destination_file_path=new_path)", "source_step": 15, "supporting_quote": "apis.file_system.move_file(access_token=access_token, source_file_path=..."}
+{"task_id": "68ee2c9_2", "unit_id": "u0012", "unit_type": "action_outcome", "text": "file_renamed: DIY_home_improvement_guide.docx -> 2021_09_27-DIY_home_improvement_guide.docx", "source_step": 15, "supporting_quote": "Moved DIY_home_improvement_guide.docx -> 2021_09_27-DIY_home_improvement_guide.docx"}
+{"task_id": "68ee2c9_2", "unit_id": "u0013", "unit_type": "action_outcome", "text": "file_moved_to_recycle_bin: 2021_09_27-DIY_home_improvement_guide.docx", "source_step": 15, "supporting_quote": "-> Moved to recycle bin: /home/jeremy/recycle_bin/2021_09_27-DIY_home_improvement_guide.docx"}
+{"task_id": "68ee2c9_2", "unit_id": "u0014", "unit_type": "action_outcome", "text": "file_renamed: coding_interview_prep.docx -> 2022_07_30-coding_interview_prep.docx", "source_step": 15, "supporting_quote": "Moved coding_interview_prep.docx -> 2022_07_30-coding_interview_prep.docx"}
+{"task_id": "68ee2c9_2", "unit_id": "u0015", "unit_type": "action_outcome", "text": "file_moved_to_recycle_bin: 2022_07_30-coding_interview_prep.docx", "source_step": 15, "supporting_quote": "-> Moved to recycle bin: /home/jeremy/recycle_bin/2022_07_30-coding_interview_p..."}
+{"task_id": "68ee2c9_2", "unit_id": "u0016", "unit_type": "action_outcome", "text": "task_completed=true", "source_step": 16, "supporting_quote": "Execution successful."}
+{"task_id": "68ee2c9_2", "unit_id": "u0017", "unit_type": "constraint", "text": "prefix_format=YYYY_MM_DD-", "source_step": 13, "supporting_quote": "formatted_prefix = date_prefix.replace('-', '_') + '-'"}
+{"task_id": "68ee2c9_2", "unit_id": "u0018", "unit_type": "constraint", "text": "move_non_current_year_files=true", "source_step": 13, "supporting_quote": "Move files not from 2023 to ~/recycle_bin/"}
+{"task_id": "68ee2c9_2", "unit_id": "u0019", "unit_type": "entity_binding", "text": "user_email=jer.calhoun@gmail.com", "source_step": 5, "supporting_quote": "username='jer.calhoun@gmail.com'"}
+{"task_id": "396c5a2_2", "unit_id": "u0000", "unit_type": "object_id", "text": "artist_id=8", "source_step": 6, "supporting_quote": "artist_id=8"}
+{"task_id": "396c5a2_2", "unit_id": "u0001", "unit_type": "object_id", "text": "song_id=51", "source_step": 8, "supporting_quote": "song_id: 51"}
+{"task_id": "396c5a2_2", "unit_id": "u0002", "unit_type": "object_id", "text": "song_id=45", "source_step": 2, "supporting_quote": "song_id: 45"}
+{"task_id": "396c5a2_2", "unit_id": "u0003", "unit_type": "object_id", "text": "song_id=37", "source_step": 2, "supporting_quote": "song_id: 37"}
+{"task_id": "396c5a2_2", "unit_id": "u0004", "unit_type": "object_id", "text": "song_id=130", "source_step": 4, "supporting_quote": "song_id: 130"}
+{"task_id": "396c5a2_2", "unit_id": "u0005", "unit_type": "object_id", "text": "song_id=40", "source_step": 4, "supporting_quote": "song_id: 40"}
+{"task_id": "396c5a2_2", "unit_id": "u0006", "unit_type": "object_id", "text": "song_id=38", "source_step": 6, "supporting_quote": "song_id: 38"}
+{"task_id": "396c5a2_2", "unit_id": "u0007", "unit_type": "object_id", "text": "song_id=126", "source_step": 7, "supporting_quote": "song_id: 126"}
+{"task_id": "396c5a2_2", "unit_id": "u0008", "unit_type": "object_id", "text": "song_id=127", "source_step": 7, "supporting_quote": "song_id: 127"}
+{"task_id": "396c5a2_2", "unit_id": "u0009", "unit_type": "variable_value", "text": "play_count=991", "source_step": 8, "supporting_quote": "play_count: 991"}
+{"task_id": "396c5a2_2", "unit_id": "u0010", "unit_type": "variable_value", "text": "play_count=713", "source_step": 2, "supporting_quote": "play_count: 713"}
+{"task_id": "396c5a2_2", "unit_id": "u0011", "unit_type": "variable_value", "text": "play_count=379", "source_step": 2, "supporting_quote": "play_count: 379"}
+{"task_id": "396c5a2_2", "unit_id": "u0012", "unit_type": "variable_value", "text": "play_count=486", "source_step": 4, "supporting_quote": "play_count: 486"}
+{"task_id": "396c5a2_2", "unit_id": "u0013", "unit_type": "variable_value", "text": "play_count=120", "source_step": 4, "supporting_quote": "play_count: 120"}
+{"task_id": "396c5a2_2", "unit_id": "u0014", "unit_type": "variable_value", "text": "play_count=178", "source_step": 6, "supporting_quote": "play_count: 178"}
+{"task_id": "396c5a2_2", "unit_id": "u0015", "unit_type": "variable_value", "text": "play_count=501", "source_step": 7, "supporting_quote": "play_count: 501"}
+{"task_id": "396c5a2_2", "unit_id": "u0016", "unit_type": "variable_value", "text": "play_count=463", "source_step": 7, "supporting_quote": "play_count: 463"}
+{"task_id": "396c5a2_2", "unit_id": "u0017", "unit_type": "api_argument", "text": "query=Aria Sterling", "source_step": 2, "supporting_quote": "query=\"Aria Sterling\""}
+{"task_id": "396c5a2_2", "unit_id": "u0018", "unit_type": "api_argument", "text": "artist_id=8", "source_step": 6, "supporting_quote": "artist_id=8"}
+{"task_id": "396c5a2_2", "unit_id": "u0019", "unit_type": "api_argument", "text": "page_limit=20", "source_step": 6, "supporting_quote": "page_limit=20"}
+{"task_id": "396c5a2_2", "unit_id": "u0020", "unit_type": "api_argument", "text": "page_index=1", "source_step": 7, "supporting_quote": "page_index=1"}
+{"task_id": "396c5a2_2", "unit_id": "u0021", "unit_type": "api_argument", "text": "username=tr_solo@gmail.com", "source_step": 12, "supporting_quote": "username=\"tr_solo@gmail.com\""}
+{"task_id": "396c5a2_2", "unit_id": "u0022", "unit_type": "api_argument", "text": "password=Q3c_DvY", "source_step": 12, "supporting_quote": "password=\"Q3c_DvY\""}
+{"task_id": "396c5a2_2", "unit_id": "u0023", "unit_type": "api_argument", "text": "access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzcG90aWZ5K3RyX3NvbG9AZ21haWwuY29tIiwiZXhwIjoxNjg0NDEyMDk4fQ.sSUfy5xYxOpVCLKB_KnWKG54-mQSBqDaNoWuUirNawM", "source_step": 15, "supporting_quote": "access_token=\"eyJhbGci...irNawM\""}
+{"task_id": "396c5a2_2", "unit_id": "u0024", "unit_type": "constraint", "text": "page_limit<=20", "source_step": 5, "supporting_quote": "ensure this value is less than or equal to 20"}
+{"task_id": "396c5a2_2", "unit_id": "u0025", "unit_type": "constraint", "text": "play_count>990", "source_step": 1, "supporting_quote": "play count > 990"}
+{"task_id": "396c5a2_2", "unit_id": "u0026", "unit_type": "error_fix", "text": "add_to_queue requires access_token parameter", "source_step": 14, "supporting_quote": "access_token: Access token obtained from spotify app login."}
+{"task_id": "396c5a2_2", "unit_id": "u0027", "unit_type": "action_outcome", "text": "add_to_queue success", "source_step": 15, "supporting_quote": "Song added to the queue."}
+{"task_id": "396c5a2_2", "unit_id": "u0028", "unit_type": "action_outcome", "text": "login success", "source_step": 12, "supporting_quote": "access_token returned"}
+{"task_id": "396c5a2_2", "unit_id": "u0029", "unit_type": "status", "text": "401 unauthorized", "source_step": 8, "supporting_quote": "Response status code is 401"}
+{"task_id": "396c5a2_2", "unit_id": "u0030", "unit_type": "status", "text": "422 validation error", "source_step": 5, "supporting_quote": "Response status code is 422"}

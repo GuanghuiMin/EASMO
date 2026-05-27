@@ -1,0 +1,4 @@
+method,n_audits,n_units,behavioral_evidence_coverage,identifier_coverage,binding_coverage,constraint_coverage,action_outcome_coverage,top_missing_error_type
+task_aware_summary,30,443,0.7427,0.8989,0.988,0.94,0.9139,dropped_identifier
+acon_style_summary,30,428,0.8575,0.9582,0.9892,0.9683,0.9607,dropped_identifier
+symbolic_evidence,30,434,0.9954,1.0,1.0,1.0,1.0,vague_or_wrong_abstraction
