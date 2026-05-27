@@ -1,1 +1,1 @@
-/workspace/EASMO/motivation_v2/user_feedback/compression_experiments.md
+/workspace/EASMO/user_feedback/compression_experiments.md
