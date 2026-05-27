@@ -358,7 +358,14 @@ def compute_jacobian_saliency(
     # Clean up the grad / cached buffer to avoid OOM across cases.
     inputs_embeds.grad = None
     if capture_active and cache["hidden"] is not None:
-        cache["hidden"].grad = None
+        try:
+            cache["hidden"].grad = None
+        except Exception:
+            pass
+        cache["hidden"] = None
+    del inputs_embeds, e_all, g_all, g, e, grad_norm, gxa_abs
+    import gc
+    gc.collect()
     torch.cuda.empty_cache()
 
     return JacobianResult(

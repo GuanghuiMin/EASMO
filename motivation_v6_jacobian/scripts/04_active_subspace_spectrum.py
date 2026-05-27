@@ -65,19 +65,36 @@ def main() -> None:
     meta_rows = read_jsonl(Path(args.meta))
     span_meta = [m for m in meta_rows if m.get("matrix") == "span"]
     span_meta.sort(key=lambda m: m["row"])
+
+    def _coerce(x):
+        if x is None:
+            return float("nan")
+        try:
+            return float(x)
+        except Exception:
+            return float("nan")
+
     span_sens = np.array(
-        [m.get("v4_final_sensitivity") or 0.0 for m in span_meta],
+        [_coerce(m.get("v4_final_sensitivity")) for m in span_meta],
         dtype=np.float64,
     )
     if len(span_sens) != span.shape[0]:
         print(f"      WARN: span meta count {len(span_sens)} != span rows {span.shape[0]}")
         span_sens = np.zeros(span.shape[0])
 
-    threshold = float(np.median(span_sens))
-    high_mask = span_sens >= threshold
-    low_mask = span_sens < threshold
+    finite_mask = np.isfinite(span_sens)
+    if finite_mask.sum() < 2:
+        print("      WARN: no finite v4 sensitivities; skipping high/low split")
+        threshold = float("nan")
+        high_mask = np.zeros_like(span_sens, dtype=bool)
+        low_mask = np.zeros_like(span_sens, dtype=bool)
+    else:
+        threshold = float(np.nanmedian(span_sens))
+        high_mask = np.where(finite_mask, span_sens >= threshold, False)
+        low_mask = np.where(finite_mask, span_sens < threshold, False)
     print(f"      median v4 sensitivity = {threshold:.3f}  "
-          f"high={int(high_mask.sum())}  low={int(low_mask.sum())}")
+          f"high={int(high_mask.sum())}  low={int(low_mask.sum())}  "
+          f"finite={int(finite_mask.sum())}/{len(span_sens)}")
 
     matrices = {
         "example": example,
