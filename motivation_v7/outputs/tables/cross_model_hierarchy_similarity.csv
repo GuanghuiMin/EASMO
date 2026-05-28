@@ -1,0 +1,2 @@
+model_a,prompt_a,budget_a,model_b,prompt_b,budget_b,n_types,kendall_tau,kendall_p,spearman_rho,spearman_p
+minimax,UTCO,1500,qwen,UTCO,1500,11,0.4909090909090909,0.04053235730319064,0.6363636363636364,0.03528698122006231

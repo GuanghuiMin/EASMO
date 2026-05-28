@@ -1,0 +1,3 @@
+compressor_model,prompt_variant,budget_chars,sdi
+minimax,UTCO,1500,0.9607464347050033
+qwen,UTCO,1500,0.9893322535140425

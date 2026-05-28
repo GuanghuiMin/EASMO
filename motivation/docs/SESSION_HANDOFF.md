@@ -1,23 +1,23 @@
 # Session handoff — paste this into a new chat if context fills up
 
-> Updated: 2026-05-28 8:50 AM PT.
+> Updated: 2026-05-28 3:30 PM PT.
 > All times in Pacific Time (PT).
 >
 > **➡ For a fresh chat, read these in order:**
 > 1. This file (project map + open threads).
 > 2. The single track-level snapshot you care about most — each
->    track has a `docs/04_results_summary.md` (v6) or
+>    track has a `docs/04_results_summary.md` (v6, v7) or
 >    `docs/05_results_summary.md` (v2–v5) that's decision-ready in
 >    ~5 minutes.
 >
 > The git remote is `github.com:GuanghuiMin/EASMO.git`.
-> Latest commit (as of 2026-05-28 01:26Z): `900a3b0  auto-sync` —
-> contains all of v6's outputs/raw, outputs/tables, outputs/figures.
+> Latest milestone commit will be set after `v7 done` push.
 > Auto-push watcher PID 3916707 stages every 20 min and covers
 > `motivation/`, `motivation_v2/`, `motivation_v3/`, `motivation_v4/`,
-> `motivation_v5/`, **`motivation_v6_jacobian/`** automatically.
+> `motivation_v5/`, `motivation_v6_jacobian/`, **`motivation_v7/`**
+> automatically.
 
-## 1. Project map (6 motivation tracks)
+## 1. Project map (7 motivation tracks)
 
 | Track | Purpose | Status | Headline |
 |---|---|---|---|
@@ -27,6 +27,7 @@
 | `motivation_v4/` | decision-state probing: leave-one-span-out sensitivity | ✅ done; **4/6 spec criteria** | high-sens > low-sens (+23pp), > random (+7pp); but recency baseline beats high-sens (47 vs 40 at cap=15) |
 | `motivation_v5/` | **ACON failure-mode audit** (recovered-then-dropped) | ✅ done; **strong positive signal verified** | 93% of audit-recovered actionable items are dropped again by recompression; 81% by abstraction policy not capacity; recompressed-context rerun saves 5/24 (21%) of originally-failed cases |
 | `motivation_v6_jacobian/` | **white-box Jacobian active-subspace diagnostics** (Qwen3-4B-Instruct-2507) | ✅ done 2026-05-28 | **B positive** (example-level k=16 cum-var = 92 %); **A negative** (per-task median Spearman vs v4 = −0.03); **D negative** (jacobian_low_spans 0.80 ≈ high_spans_raw 0.83 at MiniMax cap=15); **C degenerate** (k=4 soft tokens already overfit target NLL with gap-recovery 2.26×). Story: kills span-rank selection, supports active-subspace projection. |
+| `motivation_v7/` | **abstraction prior + iterative compression dynamics** with official ACON UTCO prompt (Qwen3-4B-Instruct-2507 + MiniMax-M2.5) | ✅ done 2026-05-28 | **Claim A STRONG positive 5/5 (Qwen), 4/5 (MiniMax):** SDI = 0.96 / 0.99 — McFadden R² of need_label = 0.003/0.0006 vs R² of fact_type = 0.155/0.110 (50–180× gap). **Claim B STRONG positive 5/5 / 4/5**: cross-model Kendall τ = 0.491 (p=0.041), 79.3% chains converge in ≤5 rounds, AUTH_OR_ACCESS_TOKEN has lowest AUSC in both models. Story: LLM compressors are unconditioned surface-type abstraction priors; tokens/IDs/paths die fast regardless of need. |
 
 Each track folder follows the same shape:
 
@@ -136,13 +137,27 @@ use `acon/.venv` for `appworld` / `productive_agents`.
   - Active-subspace-preserving compressor: project residual stream onto top-k SVD of active vectors, then construct soft prompt that reproduces those directions. Compare against recency / ACON downstream.
   - Cross-model: run the same pipeline on Llama-3-8B or another instruction-tuned 7-13B model to see if the negative A result is model-specific.
 
-## 4.5. v6 GPU / endpoint state
+### v7
+* Done 2026-05-28. **STRONG positive on both Claim A and Claim B** (the project's cleanest paper-tier result so far).
+* Full paper-tier report at `motivation_v7/docs/04_results_summary.md`.
+* Compressors used: Qwen3-4B-Instruct-2507 (port 8000 vLLM) + MiniMax-M2.5 (10.183.22.68:8005). ACON prompts loaded verbatim from `/workspace/acon` (commit d63f9ae): UTCO = `improved_history_prompt_samples_4.jinja`.
+* Methodological negatives + caveats:
+  - Need-condition generator (MiniMax) produces matched pairs that pass quality checks 64% of the time (150/233). Writing pure-need counterfactuals is itself non-trivial.
+  - Neither UT nor UTCO has a `max_chars` template variable; outputs are 2,000–2,800 chars vs nominal 1,500-char budget.
+  - Plan B scope: iterative chains are 2 per case (needed + unneeded for one EXECUTABLE fact), not the spec's full sweep.
+  - v3-derived 30 cases all medium/long (≥15 steps); no short stratum.
+* Possible follow-ups (not requested):
+  - Run UT ablation (the unoptimised utility-only prompt) to verify SDI ≈ 1 isn't UTCO-specific.
+  - Secondary budgets {800, 2500} to see whether retention preferences shift with budget.
+  - GPT-4.1-mini as a 3rd compressor to extend cross-model τ test.
+  - Causal intervention: insert "you MUST preserve any access_token / file_path verbatim" into the system prompt and see whether SDI drops.
 
-The local Qwen3-4B vLLM server was stopped at 2026-05-27 23:20 PT to
-free GPU for v6's white-box backward pass. v6 itself ran 2026-05-27
-23:25 → 2026-05-28 00:24 PT (stages 01–08) plus 00:30 → 01:00 PT
-(stage 10 downstream, 240 MiniMax agent runs). No GPU process is
-currently running.
+## 4.5. GPU / endpoint state
+
+* **Qwen3-4B-Instruct-2507 vLLM** is currently running on port 8000 (PID 1114353, started 2026-05-28 11:43 AM PT). Served model id = `qwen3-4b-instruct-2507`. Launch script: `/workspace/qwen3-vllm/serve_instruct.sh`. Stop with `pkill -f 'served-model-name qwen3-4b-instruct-2507'`.
+* The older base-model serve (`Qwen/Qwen3-4B` on port 8000 as `qwen3-4b`) is **stopped** since 2026-05-27. Launch script preserved at `/workspace/qwen3-vllm/serve.sh`.
+* GPU memory used: ~56 GB / 80 GB. ~25 GB free — enough for a parallel HF gradient run if needed.
+* MiniMax-M2.5 endpoint at 10.183.22.68:8005 has been continuously available across v4–v7.
 
 ## 5. Active background processes
 
@@ -226,17 +241,19 @@ Common pitfalls observed across rounds:
 | motivation_v4 | 30 dev (reused v3) | 1,268 (probe + judge) | 360 | ~1.5 h | 2026-05-27 |
 | motivation_v5 | 24 (Tier 1 from v3) | 168 | 24 | 16 min | 2026-05-27 |
 | motivation_v6_jacobian | 30 (reused v4) | 0 LLM API; **30 Qwen3-4B backward + 150 × 200-step soft-token training** | 240 MiniMax (Exp D) | 1 h compute + 25 min D | 2026-05-28 |
+| motivation_v7 | 30 (reused v3) | ~10,360 LLM calls (fact extract 30, conditions 233, compress 600 + 460, retention 600 + 3,640) | 0 agent runs (diagnostic-only) | 1 h 33 min | 2026-05-28 |
 
 ## 9. Final advice for whoever picks this up
 
 * **Start with `docs/05_results_summary.md`** in whichever track is relevant. Each one is paper-tier and ~5-10 min to read.
 * **Don't refactor across tracks.** Each track is self-contained. v3 reuses v2 modules (e.g. `motivation_v2/data.py`); v4 reuses v3; v5 reuses v3+v2. Keep that direction (newer reuses older, never the other way).
 * **The auto-push watcher is your friend**. It commits whatever's in `outputs/` every 20 min. If you're mid-experiment and your shell dies, the data is still there.
-* **Four docs that frame the project at paper-level**:
+* **Five docs that frame the project at paper-level**:
   - `motivation_v2/docs/05_results_summary.md` — the original three-tier story.
   - `motivation_v3/outputs/motivation_results.md` — the structural-vs-behavioral mismatch.
   - `motivation_v5/docs/05_results_summary.md` — the recovered-then-dropped bottleneck.
   - `motivation_v6_jacobian/docs/04_results_summary.md` — active-subspace exists, span-rank by gradient doesn't work (clean negative + clean positive in one round).
+  - **`motivation_v7/docs/04_results_summary.md`** — the project's cleanest paper-tier result: LLM history compressors are unconditioned surface-type abstraction priors (SDI ≈ 1, cross-model Kendall τ = 0.49). **This is the best candidate for the paper headline as of 2026-05-28.**
   v4 is methodologically interesting (decision-state probing) but its main empirical result is "recency is a strong baseline" which is a less-clean paper story.
 
 ---
