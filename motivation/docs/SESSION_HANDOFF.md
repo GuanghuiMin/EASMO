@@ -1,21 +1,23 @@
 # Session handoff — paste this into a new chat if context fills up
 
-> Updated: 2026-05-27 1:25 PM PT.
+> Updated: 2026-05-28 8:50 AM PT.
 > All times in Pacific Time (PT).
 >
 > **➡ For a fresh chat, read these in order:**
 > 1. This file (project map + open threads).
 > 2. The single track-level snapshot you care about most — each
->    track has a `docs/05_results_summary.md` that's
->    decision-ready in ~5 minutes.
+>    track has a `docs/04_results_summary.md` (v6) or
+>    `docs/05_results_summary.md` (v2–v5) that's decision-ready in
+>    ~5 minutes.
 >
 > The git remote is `github.com:GuanghuiMin/EASMO.git`.
-> Latest commit: `0a26334  motivation_v5: ACON failure-mode audit on AppWorld`.
+> Latest commit (as of 2026-05-28 01:26Z): `900a3b0  auto-sync` —
+> contains all of v6's outputs/raw, outputs/tables, outputs/figures.
 > Auto-push watcher PID 3916707 stages every 20 min and covers
 > `motivation/`, `motivation_v2/`, `motivation_v3/`, `motivation_v4/`,
-> `motivation_v5/` automatically.
+> `motivation_v5/`, **`motivation_v6_jacobian/`** automatically.
 
-## 1. Project map (5 motivation tracks)
+## 1. Project map (6 motivation tracks)
 
 | Track | Purpose | Status | Headline |
 |---|---|---|---|
@@ -24,6 +26,7 @@
 | `motivation_v3/` | LLM compressor comparison (NL / ACON / symbolic) + behavioral utility | ✅ done | structural-vs-behavioral ranking-mismatch: symbolic 99.5% coverage but **57% downstream success at cap=15**; ACON 67%; NL 70% |
 | `motivation_v4/` | decision-state probing: leave-one-span-out sensitivity | ✅ done; **4/6 spec criteria** | high-sens > low-sens (+23pp), > random (+7pp); but recency baseline beats high-sens (47 vs 40 at cap=15) |
 | `motivation_v5/` | **ACON failure-mode audit** (recovered-then-dropped) | ✅ done; **strong positive signal verified** | 93% of audit-recovered actionable items are dropped again by recompression; 81% by abstraction policy not capacity; recompressed-context rerun saves 5/24 (21%) of originally-failed cases |
+| `motivation_v6_jacobian/` | **white-box Jacobian active-subspace diagnostics** (Qwen3-4B-Instruct-2507) | ✅ done 2026-05-28 | **B positive** (example-level k=16 cum-var = 92 %); **A negative** (per-task median Spearman vs v4 = −0.03); **D negative** (jacobian_low_spans 0.80 ≈ high_spans_raw 0.83 at MiniMax cap=15); **C degenerate** (k=4 soft tokens already overfit target NLL with gap-recovery 2.26×). Story: kills span-rank selection, supports active-subspace projection. |
 
 Each track folder follows the same shape:
 
@@ -34,22 +37,24 @@ motivation_v?/
 │   ├── 01_experimental_design.md        full design + pipeline
 │   ├── 02_*.md                          prompts (paper appendix)
 │   ├── 03_*.md                          definitions / taxonomy
-│   ├── 04_*.md                          conditions / setup
-│   └── 05_results_summary.md            ★ decision-ready snapshot
+│   ├── 04_*.md                          conditions / setup (v6: ★ results_summary)
+│   └── 05_results_summary.md            ★ decision-ready snapshot (v2–v5)
 ├── prompts/                             (v3+v5) verbatim prompt templates
 ├── motivation_v?/                       python package
 ├── scripts/                             stage scripts + run_all.sh
 ├── data/                                (v5) raw + sampled cases
 └── outputs/
-    ├── raw/                             JSONL
+    ├── raw/                             JSONL + .npz active vectors (v6)
     ├── tables/                          CSV
     ├── figures/                         PDF + PNG
     ├── reports/                         markdown
     └── sprint_logs/                     run logs (gitignored *.log)
 ```
 
-Pick the right `05_results_summary.md` based on what you're working
-on. They're 200–340 lines each and self-contained.
+Pick the right paper-tier summary based on what you're working on.
+For v2–v5 it's `docs/05_results_summary.md`; for v6 it's
+`docs/04_results_summary.md` (spec layout). They're 200–340 lines
+each and self-contained.
 
 ## 2. Latest-round summary (motivation_v5, today's work)
 
@@ -100,6 +105,7 @@ use `acon/.venv` for `appworld` / `productive_agents`.
 * Plan in `motivation_v2/user_feedback/experiment_modification.md` §9: rerun A (hierarchy at B=512), D (prompted at B=512), C (behavior cost at B=512, max_iter=15) on Qwen.
 * Compute: ~6h on Qwen endpoint + 30min analysis.
 * Now that we have a local Qwen3-4B server, this could in principle be done locally (but Qwen3-4B is much smaller than Qwen2.5-7B; using a different model size would change the conclusion). User originally said "外部 endpoint 协调中".
+* **NOTE for v6 era**: The local Qwen3-4B vLLM server (port 8000) was killed on 2026-05-27 to free GPU for v6's white-box gradient pass. Restart with `bash /workspace/qwen3-vllm/serve.sh` if v2 #5 picks up locally.
 
 ### v3
 * Done. Recovery counts in tables/. Methodological self-correction (previous "6.0× ratio" was apples-to-oranges) is documented in `docs/05_results_summary.md`.
@@ -110,12 +116,33 @@ use `acon/.venv` for `appworld` / `productive_agents`.
 * Future work (per `docs/05_results_summary.md` §7): cross-model probe, multi-step span granularity, benchmarks where recency is a weak baseline.
 
 ### v5
-* Done as of today. Strong positive signal.
+* Done 2026-05-27. Strong positive signal.
 * Possible follow-ups (not requested):
   - Run the audit pipeline on remaining 36 non-Tier-1 cases (when ACON succeeded) to measure baseline grounded-additions and check whether the recompressor drops less when ACON didn't fail.
   - Add easy/medium difficulty cases by running full-context on shorter v3 dev tasks.
   - Cross-model audit: let GPT-4o-mini audit instead of Qwen3-4B, see if `LOST_ACCESS_TOKEN` non-spec-label issue disappears.
   - Implement a method (preserve-by-construction tags) that acts on the bottleneck and verify >21% recovery rate.
+
+### v6
+* Done 2026-05-28. **Mixed result: A negative, B positive (STRONG), C degenerate, D negative.**
+* Full paper-tier report at `motivation_v6_jacobian/docs/04_results_summary.md`.
+* Methodological negatives to remember:
+  - First-order embedding Jacobian on Qwen3-4B doesn't predict v4 span sensitivity (median Spearman −0.03 across 28 tasks).
+  - Jacobian has length bias (+0.36 Spearman with token count).
+  - Soft-token oracle on v4 reference-state target is degenerate: k=4 already over-recovers with gap recovery 2.26× because soft-token bandwidth exceeds target entropy.
+* Possible follow-ups (not requested):
+  - C2 with held-out next-action target (vs reference decision state) to fix soft-token degeneracy.
+  - KL-divergence-against-full-context as the soft-token objective instead of teacher-forced NLL.
+  - Active-subspace-preserving compressor: project residual stream onto top-k SVD of active vectors, then construct soft prompt that reproduces those directions. Compare against recency / ACON downstream.
+  - Cross-model: run the same pipeline on Llama-3-8B or another instruction-tuned 7-13B model to see if the negative A result is model-specific.
+
+## 4.5. v6 GPU / endpoint state
+
+The local Qwen3-4B vLLM server was stopped at 2026-05-27 23:20 PT to
+free GPU for v6's white-box backward pass. v6 itself ran 2026-05-27
+23:25 → 2026-05-28 00:24 PT (stages 01–08) plus 00:30 → 01:00 PT
+(stage 10 downstream, 240 MiniMax agent runs). No GPU process is
+currently running.
 
 ## 5. Active background processes
 
@@ -197,17 +224,19 @@ Common pitfalls observed across rounds:
 | motivation_v2 | 90 train tasks (45 single-app) | 1,328 + 1,992 prompt variants | 198 strategy + 354 xtask | ~3-4 h spread over days | 2026-05-26 |
 | motivation_v3 | 30 dev | ~1,800 (compressor + audit + recovery labels) | 418 | ~2.5 h | 2026-05-27 |
 | motivation_v4 | 30 dev (reused v3) | 1,268 (probe + judge) | 360 | ~1.5 h | 2026-05-27 |
-| motivation_v5 | 24 (Tier 1 from v3) | 168 | 24 | 16 min | 2026-05-27 (today) |
+| motivation_v5 | 24 (Tier 1 from v3) | 168 | 24 | 16 min | 2026-05-27 |
+| motivation_v6_jacobian | 30 (reused v4) | 0 LLM API; **30 Qwen3-4B backward + 150 × 200-step soft-token training** | 240 MiniMax (Exp D) | 1 h compute + 25 min D | 2026-05-28 |
 
 ## 9. Final advice for whoever picks this up
 
 * **Start with `docs/05_results_summary.md`** in whichever track is relevant. Each one is paper-tier and ~5-10 min to read.
 * **Don't refactor across tracks.** Each track is self-contained. v3 reuses v2 modules (e.g. `motivation_v2/data.py`); v4 reuses v3; v5 reuses v3+v2. Keep that direction (newer reuses older, never the other way).
 * **The auto-push watcher is your friend**. It commits whatever's in `outputs/` every 20 min. If you're mid-experiment and your shell dies, the data is still there.
-* **Three docs that frame the project at paper-level**:
+* **Four docs that frame the project at paper-level**:
   - `motivation_v2/docs/05_results_summary.md` — the original three-tier story.
   - `motivation_v3/outputs/motivation_results.md` — the structural-vs-behavioral mismatch.
   - `motivation_v5/docs/05_results_summary.md` — the recovered-then-dropped bottleneck.
+  - `motivation_v6_jacobian/docs/04_results_summary.md` — active-subspace exists, span-rank by gradient doesn't work (clean negative + clean positive in one round).
   v4 is methodologically interesting (decision-state probing) but its main empirical result is "recency is a strong baseline" which is a less-clean paper story.
 
 ---
