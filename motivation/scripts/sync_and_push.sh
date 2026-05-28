@@ -31,7 +31,7 @@ cp -f "$GUIDANCES_SRC/ICLR27_Memory_motivation_results_and_interpretation.md" \
 # motivation_v4/ + the doc + top-level README. Per-track outputs are
 # kept in-repo so the paper-quality numbers live with the code; *.log
 # is gitignored so sprint_logs/ don't bloat history.
-git add -A motivation/ motivation_v2/ motivation_v3/ motivation_v4/ motivation_v5/ motivation_v6_jacobian/ user_feedback/ README.md .gitignore 2>/dev/null || true
+git add -A motivation/ motivation_v2/ motivation_v3/ motivation_v4/ motivation_v5/ motivation_v6_jacobian/ motivation_v7/ user_feedback/ README.md .gitignore 2>/dev/null || true
 
 if git diff --cached --quiet; then
     echo "[sync_and_push] No changes to commit."
