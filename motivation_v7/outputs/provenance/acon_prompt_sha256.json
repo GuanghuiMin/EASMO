@@ -1,0 +1,22 @@
+{
+  "UT": {
+    "variant": "UT",
+    "source_path": "experiments/appworld/prompts/context_opt/prompt_history_v2.jinja",
+    "local_copy": "/workspace/EASMO/motivation_v7/prompts/acon_history_ut_original.md",
+    "sha256": "0508caa837c50403be2c8545646359a0fb72009fb14df3a8acf85aedaf649834",
+    "has_max_chars_variable": false
+  },
+  "UTCO": {
+    "variant": "UTCO",
+    "source_path": "experiments/prompt_optimizer/outputs_appworld/stage1_minimax/optimized_prompts/improved_history_prompt_samples_4.jinja",
+    "local_copy": "/workspace/EASMO/motivation_v7/prompts/acon_history_utco_original.md",
+    "sha256": "9e50d0f93aca7f75eb723a90a758642d1aac3d7550f6afe1e692e56e2bc7b71c",
+    "has_max_chars_variable": false
+  },
+  "system": {
+    "source_path": "experiments/appworld/prompts/context_opt/system_prompt.jinja",
+    "local_copy": "/workspace/EASMO/motivation_v7/prompts/acon_system_prompt.md",
+    "sha256": "f9a0a5188d643d0990a422e94557e781e9e4f9c00a6506f699c4956b7096a392"
+  },
+  "acon_commit_hash": "d63f9ae18959dc7215ff62899c94c5e8c56847ae"
+}
