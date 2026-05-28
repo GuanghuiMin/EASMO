@@ -1,0 +1,5 @@
+{
+  "source": "/workspace/EASMO/motivation_v7/data/case_pool.jsonl",
+  "n_cases": 30,
+  "max_chars": 18000
+}

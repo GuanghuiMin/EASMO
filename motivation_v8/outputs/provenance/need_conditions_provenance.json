@@ -1,0 +1,6 @@
+{
+  "source": "/workspace/EASMO/motivation_v7/data/need_conditions.jsonl",
+  "n_rows": 300,
+  "n_fact_pairs": 150,
+  "only_passed_quality": true
+}

@@ -1,0 +1,25 @@
+{
+  "source": "/workspace/EASMO/motivation_v7/data/fact_bank_filtered.jsonl",
+  "n_facts": 233,
+  "by_coarse_group": {
+    "EXECUTABLE": 174,
+    "CONTROL": 36,
+    "TASK_STATE": 11,
+    "NARRATIVE": 12
+  },
+  "by_fact_type": {
+    "API_SCHEMA_OR_PARAMETER": 49,
+    "AUTH_OR_ACCESS_TOKEN": 46,
+    "ACTION_OUTCOME": 17,
+    "RUNTIME_VARIABLE": 33,
+    "NEGATIVE_EVIDENCE_OR_FAILED_ATTEMPT": 36,
+    "NUMERIC_OR_DATE_LITERAL": 7,
+    "EXACT_IDENTIFIER": 21,
+    "ENVIRONMENT_STATE": 6,
+    "COMPLETED_SUBTASK": 5,
+    "NARRATIVE_PROGRESS": 7,
+    "NARRATIVE_GOAL": 4,
+    "HIGH_LEVEL_REASONING": 1,
+    "FILE_PATH_OR_RESOURCE_LOCATOR": 1
+  }
+}
