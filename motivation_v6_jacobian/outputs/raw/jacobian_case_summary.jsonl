@@ -26,3 +26,5 @@
 {"task_id": "d4e9306_2", "loss": 0.873648464679718, "n_context_tokens": 3397, "n_target_tokens": 345, "n_spans_used": 16}
 {"task_id": "df61dc5_2", "loss": 0.8569144010543823, "n_context_tokens": 4666, "n_target_tokens": 414, "n_spans_used": 18}
 {"task_id": "fac291d_1", "loss": 1.0726239681243896, "n_context_tokens": 4131, "n_target_tokens": 266, "n_spans_used": 16}
+{"task_id": "57c3486_2", "loss": 1.058542013168335, "n_context_tokens": 5566, "n_target_tokens": 682, "n_spans_used": 6, "retry": true, "max_context_tokens": 6000}
+{"task_id": "57c3486_3", "loss": 1.1658687591552734, "n_context_tokens": 5847, "n_target_tokens": 736, "n_spans_used": 16, "retry": true, "max_context_tokens": 6000}

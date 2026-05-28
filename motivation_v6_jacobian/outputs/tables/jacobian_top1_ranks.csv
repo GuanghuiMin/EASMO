@@ -15,6 +15,8 @@ task_id,rank_v4top1_under_jacobian,rank_jacobiantop1_under_v4,n_spans
 50e1ac9_1,16,11,19
 530b157_3,12,21,25
 57c3486_1,10,13,19
+57c3486_2,1,1,6
+57c3486_3,16,11,16
 6171bbc_2,2,20,20
 6171bbc_3,2,3,18
 68ee2c9_2,14,11,16

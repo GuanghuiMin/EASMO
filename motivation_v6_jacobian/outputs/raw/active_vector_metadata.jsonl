@@ -26,6 +26,8 @@
 {"matrix": "example", "row": 25, "task_id": "d4e9306_2", "n_context_tokens": 3397, "loss": 0.873648464679718}
 {"matrix": "example", "row": 26, "task_id": "df61dc5_2", "n_context_tokens": 4666, "loss": 0.8569144010543823}
 {"matrix": "example", "row": 27, "task_id": "fac291d_1", "n_context_tokens": 4131, "loss": 1.0726239681243896}
+{"task_id": "57c3486_2", "n_context_tokens": 5566, "loss": 1.058542013168335, "matrix": "example", "row": 28}
+{"task_id": "57c3486_3", "n_context_tokens": 5847, "loss": 1.1658687591552734, "matrix": "example", "row": 29}
 {"matrix": "span", "row": 0, "task_id": "0d8a4ee_2", "span_id": "step_015", "step_id": 15, "v4_final_sensitivity": 0.8572, "token_count": 232}
 {"matrix": "span", "row": 1, "task_id": "0d8a4ee_2", "span_id": "step_002", "step_id": 2, "v4_final_sensitivity": 0.8572, "token_count": 212}
 {"matrix": "span", "row": 2, "task_id": "0d8a4ee_2", "span_id": "step_019", "step_id": 19, "v4_final_sensitivity": 0.8476, "token_count": 547}
@@ -597,3 +599,25 @@
 {"matrix": "span", "row": 568, "task_id": "fac291d_1", "span_id": "step_011", "step_id": 11, "v4_final_sensitivity": 0.0476, "token_count": 258}
 {"matrix": "span", "row": 569, "task_id": "fac291d_1", "span_id": "step_014", "step_id": 14, "v4_final_sensitivity": 0.0158, "token_count": 405}
 {"matrix": "span", "row": 570, "task_id": "fac291d_1", "span_id": "step_005", "step_id": 5, "v4_final_sensitivity": 0.008, "token_count": 213}
+{"task_id": "57c3486_2", "span_id": "step_018", "step_id": 18, "v4_final_sensitivity": 0.881, "token_count": 1544, "matrix": "span", "row": 571}
+{"task_id": "57c3486_2", "span_id": "step_016", "step_id": 16, "v4_final_sensitivity": 0.875, "token_count": 1401, "matrix": "span", "row": 572}
+{"task_id": "57c3486_2", "span_id": "step_017", "step_id": 17, "v4_final_sensitivity": 0.875, "token_count": 442, "matrix": "span", "row": 573}
+{"task_id": "57c3486_2", "span_id": "step_019", "step_id": 19, "v4_final_sensitivity": 0.875, "token_count": 442, "matrix": "span", "row": 574}
+{"task_id": "57c3486_2", "span_id": "step_021", "step_id": 21, "v4_final_sensitivity": 0.8746, "token_count": 182, "matrix": "span", "row": 575}
+{"task_id": "57c3486_2", "span_id": "step_020", "step_id": 20, "v4_final_sensitivity": 0.869, "token_count": 1555, "matrix": "span", "row": 576}
+{"task_id": "57c3486_3", "span_id": "step_028", "step_id": 28, "v4_final_sensitivity": 0.8488, "token_count": 147, "matrix": "span", "row": 577}
+{"task_id": "57c3486_3", "span_id": "step_013", "step_id": 13, "v4_final_sensitivity": 0.8095, "token_count": 470, "matrix": "span", "row": 578}
+{"task_id": "57c3486_3", "span_id": "step_027", "step_id": 27, "v4_final_sensitivity": 0.8095, "token_count": 310, "matrix": "span", "row": 579}
+{"task_id": "57c3486_3", "span_id": "step_017", "step_id": 17, "v4_final_sensitivity": 0.8095, "token_count": 325, "matrix": "span", "row": 580}
+{"task_id": "57c3486_3", "span_id": "step_026", "step_id": 26, "v4_final_sensitivity": 0.8095, "token_count": 470, "matrix": "span", "row": 581}
+{"task_id": "57c3486_3", "span_id": "step_016", "step_id": 16, "v4_final_sensitivity": 0.8095, "token_count": 339, "matrix": "span", "row": 582}
+{"task_id": "57c3486_3", "span_id": "step_025", "step_id": 25, "v4_final_sensitivity": 0.8095, "token_count": 321, "matrix": "span", "row": 583}
+{"task_id": "57c3486_3", "span_id": "step_018", "step_id": 18, "v4_final_sensitivity": 0.8095, "token_count": 470, "matrix": "span", "row": 584}
+{"task_id": "57c3486_3", "span_id": "step_024", "step_id": 24, "v4_final_sensitivity": 0.8095, "token_count": 469, "matrix": "span", "row": 585}
+{"task_id": "57c3486_3", "span_id": "step_022", "step_id": 22, "v4_final_sensitivity": 0.8095, "token_count": 471, "matrix": "span", "row": 586}
+{"task_id": "57c3486_3", "span_id": "step_020", "step_id": 20, "v4_final_sensitivity": 0.8048, "token_count": 479, "matrix": "span", "row": 587}
+{"task_id": "57c3486_3", "span_id": "step_014", "step_id": 14, "v4_final_sensitivity": 0.8048, "token_count": 275, "matrix": "span", "row": 588}
+{"task_id": "57c3486_3", "span_id": "step_015", "step_id": 15, "v4_final_sensitivity": 0.8048, "token_count": 465, "matrix": "span", "row": 589}
+{"task_id": "57c3486_3", "span_id": "step_023", "step_id": 23, "v4_final_sensitivity": 0.8048, "token_count": 310, "matrix": "span", "row": 590}
+{"task_id": "57c3486_3", "span_id": "step_019", "step_id": 19, "v4_final_sensitivity": 0.8048, "token_count": 249, "matrix": "span", "row": 591}
+{"task_id": "57c3486_3", "span_id": "step_021", "step_id": 21, "v4_final_sensitivity": 0.8048, "token_count": 277, "matrix": "span", "row": 592}
