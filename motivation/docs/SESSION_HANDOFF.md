@@ -1,6 +1,6 @@
 # Session handoff — paste this into a new chat if context fills up
 
-> Updated: 2026-05-28 3:30 PM PT.
+> Updated: 2026-05-28 4:05 PM PT.
 > All times in Pacific Time (PT).
 >
 > **➡ For a fresh chat, read these in order:**
@@ -10,12 +10,51 @@
 >    `docs/05_results_summary.md` (v2–v5) that's decision-ready in
 >    ~5 minutes.
 >
-> The git remote is `github.com:GuanghuiMin/EASMO.git`.
-> Latest milestone commit will be set after `v7 done` push.
+> The git remote is `git@github.com:GuanghuiMin/EASMO.git` (SSH).
+> Latest pushed commit: **`7d96ea5  motivation_v7: STRONG positive on
+> Claim A + Claim B (abstraction prior + iterative dynamics)`**
+> (2026-05-28 16:00 PT). `main` is in sync with `origin/main`.
 > Auto-push watcher PID 3916707 stages every 20 min and covers
 > `motivation/`, `motivation_v2/`, `motivation_v3/`, `motivation_v4/`,
 > `motivation_v5/`, `motivation_v6_jacobian/`, **`motivation_v7/`**
 > automatically.
+
+## 0. Known gotcha — Cursor SSH agent forwarding can break silently
+
+The auto-push watcher pushes via SSH using a forwarded agent socket
+at `/tmp/cursor-remote-ssh-auth-sock-…sock`. That symlink is owned
+by Cursor and points at whichever `/tmp/ssh-XXXX*/agent.<pid>` socket
+Cursor's remote SSH integration is currently using. **When Cursor
+reconnects, the symlink may be left pointing at a stale socket whose
+upstream agent forward is dead**, which makes every git push hang
+and time out (rc=124) while watcher silently logs `git push timed
+out / failed` and re-tries every 20 min.
+
+Diagnosis recipe:
+
+```bash
+# 1. Watcher's symlink and what it points at:
+ls -la /tmp/cursor-remote-ssh-auth-sock-*.sock
+# 2. Which agent actually has keys? (one with gmin@M-H3QF046Q6L on it)
+for s in $(ls -t /tmp/ssh-*/agent.* 2>/dev/null | head -10); do
+  out=$(timeout 3 env SSH_AUTH_SOCK=$s ssh-add -l 2>&1 | head -1)
+  echo "$s : $out"
+done
+# 3. Repoint the cursor symlink to the live one:
+ln -sf /tmp/ssh-XXXXXXXX/agent.<pid> /tmp/cursor-remote-ssh-auth-sock-*.sock
+# 4. Verify watcher will work on its next cycle:
+timeout 6 env SSH_AUTH_SOCK=/tmp/cursor-remote-ssh-auth-sock-*.sock ssh-add -l
+```
+
+The user's key is `gmin@M-H3QF046Q6L` (ED25519). Repo is private; no
+PAT/`~/.netrc` exists in the workspace, so SSH is the only working
+auth path. SSH itself does work — both `git@github.com:22` and
+`ssh.github.com:443` reach GitHub fine **once the agent socket is
+live**.
+
+If you can't find a live agent at all, the user must reconnect their
+local Cursor → remote SSH session (which re-creates the forward),
+then run a `git push` to seed it.
 
 ## 1. Project map (7 motivation tracks)
 
@@ -152,30 +191,47 @@ use `acon/.venv` for `appworld` / `productive_agents`.
   - GPT-4.1-mini as a 3rd compressor to extend cross-model τ test.
   - Causal intervention: insert "you MUST preserve any access_token / file_path verbatim" into the system prompt and see whether SDI drops.
 
-## 4.5. GPU / endpoint state
+## 4.5. GPU / endpoint state (as of 2026-05-28 4:00 PM PT)
 
 * **Qwen3-4B-Instruct-2507 vLLM** is currently running on port 8000 (PID 1114353, started 2026-05-28 11:43 AM PT). Served model id = `qwen3-4b-instruct-2507`. Launch script: `/workspace/qwen3-vllm/serve_instruct.sh`. Stop with `pkill -f 'served-model-name qwen3-4b-instruct-2507'`.
-* The older base-model serve (`Qwen/Qwen3-4B` on port 8000 as `qwen3-4b`) is **stopped** since 2026-05-27. Launch script preserved at `/workspace/qwen3-vllm/serve.sh`.
+* The older base-model serve (`Qwen/Qwen3-4B` on port 8000 as `qwen3-4b`) is **stopped** since 2026-05-27. Launch script preserved at `/workspace/qwen3-vllm/serve.sh`. Cannot run both at once — same port.
 * GPU memory used: ~56 GB / 80 GB. ~25 GB free — enough for a parallel HF gradient run if needed.
 * MiniMax-M2.5 endpoint at 10.183.22.68:8005 has been continuously available across v4–v7.
 
+## 4.6. Running background processes (as of 2026-05-28 4:05 PM PT)
+
+```
+PID 3916707  bash /workspace/EASMO/motivation/scripts/auto_push_watcher.sh
+             log: /tmp/easmo_watcher.log
+             after 4:05 PM symlink-fix it can push again.
+PID 1114353  python -m vllm.entrypoints.openai.api_server
+             --model Qwen/Qwen3-4B-Instruct-2507 --port 8000
+             log: /workspace/qwen3-vllm/server_instruct.log
+PID 1148*    (LLMLingua demo_app, user-owned, terminal 2.txt, not ours)
+```
+
+No active experiment process is running. v7 pipeline finished at 2026-05-28 22:19Z (3:19 PM PT).
+
 ## 5. Active background processes
+
+See §4.6 above for the authoritative current snapshot. Quick refs:
 
 ```
 # auto-push watcher — stages all motivation_v*/ + motivation/ → git → push every 20 min.
 PID 3916707  bash /workspace/EASMO/motivation/scripts/auto_push_watcher.sh
 log: /tmp/easmo_watcher.log
 
-# Qwen3-4B vLLM server — local OpenAI-compatible.
-PID see /workspace/qwen3-vllm/server.pid
-log: /workspace/qwen3-vllm/server.log
+# Qwen3-4B-Instruct-2507 vLLM server (port 8000, model id qwen3-4b-instruct-2507)
+PID 1114353
+log: /workspace/qwen3-vllm/server_instruct.log
 ```
 
 Stop the watcher: `pkill -f auto_push_watcher.sh`.
-Stop Qwen server: `kill "$(cat /workspace/qwen3-vllm/server.pid)"`.
+Stop Qwen vLLM: `pkill -f 'served-model-name qwen3-4b-instruct-2507'`
+(or `pkill -P 1114350` to take down the wrapper too).
 
-No experiment processes running at this snapshot. All v3/v4/v5 pipelines
-finished and pushed to git.
+No experiment processes running at this snapshot. All v3/v4/v5/v6/v7
+pipelines finished and pushed to git.
 
 ## 6. How to extend (typical next-round patterns)
 
