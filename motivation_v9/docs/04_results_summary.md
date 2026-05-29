@@ -27,36 +27,52 @@
    discards. The text itself converges fast: 18/270 chains hit a
    text-level fixed point by round 1 and **85/270 by round 2**, so the
    behavioral fragility is concentrated in the first 1–2 recompressions.
-3. **Chunks with explicit causal relations carry disproportionate
-   behavioral information.** Aggregating per-chunk leave-one-out
-   advantage by the MiniMax-labeled `contains_causal_relation` flag:
+3. **(NEGATIVE after widening n=12 → n=20.)** The first-pass version
+   of this finding said "causal-flagged chunks have 15× higher mean
+   advantage than non-causal non-entity, and unbounded ratio over
+   ENTITY_LIST_ONLY". On the widened sample (239 unique chunks vs
+   144 first-pass), the direction **reverses**:
 
-   | group | n | mean score advantage | % chunks with positive advantage |
+   | group | n_unique (n=20) | mean score adv | % positive |
    |---|---:|---:|---:|
-   | `contains_causal_relation=True` | 20 | **+0.150** | 30.0 % |
-   | other (non-causal, non-entity) | 112 | +0.009 | 19.6 % |
-   | `ENTITY_LIST_ONLY` | 12 | +0.000 | 8.3 % |
+   | `ENTITY_LIST_ONLY` (type) | 27 | **+0.167** | 25.9 % |
+   | `contains_causal_relation = True` | 28 | +0.036 | 10.7 % |
+   | other (non-causal, non-entity) | 184 | −0.030 | 14.1 % |
 
-   Causal-flagged chunks have **15× higher mean advantage** than other
-   non-entity chunks and unbounded ratio over entity-only chunks. This
-   verifies the spec's directional prediction (causal NL > entity
-   lists) at flag granularity. The *categorical* type view is noisier
-   (see §6) and surfaces a secondary winner ACTION_OUTCOME, which
-   tracks "past action outcome literals" rather than reasoning.
+   The spec's "causal NL > entity lists" prediction is **falsified at
+   n=239**. The first-pass +0.150 mean for causal chunks was an
+   n-fragile artifact. **Likely reason**: the labeler's
+   `ENTITY_LIST_ONLY` describes *form* (compact tokens listed without
+   prose) not *function* — many entity-list chunks are actually
+   exact runtime bindings (`access_token`, `target_id`) that the
+   next-step API call depends on. The one type that survives
+   widening with positive mean advantage is **CONTROL_NEGATIVE_EVIDENCE**
+   (n=13, mean +0.115, 47.4 % causal-flag rate) — "what failed last
+   time" is the only chunk-type label whose semantics map cleanly to
+   agent behavior. See §10 addendum for the full new numbers.
 
-**Interpretation under spec §22.** All three claims clear their
-acceptance thresholds:
+**Interpretation under spec §22.** Claims 1 and 2 clear their
+acceptance thresholds; Claim 3 in its originally-stated form does
+NOT:
 
 > ACON's greedy compression is a single sample from a behaviorally
 > bimodal distribution. Its modal failure modes (brittle to
-> recompression, missing causal relations) are not artifacts of
-> capacity but of *decoding strategy + abstraction prior*. v9 thus
-> reframes the v7/v8 surface-type abstraction prior as a *behavioral
-> tax*: not only does the compressor over-abstract executable content
-> (v7), and not only does it converge to a surface-type fixed point
-> regardless of need (v8), but those defects translate into measurable
-> +27 to +37 pp pass-rate loss and 28.6 % stress-induced regression
-> on AppWorld.
+> recompression) are not artifacts of capacity but of *decoding
+> strategy + abstraction prior*. v9 thus reframes the v7/v8 surface-
+> type abstraction prior as a *behavioral tax*: not only does the
+> compressor over-abstract executable content (v7), and not only does
+> it converge to a surface-type fixed point regardless of need (v8),
+> but those defects translate into measurable +27 to +37 pp
+> pass-rate loss and 28.6 % stress-induced regression on AppWorld.
+>
+> However, the v7/v8 spec hypothesis "preserving causal natural-
+> language chunks should help more than preserving entity lists"
+> does NOT survive chunk-level ablation: at n=239 chunks, entity-
+> only chunks have higher mean per-chunk advantage than causal-
+> flagged chunks. The v9 chunk-level finding that does survive is
+> narrower: **chunks describing past failures / negative evidence
+> carry the highest behavioral advantage**, which echoes v5's
+> recompressor-drops-failure-log bottleneck.
 
 ## 1. Setup
 
@@ -250,19 +266,27 @@ spec-predicted winner CAUSAL_PRECONDITION is out-shone by
 ACTION_OUTCOME, but with small n on the causal type, the directional
 claim still holds.
 
-## 6. Spec §22 acceptance summary
+## 6. Spec §22 acceptance summary (★ after widened n=20 addendum)
 
-| Claim | Threshold | Observed | Verdict |
-|---|---|---|---|
-| 1 — best-of-N gain | gain ≥ 20 pp AND oracle_win ≥ 0.8 (CK) | gain +36.7 pp, oracle 0.833 | **STRONG ✅** |
-| 2 — fragility | fragility_rate ≥ 0.20 AND stress_drop ≥ 5 pp | greedy 0.286 / 10 pp | **POSITIVE ✅** |
-| 3 — chunk causal > entity | mean adv (causal) > mean adv (entity) | +0.150 vs 0.000 | **POSITIVE ✅** (at flag level) |
+| Claim | Threshold | First-pass (n_chunks=144) | Widened (n_chunks=239) | Final verdict |
+|---|---|---|---|---|
+| 1 — best-of-N gain | gain ≥ 20 pp AND oracle_win ≥ 0.8 (CK) | gain +36.7 pp, oracle 0.833 | (unchanged; stages 01–06 same) | **STRONG ✅** |
+| 2 — fragility | fragility_rate ≥ 0.20 AND stress_drop ≥ 5 pp | greedy 0.286 / 10 pp | (unchanged; stages 01–06 same) | **POSITIVE ✅** |
+| 3 — chunk causal > entity | mean adv (causal) > mean adv (entity) | +0.150 vs 0.000 (n=20 / 12) | **+0.036 vs +0.167 (n=28 / 27)** | **NEGATIVE ❌** at the originally-stated form |
 
-(The auto-written `outputs/reports/motivation_v9_results_summary.md`
-labels Claim 3 "STRONG POSITIVE" based on the categorical pivot. I'm
-deliberately downgrading to "POSITIVE" here pending the widened-n
-addendum because the categorical row that drives the headline number
-has n=8 (CAUSAL_PRECONDITION).)
+**Important**: the first-pass §5.1 "STRONG positive at flag-level"
+finding does NOT survive widening to n_unique_chunks=239. See §10
+addendum for the post-widening numbers. The auto-written
+`outputs/reports/motivation_v9_results_summary.md` was regenerated
+after the addendum but still mechanically labels Claim 3 STRONG
+positive based on row-level deltas across categorical types — that
+verdict is over-confident and superseded by this document (§6 + §10).
+
+The single Claim-3 sub-finding that does survive widening is
+**CONTROL_NEGATIVE_EVIDENCE > everything else, with stable mean
++0.105 row-level / +0.115 unique-chunk and 47.4 % causal-flag rate**.
+This is a categorical sub-result, not the spec's flag-level
+prediction; see §10.3.
 
 ## 7. Caveats
 
@@ -355,25 +379,120 @@ motivation_v9/
 └── outputs/reports/motivation_v9_results_summary.md  auto-written counterpart
 ```
 
-## 10. Addendum — widened n=20 chunk-cases run
+## 10. Addendum — widened n=20 chunk-cases run (★ supersedes §5 for Claim 3)
 
-> **Status**: 🔄 running (PID 2357806, started 2026-05-29 1:11 PM PT,
-> ETA ~55 min). Stage 07 selected **20 cases** from groups 1+2 alone
-> (11 best_sample_CK_succeeds_greedy_fails + 9 fragile_pass) — strict
-> superset of the n=12 first pass.
+> **Status**: ✅ done 2026-05-29 2:15 PM PT (PID 2357806, wall-clock
+> 64 min, 20:11Z → 21:15Z). Stage 07 selected **20 cases** from groups
+> 1+2 alone (11 best_sample_CK_succeeds_greedy_fails + 9
+> fragile_pass) — strict superset of the n=12 first pass. Stages
+> 01–06 untouched, so Claims 1 & 2 numbers in §3/§4 are unchanged.
+>
+> **Bottom line: Claim 3 must be DOWNGRADED.** The widened n shows
+> that §5's "causal-flag chunks have 15× higher mean advantage"
+> finding does NOT survive a 2.2× larger chunk pool. Both the
+> flag-aggregation cut and the categorical cut reverse direction
+> at n_unique_chunks=239.
 
-The addendum re-runs stages 07–14 with `CHUNK_MAX_CASES=20` (added as
-an env knob to `scripts/run_all.sh` for v10 reuse). Stages 01–06 are
-unchanged so Claims 1 and 2 numbers are unaffected. The relevant
-deltas will land in:
+### 10.1 New numbers — flag-aggregation (★ replaces §5.1)
 
-* `outputs/raw/chunks.jsonl` (~240 chunks, vs 144)
-* `outputs/raw/chunk_type_labels.jsonl` (~240 labels)
-* `outputs/tables/chunk_information_advantage.csv` (~240 rows)
-* `outputs/tables/chunk_advantage_by_type.csv` (still 7 categorical rows, narrower CIs)
+Aggregating per-chunk leave-one-out score advantage at **unique-chunk
+level** (mean over C1+CK rounds for each unique chunk_id):
 
-Numbers will be appended here when the run completes; the
-flag-aggregation in §5.1 and the categorical pivot in §5.2 will be
-updated in place with the wider sample, and the §6 verdict on Claim 3
-may upgrade from POSITIVE to STRONG POSITIVE if CAUSAL_PRECONDITION
-crosses n=15 with positive mean advantage.
+| group | n_unique | mean score advantage | median | % positive |
+|---|---:|---:|---:|---:|
+| `ENTITY_LIST_ONLY` (type) | 27 | **+0.167** | 0.000 | 25.9 % |
+| `contains_causal_relation = True` | 28 | +0.036 | 0.000 | 10.7 % |
+| other (non-causal, non-entity) | 184 | −0.030 | 0.000 | 14.1 % |
+
+**This is the OPPOSITE direction of the spec's prediction and the
+opposite of §5.1's n=12 finding.** ENTITY_LIST_ONLY chunks have the
+highest mean advantage, not the lowest. Causal-flagged chunks have
+only marginal advantage (+0.036) and crucially have the LOWEST
+%positive rate (10.7 %) — half of `other` and 40 % of entity-only.
+
+Row-level aggregation (one observation per (chunk, eval_round)) tells
+the same story with slightly different magnitudes:
+
+| group | n_obs | mean adv | % positive |
+|---|---:|---:|---:|
+| ENTITY_LIST_ONLY | 36 | +0.111 | 19.4 % |
+| causal (flag=True) | 44 | +0.023 | 6.8 % |
+| other | 303 | −0.043 | 9.6 % |
+
+### 10.2 New numbers — categorical (★ replaces §5.2)
+
+Sorted by mean score advantage, at **unique-chunk level**:
+
+| chunk_type | n_unique | mean score adv | % positive | n_first_pass | mean_first_pass | direction |
+|---|---:|---:|---:|---:|---:|---|
+| ENTITY_LIST_ONLY | 27 | **+0.167** | 25.9 % | 12 | +0.000 | **↑↑** |
+| CONTROL_NEGATIVE_EVIDENCE | 13 | +0.115 | 15.4 % | 4 | +0.000 | **↑** |
+| NARRATIVE_PROGRESS | 33 | +0.076 | 21.2 % | 19 | +0.053 | ↑ |
+| RUNTIME_BINDING | 47 | +0.011 | 14.9 % | 38 | −0.026 | ↑ |
+| CAUSAL_PRECONDITION | 5 | +0.000 | 0 % | 8 | +0.000 | = |
+| ACTION_OUTCOME | 105 | **−0.057** | 12.4 % | 59 | +0.068 | **↓↓** |
+| TASK_GOAL_OR_TODO | 5 | −0.300 | 0 % | 4 | +0.000 | ↓↓ |
+| OTHER | 4 | −0.375 | 0 % | 0 | — | new |
+
+Two large reversals to call out:
+
+* **ACTION_OUTCOME** flipped from §5's "surprise winner" (+0.068 at
+  n=59) to **−0.057 at n=168**. The §5 finding was an n-fragile
+  artifact — most action-outcome chunks turn out to be removable
+  (the agent re-derives outcome from tool re-calls).
+* **ENTITY_LIST_ONLY** flipped from "spec-predicted null" (mean 0.000
+  at n=12) to "highest mean advantage" (+0.167 at n=27, +0.111
+  row-level). This is consistent with the labeler conflating *form*
+  (tokens are listed compactly) with *function* (those tokens are
+  often the actual `access_token` / `target_id` that the next step
+  depends on). The label "entity list" describes how the chunk reads,
+  not whether it's behaviorally necessary.
+
+### 10.3 Stable sub-finding (the one paper-quotable result)
+
+**CONTROL_NEGATIVE_EVIDENCE** stays positive across both runs (n=4 →
+n=13, mean adv 0.000 → +0.115). Of the 19 (chunk, round) observations,
+47.4 % carry an explicit causal-relation flag and 73.7 % carry exact
+literals. This is the only chunk type whose label semantics
+(*records a failed attempt or thing to avoid*) directly maps to the
+agent's behavior at decision-time — and the only categorical bucket
+that survives both n=12 and n=20 with a positive mean. It echoes v5's
+"looked_like_past_log" drop pattern (v5 §4): the recompressor
+preferentially drops failure / negative-evidence content, but ablation
+here shows those are exactly the chunks the agent uses most.
+
+### 10.4 What this means for v9's overall story
+
+Combining §10.1–10.3 with §3 / §4:
+
+* **Claim 1 (best-of-N gain)** is unaffected — still STRONG POSITIVE,
+  +27/+37 pp pass gain, oracle win 0.90/0.83.
+* **Claim 2 (stress fragility)** is unaffected — still POSITIVE,
+  greedy 28.6 % fragility, greedy > sample fragility bonus finding.
+* **Claim 3 (causal > entity chunk advantage)** is **NEGATIVE** at
+  n_unique=239. The original directional prediction fails: entity-only
+  chunks have higher mean advantage than causal-flagged chunks. The
+  only directional survivor is CONTROL_NEGATIVE_EVIDENCE (n=13,
+  mean +0.115), which deserves a follow-up paper-figure on its own.
+
+**Net for the paper**: v7+v8 establish the surface-type abstraction
+prior; v9 §3 + §4 give it a behavioral price tag (+27 pp pass loss
+and 28.6 % stress fragility for greedy ACON); v9 §5+§10 caution that
+the chunk-level information story is more subtle than "causal NL
+matters more than entities" — the chunk-type label semantics don't
+map cleanly onto behavior, and a larger ablation sample is needed to
+make any chunk-level claim. RL credit-assignment at chunk level
+(§8) is still motivated but needs a sharper labeling scheme than the
+spec's 7-way taxonomy.
+
+### 10.5 What changed in the artifacts at commit time
+
+* `outputs/raw/chunks.jsonl`: 144 → **239 chunks** (20 cases × ≤12 chunks)
+* `outputs/raw/chunk_ablation_contexts.jsonl`: 144 → 259
+* `outputs/raw/chunk_ablation_behavior_runs.jsonl`: 156 → **415** (more rounds covered)
+* `outputs/raw/chunk_type_labels.jsonl`: 144 → **239 labels**, 0 errors, 2 empty rationales
+* `outputs/tables/chunk_advantage_by_type.csv`: 7 → **8 rows** (gained OTHER bucket)
+* `outputs/tables/chunk_information_advantage.csv`: 144 → **383 rows** (239 unique chunks × ~1.6 rounds avg)
+* `outputs/figures/fig_chunk_advantage_by_type.{pdf,png}` regenerated
+* `outputs/figures/fig_top_chunk_type_distribution.{pdf,png}` regenerated
+* `outputs/reports/motivation_v9_results_summary.md` regenerated (auto-written; still over-claims Claim 3 — see Caveat #4 in §7)

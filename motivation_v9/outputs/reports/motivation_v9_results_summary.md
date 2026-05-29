@@ -1,6 +1,6 @@
 # motivation_v9 Results — Behavioral Compression Stress and Chunk Information Advantage
 
-> Auto-written by `scripts/14_write_report.py` at 2026-05-29 20:01Z.
+> Auto-written by `scripts/14_write_report.py` at 2026-05-29 21:15Z.
 
 ## TL;DR
 - Behavioral validation of v7/v8 surface-type abstraction prior findings.
@@ -12,9 +12,9 @@
 - n_cases = **30**
 - n_candidate_compressions = **270**
 - n_behavior_runs (C1+CK) = **540**
-- n_chunks = **144**
-- n_chunk_labels = **144**
-- n_chunk_ablation_runs = **156**
+- n_chunks = **239**
+- n_chunk_labels = **239**
+- n_chunk_ablation_runs = **415**
 - ACON UTCO commit = `d63f9ae18959dc7215ff62899c94c5e8c56847ae`
 - ACON history prompt sha256 = `9e50d0f93aca7f75eb723a90a758642d1aac3d7550f6afe1e692e56e2bc7b71c`
 
@@ -42,15 +42,16 @@ Per (compressor_model, eval_context_round):
 
 | chunk_type                |   n_chunks |   mean_score_advantage |   mean_pass_advantage |   frac_positive_advantage |   frac_top_advantage |   contains_causal_relation_rate |   contains_exact_literals_rate |
 |:--------------------------|-----------:|-----------------------:|----------------------:|--------------------------:|---------------------:|--------------------------------:|-------------------------------:|
-| ACTION_OUTCOME            |         59 |                  0.068 |                 0.068 |                     0.22  |                0.034 |                           0.034 |                          0.831 |
-| CAUSAL_PRECONDITION       |          8 |                  0     |                 0     |                     0.25  |                0.125 |                           1     |                          0.75  |
-| CONTROL_NEGATIVE_EVIDENCE |          4 |                  0     |                 0     |                     0.25  |                0     |                           1     |                          1     |
-| ENTITY_LIST_ONLY          |         12 |                  0     |                 0     |                     0.083 |                0     |                           0     |                          1     |
-| NARRATIVE_PROGRESS        |         19 |                  0.053 |                 0.053 |                     0.158 |                0.105 |                           0.263 |                          0.789 |
-| RUNTIME_BINDING           |         38 |                 -0.026 |                -0.026 |                     0.237 |                0.132 |                           0.026 |                          1     |
-| TASK_GOAL_OR_TODO         |          4 |                  0     |                 0     |                     0     |                0     |                           0     |                          1     |
+| ACTION_OUTCOME            |        168 |                 -0.089 |                -0.089 |                     0.083 |                0.042 |                           0.065 |                          0.863 |
+| CAUSAL_PRECONDITION       |          8 |                  0     |                 0     |                     0     |                0     |                           1     |                          1     |
+| CONTROL_NEGATIVE_EVIDENCE |         19 |                  0.105 |                 0.105 |                     0.105 |                0.053 |                           0.474 |                          0.737 |
+| ENTITY_LIST_ONLY          |         36 |                  0.111 |                 0.111 |                     0.194 |                0.083 |                           0     |                          1     |
+| NARRATIVE_PROGRESS        |         54 |                  0.056 |                 0.056 |                     0.13  |                0.074 |                           0.185 |                          0.574 |
+| OTHER                     |          6 |                 -0.333 |                -0.333 |                     0     |                0     |                           0     |                          0.833 |
+| RUNTIME_BINDING           |         83 |                  0.024 |                 0.024 |                     0.108 |                0.012 |                           0.048 |                          1     |
+| TASK_GOAL_OR_TODO         |          9 |                 -0.222 |                -0.222 |                     0     |                0     |                           0.222 |                          0.778 |
 
-**Verdict Claim 3:** STRONG POSITIVE (causal/control mean adv=0.023 vs entity-only mean adv=0.000)
+**Verdict Claim 3:** WEAK / NEGATIVE (causal/control mean adv=0.005 vs entity-only mean adv=0.111)
 
 ## What This Motivates for RL
 - If Claim 1 + 2 pass: train compressor with reward = behavior_after_stress(T^K) - λ·length.

@@ -1,6 +1,6 @@
 # Session handoff — paste this into a new chat if context fills up
 
-> Updated: 2026-05-29 12:15 PM PT.
+> Updated: 2026-05-29 2:25 PM PT.
 > All times in Pacific Time (PT).
 >
 > **➡ For a fresh chat, read these in order:**
@@ -11,10 +11,9 @@
 >    ~5 minutes.
 >
 > The git remote is `git@github.com:GuanghuiMin/EASMO.git` (SSH).
-> Latest pushed: v9 **first-pass complete** (auto-pushed 2026-05-29
-> 19:55 UTC), with a **widened-n addendum currently running**
-> (started 2026-05-29 1:11 PM PT, ~55 min ETA). All earlier tracks
-> v2-v8 still pushed and final.
+> Latest pushed: v9 **first-pass + widened-n addendum both complete**
+> (addendum finished 2026-05-29 2:15 PM PT after 64 min wall-clock).
+> All earlier tracks v2-v8 still pushed and final.
 >
 > Auto-push watcher PID 3916707 stages every 20 min and covers
 > `motivation/`, `motivation_v2/`, `motivation_v3/`, `motivation_v4/`,
@@ -70,7 +69,7 @@ then run a `git push` to seed it.
 | `motivation_v6_jacobian/` | **white-box Jacobian active-subspace diagnostics** (Qwen3-4B-Instruct-2507) | ✅ done 2026-05-28 | **B positive** (example-level k=16 cum-var = 92 %); **A negative** (per-task median Spearman vs v4 = −0.03); **D negative** (jacobian_low_spans 0.80 ≈ high_spans_raw 0.83 at MiniMax cap=15); **C degenerate** (k=4 soft tokens already overfit target NLL with gap-recovery 2.26×). Story: kills span-rank selection, supports active-subspace projection. |
 | `motivation_v7/` | **abstraction prior + iterative compression dynamics** with official ACON UTCO prompt (Qwen3-4B-Instruct-2507 + MiniMax-M2.5) | ✅ done 2026-05-28 | **Claim A STRONG positive 5/5 (Qwen), 4/5 (MiniMax):** SDI = 0.96 / 0.99 — McFadden R² of need_label = 0.003/0.0006 vs R² of fact_type = 0.155/0.110 (50–180× gap). **Claim B STRONG positive 5/5 / 4/5**: cross-model Kendall τ = 0.491 (p=0.041), 79.3% chains converge in ≤5 rounds, AUTH_OR_ACCESS_TOKEN has lowest AUSC in both models. Story: LLM compressors are unconditioned surface-type abstraction priors; tokens/IDs/paths die fast regardless of need. |
 | `motivation_v8/` | **fixed-point analysis of GENERAL (non-ACON) LLM compression** + basin-of-attraction experiment (same 30 cases + 233 facts + 150 quality pairs reused from v7) | ✅ done 2026-05-28 | **v7's abstraction prior REPLICATES and STRENGTHENS under general prompts:** SDI under P2 task-agnostic = **1.000 / 0.998** (vs v7 ACON 0.96/0.99); cross-model Kendall τ up to **0.778** (vs v7 0.49). **Two new mechanisms identified:** (1) P1 task-aware **inverts** the fixed-point composition from NARR>EXEC (P2 0.88 vs 0.55) to EXEC>NARR (P1 0.64 vs 0.46) — task framing reshapes the attractor. (2) Different inits (RAW_FULL/DETAIL_HEAVY/NARRATIVE_HEAVY/FACT_TABLE_ONLY) reach **disjoint** fixed points (Jaccard distance up to 1.00) — no universal attractor. Δ_need^∞ for executable facts = **+0.27 under P1** — moderate, and **strengthens across iterative rounds** vs single-round Δ_need. |
-| `motivation_v9/` | **behavior-first** validation: Best-of-N ACON, C1-vs-CK fragility under repeated-compression stress, NL chunk information advantage (MiniMax-only primary; reuse v3 30 cases + ACON UTCO) | ✅ first-pass done 2026-05-29; **widened-n addendum 🔄 in progress** | **Claim 1 STRONG positive** (best-of-N vs greedy: C1 +26.7 pp, CK +36.7 pp pass-rate; oracle_win 90/83%). **Claim 2 POSITIVE** (greedy fragility 28.6%, stress drop 10 pp; greedy more fragile than sample). **Claim 3 PARTIAL positive** (ENTITY_LIST_ONLY confirmed zero advantage; **ACTION_OUTCOME** is the surprise top type with mean adv +0.068 over n=59 chunks — not CAUSAL_PRECONDITION as spec predicted, since causal/control types only have n=12 total). Wider n=20 chunk run kicked off to tighten Claim 3. Total pipeline took 2h 16min, ~3× faster than spec's 6-7 h estimate. |
+| `motivation_v9/` | **behavior-first** validation: Best-of-N ACON, C1-vs-CK fragility under repeated-compression stress, NL chunk information advantage (MiniMax-only primary; reuse v3 30 cases + ACON UTCO) | ✅ done 2026-05-29 (first-pass + widened addendum) | **Claim 1 STRONG positive** (best-of-N vs greedy: C1 +26.7 pp, CK +36.7 pp pass-rate; oracle_win 90/83%). **Claim 2 POSITIVE** (greedy fragility 28.6%, stress drop 10 pp; greedy more fragile than sample, 28.6% vs 21.8%). **Claim 3 NEGATIVE at n=239** (originally "STRONG positive at n=144 first-pass" did NOT survive widening: causal-flag chunks mean adv +0.036 vs ENTITY_LIST_ONLY +0.167 — direction reverses, likely because the labeler's "entity list" describes form not function). Only Claim-3 sub-finding to survive widening: **CONTROL_NEGATIVE_EVIDENCE** (n=13, mean +0.115, echoes v5's lost-failure-log bottleneck). Total pipeline 2h 16min first-pass + 64 min widened addendum. |
 
 Each track folder follows the same shape:
 
@@ -123,14 +122,21 @@ n_chunks=144 first-pass / ~240 widened-pending)**:
   is more robust than greedy — sample fragility 21.8% vs greedy 28.6%.
   This is consistent with greedy attaching to brittle surface features
   that recompression discards.
-* **Claim 3 PARTIAL POSITIVE.** ENTITY_LIST_ONLY chunks (n=12) confirmed
-  zero behavioral advantage (mean adv 0.000, %top 0%). But the top
-  advantage type is **ACTION_OUTCOME** (n=59, mean adv +0.068), NOT
-  the spec-predicted CAUSAL_PRECONDITION (n=8, mean adv 0 but %top
-  12.5%, bimodal). Spec hypothesis ("causal NL > entities") holds in
-  *direction* but ACTION_OUTCOME (past-step recording) wins on mean
-  advantage. RUNTIME_BINDING has negative mean advantage (-0.026) but
-  highest %top (13.2%) — bimodal: a few critical tokens, many removable.
+* **Claim 3 NEGATIVE at n=239 (widened addendum).** First-pass n=144
+  showed ENTITY_LIST_ONLY mean adv 0.000 and a "causal-flag" cut at
+  +0.150 (n=20), which looked like a STRONG positive. The widened
+  n=20 chunk-cases run (239 chunks, finished 2026-05-29 2:15 PM PT)
+  REVERSED direction: causal-flag mean +0.036 (n=28 unique chunks) vs
+  ENTITY_LIST_ONLY mean **+0.167** (n=27 unique chunks). The
+  first-pass "ACTION_OUTCOME wins" surprise also reversed: n=59 mean
+  +0.068 → n=105 mean **−0.057**. **Only chunk-type with a stable
+  positive mean across both runs is CONTROL_NEGATIVE_EVIDENCE**
+  (n=4 → n=13, mean 0.000 → +0.115, 47.4% causal-flag rate). This
+  echoes v5's "looked_like_past_log" recompressor-drop pattern. The
+  spec's directional prediction (causal > entity) **does not survive
+  widening** — likely because the labeler's `ENTITY_LIST_ONLY`
+  describes form (compact token lists) not function (those tokens are
+  often the actual `access_token`/`target_id` the next step needs).
 
 **Methodological footgun (caught + fixed mid-day)**:
 * Stage 11 first shipped with `max_tokens=256` for MiniMax label calls.
@@ -146,16 +152,13 @@ n_chunks=144 first-pass / ~240 widened-pending)**:
   thinking 543 tokens, p90 750).
 
 **Caveats** (must include in any paper writing):
-* CAUSAL_PRECONDITION n=8, CONTROL_NEGATIVE_EVIDENCE n=4 — both too
-  small to bound a strong claim. Widened n=20 chunk-cases run is
-  in flight (PID 2357806, started 1:11 PM PT) and will roughly
-  double the chunk pool.
-* Auto-written `outputs/reports/motivation_v9_results_summary.md`
-  declares Claim 3 STRONG POSITIVE based on causal/control mean
-  adv (0.023) vs entity-only (0.000). The honest read in
-  `docs/04_results_summary.md` (hand-written) is PARTIAL: the
-  *winner* is ACTION_OUTCOME, not the causal types, and small-n
-  precludes a confident causal>entity verdict.
+* Both first-pass (n=144) and widened (n=239) auto-written
+  `outputs/reports/motivation_v9_results_summary.md` say Claim 3
+  STRONG POSITIVE. The hand-written `docs/04_results_summary.md`
+  §6+§10 supersedes that: at n=239, Claim 3 is **NEGATIVE** as
+  originally stated. Subordinate finding to keep: CONTROL_NEGATIVE_EVIDENCE
+  (n=13, mean +0.115) is the only stable positive chunk-type
+  category across n=12 → n=20 case widening.
 * `chunk_information_advantage.csv` has a large fraction of rows
   where `score_full=1.0, score_minus_chunk=1.0` (chunk not causally
   necessary). This is real, not a bug — most chunks are removable.
@@ -260,11 +263,11 @@ use `acon/.venv` for `appworld` / `productive_agents`.
 * Three claims:
   - **Claim 1 STRONG positive**: best-of-N (N=8) beats greedy by **+26.7 pp pass-rate on C1 and +36.7 pp on CK**. Oracle win rate 90% / 83%. Best-of-N samples are also shorter (~451 vs 487 chars) — gain is not length-mediated.
   - **Claim 2 POSITIVE**: K=2 repeated-compression drops greedy pass-rate 70%→60% (fragility rate 28.6%). **Sample compressions are more robust than greedy** (fragility 21.8%) — argues against ACON greedy decoding for stress-robustness too.
-  - **Claim 3 PARTIAL positive (after bug fix)**: ENTITY_LIST_ONLY confirmed zero advantage. But the winning type is **ACTION_OUTCOME** (n=59, mean adv +0.068), not the spec-predicted CAUSAL_PRECONDITION (n=8, mean adv 0 but %top 12.5% — bimodal). RUNTIME_BINDING: negative mean (-0.026) but highest %top (13.2%) — also bimodal.
+  - **Claim 3 NEGATIVE at n=239** (after widened addendum, which superseded the n=144 first-pass "PARTIAL POSITIVE" reading). At n=12 case selection the causal-flag aggregation showed +0.150 vs +0.000 for entity-only — that did NOT survive widening to n=20 cases / n=239 chunks: causal-flag mean +0.036 (n=28 unique) vs ENTITY_LIST_ONLY **+0.167** (n=27 unique) — direction reverses. ACTION_OUTCOME's "surprise winner" also reverses (n=59 +0.068 → n=168 −0.057). Stable cross-run positive: CONTROL_NEGATIVE_EVIDENCE (n=4 → n=13, mean 0.000 → +0.115) — echoes v5's lost-failure-log bottleneck. Spec hypothesis "causal NL > entities" thus fails the chunk-level ablation test, but the CONTROL_NEGATIVE_EVIDENCE sub-finding is paper-quotable on its own.
 * **Bug fix shipped**: stage 11 first ran with `max_tokens=256` and all 144 labels silently fell back to `OTHER` because MiniMax thinking blocks alone are ≥256 tokens. Fixed by bumping to 2048 and adding a `WARN_THINKING_MIN_MAX_TOKENS=1024` warn-once guard in `motivation_v9/clients.py` that fires when MiniMax is called below the empirical threshold. (See §6 pitfalls below.) Re-ran stages 11-14 in ~5 min and got the real labels.
 * Caveats:
-  - CAUSAL_PRECONDITION n=8 and CONTROL_NEGATIVE_EVIDENCE n=4 too small for a strong directional claim → widened n=20 cases addendum running.
-  - Auto-written `outputs/reports/motivation_v9_results_summary.md` is mechanical; `docs/04_results_summary.md` is the honest hand-written counterpart.
+  - Even at widened n=20 cases (n_chunks=239), CAUSAL_PRECONDITION n_unique=5 and CONTROL_NEGATIVE_EVIDENCE n_unique=13 — the small-n problem for the causal categorical types persists. The flag-level cut (n_unique=28 for causal flag) is larger but the direction still goes the "wrong" way per spec.
+  - Auto-written `outputs/reports/motivation_v9_results_summary.md` is mechanical and continues to over-claim Claim 3; `docs/04_results_summary.md` §6+§10 is the honest hand-written counterpart.
   - All cases reused from v3 dev (medium/long: ≥15 steps); no short-trajectory stratum.
 * Possible follow-ups (not requested):
   - Method round: train compressor with reward = `behavior_after_stress(T^K) − λ·length`. Claim 1 + 2 jointly motivate this exactly.
@@ -287,15 +290,12 @@ PID 3916707  bash /workspace/EASMO/motivation/scripts/auto_push_watcher.sh
 PID 1114353  python -m vllm.entrypoints.openai.api_server
              --model Qwen/Qwen3-4B-Instruct-2507 --port 8000
              log: /workspace/qwen3-vllm/server_instruct.log
-PID 2357806  bash /workspace/EASMO/motivation_v9/scripts/run_all.sh
-             STAGES="07,08,09a,09,10,11,12,13,14" CHUNK_MAX_CASES=20
-             log: motivation_v9/outputs/logs/runall_wide_n20.log
-             v9 widened-n addendum, started 20:11Z (1:11 PM PT), ETA ~55 min.
 ```
 
-No other experiment process running. Earlier v9 first-pass finished
-at 18:50Z (11:50 AM PT) and the refix run (stages 11-14) finished
-at 20:01Z (1:01 PM PT) — both reported in §4 v9 thread above.
+No experiment process running as of 2:25 PM PT. v9 first-pass
+finished 18:50Z (11:50 AM PT), label-refix run finished 20:01Z
+(1:01 PM PT), widened n=20 addendum finished **21:15Z (2:15 PM PT)**
+— all three covered in §4 v9 thread above.
 
 ## 5. Active background processes
 
@@ -399,7 +399,7 @@ Common pitfalls observed across rounds:
   - `motivation_v6_jacobian/docs/04_results_summary.md` — active-subspace exists, span-rank by gradient doesn't work.
   - `motivation_v7/docs/04_results_summary.md` — abstraction prior under ACON (SDI ≈ 1, cross-model τ = 0.49).
   - `motivation_v8/docs/04_results_summary.md` — generalises v7 to non-ACON prompts (SDI = 1.00 under task-agnostic; cross-model τ up to 0.78) AND identifies two new mechanisms: task-aware prompts invert fixed-point composition, and different inits reach disjoint fixed points.
-  - **`motivation_v9/docs/04_results_summary.md`** — behavior-side validation of v7/v8. Claim 1 STRONG (best-of-N beats greedy +27/+37 pp pass-rate, oracle win 90/83%); Claim 2 POSITIVE (greedy more stress-fragile than sample, 28.6% vs 21.8%); Claim 3 PARTIAL (ACTION_OUTCOME is the surprise top type, not CAUSAL_PRECONDITION as spec predicted; ENTITY_LIST_ONLY confirmed zero advantage). **v7+v8+v9 together are the paper headline as of 2026-05-29.** v7/v8 say *what compressors do*; v9 says *what it costs the agent*.
+  - **`motivation_v9/docs/04_results_summary.md`** — behavior-side validation of v7/v8. Claim 1 STRONG (best-of-N beats greedy +27/+37 pp pass-rate, oracle win 90/83%); Claim 2 POSITIVE (greedy more stress-fragile than sample, 28.6% vs 21.8%); Claim 3 NEGATIVE at n=239 (spec's causal>entity prediction reverses at widened n; only stable sub-finding is CONTROL_NEGATIVE_EVIDENCE +0.115, n=13). **v7+v8+v9 together are the paper headline as of 2026-05-29.** v7/v8 say *what compressors do*; v9 says *what it costs the agent for Claims 1+2* and warns *that the spec-level chunk taxonomy doesn't cleanly track behavior at chunk granularity*.
   v4 is methodologically interesting (decision-state probing) but its main empirical result is "recency is a strong baseline" which is a less-clean paper story.
 
 ---
