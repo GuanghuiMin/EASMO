@@ -68,6 +68,7 @@ then run a `git push` to seed it.
 | `motivation_v5/` | **ACON failure-mode audit** (recovered-then-dropped) | ✅ done; **strong positive signal verified** | 93% of audit-recovered actionable items are dropped again by recompression; 81% by abstraction policy not capacity; recompressed-context rerun saves 5/24 (21%) of originally-failed cases |
 | `motivation_v6_jacobian/` | **white-box Jacobian active-subspace diagnostics** (Qwen3-4B-Instruct-2507) | ✅ done 2026-05-28 | **B positive** (example-level k=16 cum-var = 92 %); **A negative** (per-task median Spearman vs v4 = −0.03); **D negative** (jacobian_low_spans 0.80 ≈ high_spans_raw 0.83 at MiniMax cap=15); **C degenerate** (k=4 soft tokens already overfit target NLL with gap-recovery 2.26×). Story: kills span-rank selection, supports active-subspace projection. |
 | `motivation_v7/` | **abstraction prior + iterative compression dynamics** with official ACON UTCO prompt (Qwen3-4B-Instruct-2507 + MiniMax-M2.5) | ✅ done 2026-05-28 | **Claim A STRONG positive 5/5 (Qwen), 4/5 (MiniMax):** SDI = 0.96 / 0.99 — McFadden R² of need_label = 0.003/0.0006 vs R² of fact_type = 0.155/0.110 (50–180× gap). **Claim B STRONG positive 5/5 / 4/5**: cross-model Kendall τ = 0.491 (p=0.041), 79.3% chains converge in ≤5 rounds, AUTH_OR_ACCESS_TOKEN has lowest AUSC in both models. Story: LLM compressors are unconditioned surface-type abstraction priors; tokens/IDs/paths die fast regardless of need. |
+| `motivation_v8/` | **fixed-point analysis of GENERAL (non-ACON) LLM compression** + basin-of-attraction experiment (same 30 cases + 233 facts + 150 quality pairs reused from v7) | ✅ done 2026-05-28 | **v7's abstraction prior REPLICATES and STRENGTHENS under general prompts:** SDI under P2 task-agnostic = **1.000 / 0.998** (vs v7 ACON 0.96/0.99); cross-model Kendall τ up to **0.778** (vs v7 0.49). **Two new mechanisms identified:** (1) P1 task-aware **inverts** the fixed-point composition from NARR>EXEC (P2 0.88 vs 0.55) to EXEC>NARR (P1 0.64 vs 0.46) — task framing reshapes the attractor. (2) Different inits (RAW_FULL/DETAIL_HEAVY/NARRATIVE_HEAVY/FACT_TABLE_ONLY) reach **disjoint** fixed points (Jaccard distance up to 1.00) — no universal attractor. Δ_need^∞ for executable facts = **+0.27 under P1** — moderate, and **strengthens across iterative rounds** vs single-round Δ_need. |
 
 Each track folder follows the same shape:
 
@@ -178,7 +179,7 @@ use `acon/.venv` for `appworld` / `productive_agents`.
   - Cross-model: run the same pipeline on Llama-3-8B or another instruction-tuned 7-13B model to see if the negative A result is model-specific.
 
 ### v7
-* Done 2026-05-28. **STRONG positive on both Claim A and Claim B** (the project's cleanest paper-tier result so far).
+* Done 2026-05-28. **STRONG positive on both Claim A and Claim B** (the project's first cleanest paper-tier result; v8 builds on it).
 * Full paper-tier report at `motivation_v7/docs/04_results_summary.md`.
 * Compressors used: Qwen3-4B-Instruct-2507 (port 8000 vLLM) + MiniMax-M2.5 (10.183.22.68:8005). ACON prompts loaded verbatim from `/workspace/acon` (commit d63f9ae): UTCO = `improved_history_prompt_samples_4.jinja`.
 * Methodological negatives + caveats:
@@ -186,11 +187,30 @@ use `acon/.venv` for `appworld` / `productive_agents`.
   - Neither UT nor UTCO has a `max_chars` template variable; outputs are 2,000–2,800 chars vs nominal 1,500-char budget.
   - Plan B scope: iterative chains are 2 per case (needed + unneeded for one EXECUTABLE fact), not the spec's full sweep.
   - v3-derived 30 cases all medium/long (≥15 steps); no short stratum.
-* Possible follow-ups (not requested):
-  - Run UT ablation (the unoptimised utility-only prompt) to verify SDI ≈ 1 isn't UTCO-specific.
-  - Secondary budgets {800, 2500} to see whether retention preferences shift with budget.
-  - GPT-4.1-mini as a 3rd compressor to extend cross-model τ test.
-  - Causal intervention: insert "you MUST preserve any access_token / file_path verbatim" into the system prompt and see whether SDI drops.
+* Possible follow-ups (largely addressed by v8):
+  - Run UT ablation — partially done by v8 P2 general task-agnostic.
+  - Causal intervention: insert "preserve access_token verbatim" — done by v8 P1 task-aware.
+  - GPT-4.1-mini as a 3rd compressor — still open.
+
+### v8
+* Done 2026-05-28. **Refines and generalises v7.** v7's abstraction prior REPLICATES under general (non-ACON) prompts; v8 also discovers task-aware framing flips the fixed point and that different inits give disjoint fixed points.
+* Full paper-tier report at `motivation_v8/docs/04_results_summary.md`.
+* Headline numbers vs v7:
+  - SDI under P2 task-agnostic = **1.000 (MiniMax) / 0.998 (Qwen)** (vs v7 ACON 0.961 / 0.989) — even more extreme.
+  - Cross-(model, prompt) Kendall τ up to **0.778** (vs v7 cross-model τ = 0.491).
+  - Convergence rate 84.9% across 186 chains (≥6 rounds).
+  - **NEW: P1 task-aware inverts fixed-point composition** to EXEC > NARR (MiniMax 0.64 vs 0.46, Qwen 0.63 vs 0.29) — task framing reshapes the attractor.
+  - **NEW: Fixed-point Δ_need^∞ ≈ +0.27 for executable facts** under P1 — moderate need effect that strengthens across iterative rounds vs single-round.
+  - **NEW: Different initialisations reach disjoint fixed points** (RAW_FULL vs FACT_TABLE_ONLY: fact-Jaccard distance 1.00 under MiniMax P1) — no universal attractor.
+* Methodological caveats:
+  - Stage 06 retention scoring had ~28% error rate (LLM JSON parse failures), biasing retention rates uniformly downward 3-5 pp. Contrasts (Δ_need, SDI) robust.
+  - PIR small samples (n=15 / cell): CIs wide. Don't over-read individual PIR numbers.
+  - Basin contraction ratio not well-behaved when init distance = 0 (some inits start identical). Use absolute final distance instead.
+  - Plan B scope: P3 strict-extract ablation + secondary budgets deferred.
+* Possible follow-ups:
+  - Re-score retention with stricter JSON post-processing to tighten estimates.
+  - P3 ablation: does an extra "first identify exact facts" instruction step further amplify need-conditioning at fixed point?
+  - Method round: project residual stream onto top-k SVD of v6-style active vectors AND condition on a P1-style task prompt — does the combination exceed either alone in downstream success?
 
 ## 4.5. GPU / endpoint state (as of 2026-05-28 4:00 PM PT)
 
@@ -299,6 +319,7 @@ Common pitfalls observed across rounds:
 | motivation_v5 | 24 (Tier 1 from v3) | 168 | 24 | 16 min | 2026-05-27 |
 | motivation_v6_jacobian | 30 (reused v4) | 0 LLM API; **30 Qwen3-4B backward + 150 × 200-step soft-token training** | 240 MiniMax (Exp D) | 1 h compute + 25 min D | 2026-05-28 |
 | motivation_v7 | 30 (reused v3) | ~10,360 LLM calls (fact extract 30, conditions 233, compress 600 + 460, retention 600 + 3,640) | 0 agent runs (diagnostic-only) | 1 h 33 min | 2026-05-28 |
+| motivation_v8 | 30 (reused v7) | ~14,270 LLM calls (compress 1,160 + 1,470 iterative/basin; retention 12,640) | 0 agent runs (diagnostic-only) | ~1 h 50 min | 2026-05-28 |
 
 ## 9. Final advice for whoever picks this up
 
