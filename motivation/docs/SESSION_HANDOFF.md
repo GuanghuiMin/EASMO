@@ -1,23 +1,24 @@
 # Session handoff — paste this into a new chat if context fills up
 
-> Updated: 2026-05-28 4:05 PM PT.
+> Updated: 2026-05-28 7:30 PM PT.
 > All times in Pacific Time (PT).
 >
 > **➡ For a fresh chat, read these in order:**
 > 1. This file (project map + open threads).
 > 2. The single track-level snapshot you care about most — each
->    track has a `docs/04_results_summary.md` (v6, v7) or
+>    track has a `docs/04_results_summary.md` (v6, v7, v8) or
 >    `docs/05_results_summary.md` (v2–v5) that's decision-ready in
 >    ~5 minutes.
 >
 > The git remote is `git@github.com:GuanghuiMin/EASMO.git` (SSH).
-> Latest pushed commit: **`7d96ea5  motivation_v7: STRONG positive on
-> Claim A + Claim B (abstraction prior + iterative dynamics)`**
-> (2026-05-28 16:00 PT). `main` is in sync with `origin/main`.
+> Latest milestone commits:
+> - `7d96ea5` motivation_v7: STRONG positive on Claim A + B
+> - **v8 milestone commit pending push (see §0 for SSH-agent gotcha)**
+>
 > Auto-push watcher PID 3916707 stages every 20 min and covers
 > `motivation/`, `motivation_v2/`, `motivation_v3/`, `motivation_v4/`,
-> `motivation_v5/`, `motivation_v6_jacobian/`, **`motivation_v7/`**
-> automatically.
+> `motivation_v5/`, `motivation_v6_jacobian/`, `motivation_v7/`,
+> **`motivation_v8/`** automatically.
 
 ## 0. Known gotcha — Cursor SSH agent forwarding can break silently
 
