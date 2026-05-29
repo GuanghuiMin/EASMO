@@ -43,7 +43,12 @@ temperature_sample: 0.7
 seed_greedy: 42
 seed_sample:  1000 + i      # for i in 0..N-1
 max_tokens_compression: 2048
-max_tokens_label: 256
+max_tokens_label: 2048   # was 256, bumped 2026-05-29: MiniMax thinking
+                         # blocks alone are ~543 tokens (median), 256 was
+                         # entirely consumed by <think> and left zero
+                         # budget for the JSON payload → all labels fell
+                         # back to OTHER. See clients._strip_think + the
+                         # WARN_THINKING_MIN_MAX_TOKENS guard.
 ```
 
 ## 2. Data (spec §5)

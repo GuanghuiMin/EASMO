@@ -82,7 +82,7 @@ def label_chunk(
     chunk_text: str,
     user_instruction: str,
     client=None,
-    max_tokens: int = 256,
+    max_tokens: int = 2048,
 ) -> ChunkLabel:
     user = CHUNK_LABELER_USER_TEMPLATE.format(
         user_instruction=user_instruction,
