@@ -1,6 +1,6 @@
 # motivation_v9 Results — Behavioral Compression Stress and Chunk Information Advantage
 
-> Auto-written by `scripts/14_write_report.py` at 2026-05-29 18:50Z.
+> Auto-written by `scripts/14_write_report.py` at 2026-05-29 20:01Z.
 
 ## TL;DR
 - Behavioral validation of v7/v8 surface-type abstraction prior findings.
@@ -40,10 +40,17 @@ Per (compressor_model, eval_context_round):
 
 ## Claim 3: Chunk Information Advantage
 
-| chunk_type   |   n_chunks |   mean_score_advantage |   mean_pass_advantage |   frac_positive_advantage |   frac_top_advantage |   contains_causal_relation_rate |   contains_exact_literals_rate |
-|:-------------|-----------:|-----------------------:|----------------------:|--------------------------:|---------------------:|--------------------------------:|-------------------------------:|
-| OTHER        |        144 |                  0.028 |                 0.028 |                     0.201 |                0.069 |                               0 |                              0 |
+| chunk_type                |   n_chunks |   mean_score_advantage |   mean_pass_advantage |   frac_positive_advantage |   frac_top_advantage |   contains_causal_relation_rate |   contains_exact_literals_rate |
+|:--------------------------|-----------:|-----------------------:|----------------------:|--------------------------:|---------------------:|--------------------------------:|-------------------------------:|
+| ACTION_OUTCOME            |         59 |                  0.068 |                 0.068 |                     0.22  |                0.034 |                           0.034 |                          0.831 |
+| CAUSAL_PRECONDITION       |          8 |                  0     |                 0     |                     0.25  |                0.125 |                           1     |                          0.75  |
+| CONTROL_NEGATIVE_EVIDENCE |          4 |                  0     |                 0     |                     0.25  |                0     |                           1     |                          1     |
+| ENTITY_LIST_ONLY          |         12 |                  0     |                 0     |                     0.083 |                0     |                           0     |                          1     |
+| NARRATIVE_PROGRESS        |         19 |                  0.053 |                 0.053 |                     0.158 |                0.105 |                           0.263 |                          0.789 |
+| RUNTIME_BINDING           |         38 |                 -0.026 |                -0.026 |                     0.237 |                0.132 |                           0.026 |                          1     |
+| TASK_GOAL_OR_TODO         |          4 |                  0     |                 0     |                     0     |                0     |                           0     |                          1     |
 
+**Verdict Claim 3:** STRONG POSITIVE (causal/control mean adv=0.023 vs entity-only mean adv=0.000)
 
 ## What This Motivates for RL
 - If Claim 1 + 2 pass: train compressor with reward = behavior_after_stress(T^K) - λ·length.
