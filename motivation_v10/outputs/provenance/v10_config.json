@@ -1,0 +1,17 @@
+{
+  "n_samples": 8,
+  "stress_rounds_k": 2,
+  "cap_steps": 15,
+  "temperature_greedy": 0.0,
+  "temperature_sample": 0.7,
+  "seed_greedy": 42,
+  "seed_sample_base": 1000,
+  "max_tokens_compression": 2048,
+  "max_tokens_verifier": 2048,
+  "max_tokens_pairwise": 1536,
+  "max_tokens_chunk_label": 2048,
+  "max_chars_compression": 1500,
+  "lambda_length": 0.05,
+  "acon_commit": "d63f9ae18959dc7215ff62899c94c5e8c56847ae",
+  "acon_history_prompt_sha256": "9e50d0f93aca7f75eb723a90a758642d1aac3d7550f6afe1e692e56e2bc7b71c"
+}
