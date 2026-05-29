@@ -1,0 +1,5 @@
+model,prompt_family,budget_chars,n,violation_rate,median_length,p90_length,p99_length
+minimax,general_task_agnostic,1500,290,0.0,791.0,1224.0,1554.0
+minimax,general_task_aware,1500,290,0.013793103448275862,973.0,1307.2000000000003,1716.590000000001
+qwen,general_task_agnostic,1500,290,0.0,640.0,910.0,1029.0
+qwen,general_task_aware,1500,290,0.006896551724137931,822.0,1044.3000000000002,1267.150000000001

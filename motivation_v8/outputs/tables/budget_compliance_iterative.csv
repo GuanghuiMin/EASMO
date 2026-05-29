@@ -1,0 +1,11 @@
+model,prompt_family,budget_chars,init_type,n,violation_rate,median_length,p90_length,p99_length
+minimax,general_task_agnostic,1500,RAW_FULL,114,0.0,514.0,780.7,1180.1900000000005
+minimax,general_task_aware,1500,DETAIL_HEAVY,72,0.0,926.5,1267.3,1473.5600000000004
+minimax,general_task_aware,1500,FACT_TABLE_ONLY,72,0.0,591.5,762.8,910.2800000000015
+minimax,general_task_aware,1500,NARRATIVE_HEAVY,72,0.0,731.5,979.2999999999998,1178.130000000002
+minimax,general_task_aware,1500,RAW_FULL,300,0.0,754.0,1106.3000000000002,1322.2599999999998
+qwen,general_task_agnostic,1500,RAW_FULL,114,0.0,536.0,709.8,1018.9900000000004
+qwen,general_task_aware,1500,DETAIL_HEAVY,72,0.0,578.0,823.0,1162.920000000001
+qwen,general_task_aware,1500,FACT_TABLE_ONLY,72,0.0,477.5,597.0,687.4100000000002
+qwen,general_task_aware,1500,NARRATIVE_HEAVY,72,0.0,586.0,719.0,837.2500000000001
+qwen,general_task_aware,1500,RAW_FULL,300,0.0,672.0,905.0,1092.4199999999996

@@ -1,0 +1,5 @@
+model,prompt_family,budget_chars,sdi
+minimax,general_task_agnostic,1500,0.999999965117106
+minimax,general_task_aware,1500,0.8295468329287882
+qwen,general_task_agnostic,1500,0.9978326687119411
+qwen,general_task_aware,1500,0.7369385472210994
