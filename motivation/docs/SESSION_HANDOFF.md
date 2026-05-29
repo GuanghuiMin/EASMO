@@ -1,6 +1,6 @@
 # Session handoff — paste this into a new chat if context fills up
 
-> Updated: 2026-05-29 2:25 PM PT.
+> Updated: 2026-05-29 3:00 PM PT.
 > All times in Pacific Time (PT).
 >
 > **➡ For a fresh chat, read these in order:**
@@ -70,6 +70,7 @@ then run a `git push` to seed it.
 | `motivation_v7/` | **abstraction prior + iterative compression dynamics** with official ACON UTCO prompt (Qwen3-4B-Instruct-2507 + MiniMax-M2.5) | ✅ done 2026-05-28 | **Claim A STRONG positive 5/5 (Qwen), 4/5 (MiniMax):** SDI = 0.96 / 0.99 — McFadden R² of need_label = 0.003/0.0006 vs R² of fact_type = 0.155/0.110 (50–180× gap). **Claim B STRONG positive 5/5 / 4/5**: cross-model Kendall τ = 0.491 (p=0.041), 79.3% chains converge in ≤5 rounds, AUTH_OR_ACCESS_TOKEN has lowest AUSC in both models. Story: LLM compressors are unconditioned surface-type abstraction priors; tokens/IDs/paths die fast regardless of need. |
 | `motivation_v8/` | **fixed-point analysis of GENERAL (non-ACON) LLM compression** + basin-of-attraction experiment (same 30 cases + 233 facts + 150 quality pairs reused from v7) | ✅ done 2026-05-28 | **v7's abstraction prior REPLICATES and STRENGTHENS under general prompts:** SDI under P2 task-agnostic = **1.000 / 0.998** (vs v7 ACON 0.96/0.99); cross-model Kendall τ up to **0.778** (vs v7 0.49). **Two new mechanisms identified:** (1) P1 task-aware **inverts** the fixed-point composition from NARR>EXEC (P2 0.88 vs 0.55) to EXEC>NARR (P1 0.64 vs 0.46) — task framing reshapes the attractor. (2) Different inits (RAW_FULL/DETAIL_HEAVY/NARRATIVE_HEAVY/FACT_TABLE_ONLY) reach **disjoint** fixed points (Jaccard distance up to 1.00) — no universal attractor. Δ_need^∞ for executable facts = **+0.27 under P1** — moderate, and **strengthens across iterative rounds** vs single-round Δ_need. |
 | `motivation_v9/` | **behavior-first** validation: Best-of-N ACON, C1-vs-CK fragility under repeated-compression stress, NL chunk information advantage (MiniMax-only primary; reuse v3 30 cases + ACON UTCO) | ✅ done 2026-05-29 (first-pass + widened addendum) | **Claim 1 STRONG positive** (best-of-N vs greedy: C1 +26.7 pp, CK +36.7 pp pass-rate; oracle_win 90/83%). **Claim 2 POSITIVE** (greedy fragility 28.6%, stress drop 10 pp; greedy more fragile than sample, 28.6% vs 21.8%). **Claim 3 NEGATIVE at n=239** (originally "STRONG positive at n=144 first-pass" did NOT survive widening: causal-flag chunks mean adv +0.036 vs ENTITY_LIST_ONLY +0.167 — direction reverses, likely because the labeler's "entity list" describes form not function). Only Claim-3 sub-finding to survive widening: **CONTROL_NEGATIVE_EVIDENCE** (n=13, mean +0.115, echoes v5's lost-failure-log bottleneck). Total pipeline 2h 16min first-pass + 64 min widened addendum. |
+| `motivation_v10/` | **trainable compressor policy**: ACON best-of-N → proxy reward → Qwen3-4B LoRA SFT (C1 vs CK selection criteria) → GRPO readiness check; chunk reanalysis with v10 enriched §17.5 schema. Spec: `user_feedback/motivation_v10_proxy_sft_grpo_readiness_v2.md` (revised after v9's Claim 3 falsification — v10 treats chunk labels as diagnostics only). | 🔄 in progress 2026-05-29 (full path: 90 train + 27 dev + 30 test_normal AppWorld cases; ~13 h end-to-end ETA). Stage 01 baseline runs running (PID 2440619, 49/147 done, 18% pass rate so far). | 12-stage pipeline: stages 00-12 scripts all written + compile-tested. Trains 2 Qwen3-4B LoRA students (Qwen-SFT-C1 vs Qwen-SFT-CK) via trl + peft + accelerate; vLLM must be stopped during stage 08 (script enforces this). Acceptance per spec §19: (1) proxy CK gain ≥10pp or ≥40% oracle recovery; (2) SFT-CK ≥ raw Qwen + SFT-C1 on CK; (3) SFT-CK has reward spread (oracle_win ≥50%, all_fail ≤15%); (4) chunk labels alone insufficient (diagnostic). Status updates land in `motivation_v10/docs/04_results_summary.md` as stages complete. |
 
 Each track folder follows the same shape:
 
@@ -290,12 +291,17 @@ PID 3916707  bash /workspace/EASMO/motivation/scripts/auto_push_watcher.sh
 PID 1114353  python -m vllm.entrypoints.openai.api_server
              --model Qwen/Qwen3-4B-Instruct-2507 --port 8000
              log: /workspace/qwen3-vllm/server_instruct.log
+PID 2440619  /workspace/acon/.venv/bin/python -u scripts/01_build_cases.py
+             v10 stage 01 (147 baseline AppWorld runs, ~30 min total).
+             log: motivation_v10/outputs/logs/stage01_baseline.log
+             Started 21:38Z (2:38 PM PT).
 ```
 
-No experiment process running as of 2:25 PM PT. v9 first-pass
-finished 18:50Z (11:50 AM PT), label-refix run finished 20:01Z
-(1:01 PM PT), widened n=20 addendum finished **21:15Z (2:15 PM PT)**
-— all three covered in §4 v9 thread above.
+v10 stage 01 baseline runs is the only experiment process active.
+Once it finishes (~22:10Z), the next launch is stage 02 (compress
+~990 candidates, est. 75 min) which can run unattended via
+`STAGES="02,03,04,..." bash motivation_v10/scripts/run_all.sh`.
+v9 closed out earlier today — final addendum finished 21:15Z.
 
 ## 5. Active background processes
 
