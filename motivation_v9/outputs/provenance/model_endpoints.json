@@ -1,0 +1,6 @@
+{
+  "qwen3_4b_instruct": "http://127.0.0.1:8000/v1",
+  "minimax_m2_5": "http://10.183.22.68:8005/v1",
+  "downstream_agent_model": "MiniMaxAI/MiniMax-M2.5",
+  "downstream_runner_venv": "/workspace/acon/.venv"
+}
