@@ -1,24 +1,23 @@
 # Session handoff — paste this into a new chat if context fills up
 
-> Updated: 2026-05-28 7:30 PM PT.
+> Updated: 2026-05-29 9:35 AM PT.
 > All times in Pacific Time (PT).
 >
 > **➡ For a fresh chat, read these in order:**
 > 1. This file (project map + open threads).
 > 2. The single track-level snapshot you care about most — each
->    track has a `docs/04_results_summary.md` (v6, v7, v8) or
+>    track has a `docs/04_results_summary.md` (v6, v7, v8, v9) or
 >    `docs/05_results_summary.md` (v2–v5) that's decision-ready in
 >    ~5 minutes.
 >
 > The git remote is `git@github.com:GuanghuiMin/EASMO.git` (SSH).
-> Latest milestone commits:
-> - `7d96ea5` motivation_v7: STRONG positive on Claim A + B
-> - **v8 milestone commit pending push (see §0 for SSH-agent gotcha)**
+> Latest pushed: v8 (auto-pushed 2026-05-29 03:54 UTC); v9 in
+> progress (~6-7h pipeline started 2026-05-29 9:35 AM PT).
 >
 > Auto-push watcher PID 3916707 stages every 20 min and covers
 > `motivation/`, `motivation_v2/`, `motivation_v3/`, `motivation_v4/`,
 > `motivation_v5/`, `motivation_v6_jacobian/`, `motivation_v7/`,
-> **`motivation_v8/`** automatically.
+> `motivation_v8/`, **`motivation_v9/`** automatically.
 
 ## 0. Known gotcha — Cursor SSH agent forwarding can break silently
 
@@ -69,6 +68,7 @@ then run a `git push` to seed it.
 | `motivation_v6_jacobian/` | **white-box Jacobian active-subspace diagnostics** (Qwen3-4B-Instruct-2507) | ✅ done 2026-05-28 | **B positive** (example-level k=16 cum-var = 92 %); **A negative** (per-task median Spearman vs v4 = −0.03); **D negative** (jacobian_low_spans 0.80 ≈ high_spans_raw 0.83 at MiniMax cap=15); **C degenerate** (k=4 soft tokens already overfit target NLL with gap-recovery 2.26×). Story: kills span-rank selection, supports active-subspace projection. |
 | `motivation_v7/` | **abstraction prior + iterative compression dynamics** with official ACON UTCO prompt (Qwen3-4B-Instruct-2507 + MiniMax-M2.5) | ✅ done 2026-05-28 | **Claim A STRONG positive 5/5 (Qwen), 4/5 (MiniMax):** SDI = 0.96 / 0.99 — McFadden R² of need_label = 0.003/0.0006 vs R² of fact_type = 0.155/0.110 (50–180× gap). **Claim B STRONG positive 5/5 / 4/5**: cross-model Kendall τ = 0.491 (p=0.041), 79.3% chains converge in ≤5 rounds, AUTH_OR_ACCESS_TOKEN has lowest AUSC in both models. Story: LLM compressors are unconditioned surface-type abstraction priors; tokens/IDs/paths die fast regardless of need. |
 | `motivation_v8/` | **fixed-point analysis of GENERAL (non-ACON) LLM compression** + basin-of-attraction experiment (same 30 cases + 233 facts + 150 quality pairs reused from v7) | ✅ done 2026-05-28 | **v7's abstraction prior REPLICATES and STRENGTHENS under general prompts:** SDI under P2 task-agnostic = **1.000 / 0.998** (vs v7 ACON 0.96/0.99); cross-model Kendall τ up to **0.778** (vs v7 0.49). **Two new mechanisms identified:** (1) P1 task-aware **inverts** the fixed-point composition from NARR>EXEC (P2 0.88 vs 0.55) to EXEC>NARR (P1 0.64 vs 0.46) — task framing reshapes the attractor. (2) Different inits (RAW_FULL/DETAIL_HEAVY/NARRATIVE_HEAVY/FACT_TABLE_ONLY) reach **disjoint** fixed points (Jaccard distance up to 1.00) — no universal attractor. Δ_need^∞ for executable facts = **+0.27 under P1** — moderate, and **strengthens across iterative rounds** vs single-round Δ_need. |
+| `motivation_v9/` | **behavior-first** validation: Best-of-N ACON, C1-vs-CK fragility under repeated-compression stress, NL chunk information advantage (MiniMax-only primary; reuse v3 30 cases + ACON UTCO) | 🔄 in progress 2026-05-29 | Pipeline ETA ~6-7 h (stage 04 + 09 are AppWorld agent runs). Three claims to test: (1) ACON greedy not best-of-N-optimal; (2) one-step compression fragile under T^K; (3) high-advantage chunks are causal NL not entity lists. See `motivation_v9/docs/04_results_summary.md` once done. |
 
 Each track folder follows the same shape:
 
