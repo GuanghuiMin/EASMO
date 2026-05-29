@@ -10,6 +10,8 @@
 #   N_CASES            cap on cases (omit to use all 30 from v3)
 #   STAGES             comma list of stages to run (default 00..14)
 #   SKIP_CHUNK         set to "1" to skip stages 07-13 (chunk analysis)
+#   CHUNK_MAX_CASES    cap for stage 07 chunk-case selection (default 12)
+#   CHUNK_MAX_CHUNKS   cap for stage 08 chunks-per-case (default 12)
 
 set -euo pipefail
 
@@ -24,6 +26,8 @@ STRESS_ROUNDS_K="${STRESS_ROUNDS_K:-2}"
 N_CASES="${N_CASES:-}"
 WANTED="${STAGES:-00,01,02,03,04,05,06,07,08,09a,09,10,11,12,13,14}"
 SKIP_CHUNK="${SKIP_CHUNK:-0}"
+CHUNK_MAX_CASES="${CHUNK_MAX_CASES:-12}"
+CHUNK_MAX_CHUNKS="${CHUNK_MAX_CHUNKS:-12}"
 
 N_CASES_FLAG=""; [[ -n "$N_CASES" ]] && N_CASES_FLAG="--max_cases ${N_CASES}"
 
@@ -72,10 +76,10 @@ run_stage "06_c1_ck_fragility" \
 
 if [[ "${SKIP_CHUNK}" != "1" ]]; then
     run_stage "07_select_chunk_cases" \
-      "${PYBIN} -u scripts/07_select_chunk_cases.py --max_cases 12"
+      "${PYBIN} -u scripts/07_select_chunk_cases.py --max_cases ${CHUNK_MAX_CASES}"
 
     run_stage "08_segment_chunks" \
-      "${PYBIN} -u scripts/08_segment_chunks.py --max_chunks 12"
+      "${PYBIN} -u scripts/08_segment_chunks.py --max_chunks ${CHUNK_MAX_CHUNKS}"
 
     run_stage "09a_build_chunk_contexts" \
       "${PYBIN} -u scripts/09a_build_chunk_contexts.py --rounds ${STRESS_ROUNDS_K} --workers 6"

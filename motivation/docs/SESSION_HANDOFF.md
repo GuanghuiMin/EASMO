@@ -1,6 +1,6 @@
 # Session handoff — paste this into a new chat if context fills up
 
-> Updated: 2026-05-29 9:35 AM PT.
+> Updated: 2026-05-29 12:15 PM PT.
 > All times in Pacific Time (PT).
 >
 > **➡ For a fresh chat, read these in order:**
@@ -11,8 +11,10 @@
 >    ~5 minutes.
 >
 > The git remote is `git@github.com:GuanghuiMin/EASMO.git` (SSH).
-> Latest pushed: v8 (auto-pushed 2026-05-29 03:54 UTC); v9 in
-> progress (~6-7h pipeline started 2026-05-29 9:35 AM PT).
+> Latest pushed: v9 **first-pass complete** (auto-pushed 2026-05-29
+> 19:55 UTC), with a **widened-n addendum currently running**
+> (started 2026-05-29 1:11 PM PT, ~55 min ETA). All earlier tracks
+> v2-v8 still pushed and final.
 >
 > Auto-push watcher PID 3916707 stages every 20 min and covers
 > `motivation/`, `motivation_v2/`, `motivation_v3/`, `motivation_v4/`,
@@ -68,7 +70,7 @@ then run a `git push` to seed it.
 | `motivation_v6_jacobian/` | **white-box Jacobian active-subspace diagnostics** (Qwen3-4B-Instruct-2507) | ✅ done 2026-05-28 | **B positive** (example-level k=16 cum-var = 92 %); **A negative** (per-task median Spearman vs v4 = −0.03); **D negative** (jacobian_low_spans 0.80 ≈ high_spans_raw 0.83 at MiniMax cap=15); **C degenerate** (k=4 soft tokens already overfit target NLL with gap-recovery 2.26×). Story: kills span-rank selection, supports active-subspace projection. |
 | `motivation_v7/` | **abstraction prior + iterative compression dynamics** with official ACON UTCO prompt (Qwen3-4B-Instruct-2507 + MiniMax-M2.5) | ✅ done 2026-05-28 | **Claim A STRONG positive 5/5 (Qwen), 4/5 (MiniMax):** SDI = 0.96 / 0.99 — McFadden R² of need_label = 0.003/0.0006 vs R² of fact_type = 0.155/0.110 (50–180× gap). **Claim B STRONG positive 5/5 / 4/5**: cross-model Kendall τ = 0.491 (p=0.041), 79.3% chains converge in ≤5 rounds, AUTH_OR_ACCESS_TOKEN has lowest AUSC in both models. Story: LLM compressors are unconditioned surface-type abstraction priors; tokens/IDs/paths die fast regardless of need. |
 | `motivation_v8/` | **fixed-point analysis of GENERAL (non-ACON) LLM compression** + basin-of-attraction experiment (same 30 cases + 233 facts + 150 quality pairs reused from v7) | ✅ done 2026-05-28 | **v7's abstraction prior REPLICATES and STRENGTHENS under general prompts:** SDI under P2 task-agnostic = **1.000 / 0.998** (vs v7 ACON 0.96/0.99); cross-model Kendall τ up to **0.778** (vs v7 0.49). **Two new mechanisms identified:** (1) P1 task-aware **inverts** the fixed-point composition from NARR>EXEC (P2 0.88 vs 0.55) to EXEC>NARR (P1 0.64 vs 0.46) — task framing reshapes the attractor. (2) Different inits (RAW_FULL/DETAIL_HEAVY/NARRATIVE_HEAVY/FACT_TABLE_ONLY) reach **disjoint** fixed points (Jaccard distance up to 1.00) — no universal attractor. Δ_need^∞ for executable facts = **+0.27 under P1** — moderate, and **strengthens across iterative rounds** vs single-round Δ_need. |
-| `motivation_v9/` | **behavior-first** validation: Best-of-N ACON, C1-vs-CK fragility under repeated-compression stress, NL chunk information advantage (MiniMax-only primary; reuse v3 30 cases + ACON UTCO) | 🔄 in progress 2026-05-29 | Pipeline ETA ~6-7 h (stage 04 + 09 are AppWorld agent runs). Three claims to test: (1) ACON greedy not best-of-N-optimal; (2) one-step compression fragile under T^K; (3) high-advantage chunks are causal NL not entity lists. See `motivation_v9/docs/04_results_summary.md` once done. |
+| `motivation_v9/` | **behavior-first** validation: Best-of-N ACON, C1-vs-CK fragility under repeated-compression stress, NL chunk information advantage (MiniMax-only primary; reuse v3 30 cases + ACON UTCO) | ✅ first-pass done 2026-05-29; **widened-n addendum 🔄 in progress** | **Claim 1 STRONG positive** (best-of-N vs greedy: C1 +26.7 pp, CK +36.7 pp pass-rate; oracle_win 90/83%). **Claim 2 POSITIVE** (greedy fragility 28.6%, stress drop 10 pp; greedy more fragile than sample). **Claim 3 PARTIAL positive** (ENTITY_LIST_ONLY confirmed zero advantage; **ACTION_OUTCOME** is the surprise top type with mean adv +0.068 over n=59 chunks — not CAUSAL_PRECONDITION as spec predicted, since causal/control types only have n=12 total). Wider n=20 chunk run kicked off to tighten Claim 3. Total pipeline took 2h 16min, ~3× faster than spec's 6-7 h estimate. |
 
 Each track folder follows the same shape:
 
@@ -98,29 +100,68 @@ For v2–v5 it's `docs/05_results_summary.md`; for v6 it's
 `docs/04_results_summary.md` (spec layout). They're 200–340 lines
 each and self-contained.
 
-## 2. Latest-round summary (motivation_v5, today's work)
+## 2. Latest-round summary (motivation_v9, today's work)
 
-**Goal**: ACON failure-mode audit on AppWorld dev. Diagnostic only,
-not a method. Build cases where ACON-style compression failed,
-have an audit model recover missing actionable info, recompress,
-re-run downstream, see what survives.
+**Goal**: behavior-first validation of v7/v8 abstraction-prior story
+on AppWorld, with three orthogonal claims:
+1. ACON greedy decoding is NOT best-of-N-optimal under its own distribution.
+2. One-step compression is fragile under repeated-compression stress T^K.
+3. Natural-language chunks carrying causal/control content drive more
+   downstream behavior than chunks that are pure entity lists.
 
-**Outcome (n=24, all Tier 1, all `hard`)**:
-* 50% of failures are LOST_API_SCHEMA_OR_PARAMETER; +13% LOST_ACCESS_TOKEN.
-* **Audit recovers 28 grounded actionable items; recompressor drops 26 (93%) of them.**
-* **81% of drops are stylistic** (`over_abstraction` 42% + `looked_like_past_log` 38%); only 15% from `verbosity_pressure`. Bottleneck is the compressor's *abstraction policy*, not its token budget.
-* Re-running downstream agent with recompressed context recovers **5/24 = 21%** of originally-failed cases.
-* Spec acceptance §16: ✅ STRONG positive signal (recovered-then-dropped bottleneck) verified.
+**Outcome (n_cases=30 from v3, n_candidates=270, n_behavior_runs=540,
+n_chunks=144 first-pass / ~240 widened-pending)**:
+
+* **Claim 1 STRONG POSITIVE.** Best-of-N (N=8) over MiniMax-M2.5 stochastic
+  samples beats greedy by **+26.7 pp** on C1 and **+36.7 pp** on CK
+  pass-rate. Oracle win rate 90% (C1) / 83% (CK). Mean compressed length
+  is also shorter for best-of-N (~451 vs 487 chars on C1), so the gain
+  is not length-mediated.
+* **Claim 2 POSITIVE.** Repeated compression T^K with K=2 drops greedy
+  pass-rate from 70% → 60% (10 pp); 28.6% (6/21) of originally-passing
+  greedy candidates fail after recompression. **Bonus finding:** sampling
+  is more robust than greedy — sample fragility 21.8% vs greedy 28.6%.
+  This is consistent with greedy attaching to brittle surface features
+  that recompression discards.
+* **Claim 3 PARTIAL POSITIVE.** ENTITY_LIST_ONLY chunks (n=12) confirmed
+  zero behavioral advantage (mean adv 0.000, %top 0%). But the top
+  advantage type is **ACTION_OUTCOME** (n=59, mean adv +0.068), NOT
+  the spec-predicted CAUSAL_PRECONDITION (n=8, mean adv 0 but %top
+  12.5%, bimodal). Spec hypothesis ("causal NL > entities") holds in
+  *direction* but ACTION_OUTCOME (past-step recording) wins on mean
+  advantage. RUNTIME_BINDING has negative mean advantage (-0.026) but
+  highest %top (13.2%) — bimodal: a few critical tokens, many removable.
+
+**Methodological footgun (caught + fixed mid-day)**:
+* Stage 11 first shipped with `max_tokens=256` for MiniMax label calls.
+  MiniMax-M2.5 thinking blocks alone are 500-750 tokens (median 543),
+  so the entire budget was consumed by `<think>...</think>` and the
+  post-strip JSON payload was empty. All 144 chunks fell back to the
+  default `OTHER` label. Stage 11 logged `err=0` because the API
+  itself didn't fail. **Fixed:** bumped `max_tokens` 256 → 2048 in
+  `motivation_v9/chunk_label.py`. **Guard added:** `clients.py` now
+  exports `WARN_THINKING_MIN_MAX_TOKENS=1024` and `chat()` prints a
+  warn-once message when MiniMax is called below that threshold.
+  Empirically-derived from stage 02 (n=270 compressions, median
+  thinking 543 tokens, p90 750).
 
 **Caveats** (must include in any paper writing):
-* Qwen3-4B's mean `reliability_score = 0.15` (self-uncertain).
-* Qwen↔MiniMax primary-mode agreement only 42%; compression-causality agreement 50%.
-* Rule-based grounding mean 0.444 (only ~44% of Qwen quotes are literal substrings).
-* Auditor was prompt-biased toward attributing failures to compression (100% Qwen, 50% MiniMax).
-* All 24 cases are `hard` (length-biased from v3).
+* CAUSAL_PRECONDITION n=8, CONTROL_NEGATIVE_EVIDENCE n=4 — both too
+  small to bound a strong claim. Widened n=20 chunk-cases run is
+  in flight (PID 2357806, started 1:11 PM PT) and will roughly
+  double the chunk pool.
+* Auto-written `outputs/reports/motivation_v9_results_summary.md`
+  declares Claim 3 STRONG POSITIVE based on causal/control mean
+  adv (0.023) vs entity-only (0.000). The honest read in
+  `docs/04_results_summary.md` (hand-written) is PARTIAL: the
+  *winner* is ACTION_OUTCOME, not the causal types, and small-n
+  precludes a confident causal>entity verdict.
+* `chunk_information_advantage.csv` has a large fraction of rows
+  where `score_full=1.0, score_minus_chunk=1.0` (chunk not causally
+  necessary). This is real, not a bug — most chunks are removable.
 
 For full details + tables + figures see
-[`motivation_v5/docs/05_results_summary.md`](../../motivation_v5/docs/05_results_summary.md).
+[`motivation_v9/docs/04_results_summary.md`](../../motivation_v9/docs/04_results_summary.md).
 
 ## 3. Endpoints + venvs
 
@@ -212,26 +253,49 @@ use `acon/.venv` for `appworld` / `productive_agents`.
   - P3 ablation: does an extra "first identify exact facts" instruction step further amplify need-conditioning at fixed point?
   - Method round: project residual stream onto top-k SVD of v6-style active vectors AND condition on a P1-style task prompt — does the combination exceed either alone in downstream success?
 
-## 4.5. GPU / endpoint state (as of 2026-05-28 4:00 PM PT)
+### v9
+* **First-pass done 2026-05-29 11:50 AM PT** (pipeline 9:34→11:50, 2h 16min, ~3× faster than spec's 6-7h estimate). **Widened-n addendum in progress** (kicked off 1:11 PM PT, ETA ~55 min).
+* Full paper-tier report at `motivation_v9/docs/04_results_summary.md`.
+* Compressors used: MiniMax-M2.5 only (spec §3.3). ACON UTCO prompt loaded verbatim from `/workspace/acon` commit `d63f9ae`, sha256 of prompt = `9e50d0f93aca7f75eb723a90a758642d1aac3d7550f6afe1e692e56e2bc7b71c`.
+* Three claims:
+  - **Claim 1 STRONG positive**: best-of-N (N=8) beats greedy by **+26.7 pp pass-rate on C1 and +36.7 pp on CK**. Oracle win rate 90% / 83%. Best-of-N samples are also shorter (~451 vs 487 chars) — gain is not length-mediated.
+  - **Claim 2 POSITIVE**: K=2 repeated-compression drops greedy pass-rate 70%→60% (fragility rate 28.6%). **Sample compressions are more robust than greedy** (fragility 21.8%) — argues against ACON greedy decoding for stress-robustness too.
+  - **Claim 3 PARTIAL positive (after bug fix)**: ENTITY_LIST_ONLY confirmed zero advantage. But the winning type is **ACTION_OUTCOME** (n=59, mean adv +0.068), not the spec-predicted CAUSAL_PRECONDITION (n=8, mean adv 0 but %top 12.5% — bimodal). RUNTIME_BINDING: negative mean (-0.026) but highest %top (13.2%) — also bimodal.
+* **Bug fix shipped**: stage 11 first ran with `max_tokens=256` and all 144 labels silently fell back to `OTHER` because MiniMax thinking blocks alone are ≥256 tokens. Fixed by bumping to 2048 and adding a `WARN_THINKING_MIN_MAX_TOKENS=1024` warn-once guard in `motivation_v9/clients.py` that fires when MiniMax is called below the empirical threshold. (See §6 pitfalls below.) Re-ran stages 11-14 in ~5 min and got the real labels.
+* Caveats:
+  - CAUSAL_PRECONDITION n=8 and CONTROL_NEGATIVE_EVIDENCE n=4 too small for a strong directional claim → widened n=20 cases addendum running.
+  - Auto-written `outputs/reports/motivation_v9_results_summary.md` is mechanical; `docs/04_results_summary.md` is the honest hand-written counterpart.
+  - All cases reused from v3 dev (medium/long: ≥15 steps); no short-trajectory stratum.
+* Possible follow-ups (not requested):
+  - Method round: train compressor with reward = `behavior_after_stress(T^K) − λ·length`. Claim 1 + 2 jointly motivate this exactly.
+  - IAPO-style natural-language credit assignment: assign reward at chunk level using the Claim 3 chunk-advantage signal.
+  - Cross-model verification: same pipeline with Qwen3-4B as compressor. Spec §3.3 forbade Qwen as labeler but not as compressor.
 
-* **Qwen3-4B-Instruct-2507 vLLM** is currently running on port 8000 (PID 1114353, started 2026-05-28 11:43 AM PT). Served model id = `qwen3-4b-instruct-2507`. Launch script: `/workspace/qwen3-vllm/serve_instruct.sh`. Stop with `pkill -f 'served-model-name qwen3-4b-instruct-2507'`.
+## 4.5. GPU / endpoint state (as of 2026-05-29 12:15 PM PT)
+
+* **Qwen3-4B-Instruct-2507 vLLM** still running on port 8000 (PID 1114353, started 2026-05-28 11:43 AM PT — uninterrupted since). Served model id = `qwen3-4b-instruct-2507`. Launch script: `/workspace/qwen3-vllm/serve_instruct.sh`. Stop with `pkill -f 'served-model-name qwen3-4b-instruct-2507'`. v9 itself does NOT use Qwen (spec §3.3 forbids it as labeler) but the server is kept up for v2 #5 follow-up if it ever picks up.
 * The older base-model serve (`Qwen/Qwen3-4B` on port 8000 as `qwen3-4b`) is **stopped** since 2026-05-27. Launch script preserved at `/workspace/qwen3-vllm/serve.sh`. Cannot run both at once — same port.
-* GPU memory used: ~56 GB / 80 GB. ~25 GB free — enough for a parallel HF gradient run if needed.
-* MiniMax-M2.5 endpoint at 10.183.22.68:8005 has been continuously available across v4–v7.
+* GPU memory used: ~56 GB / 80 GB. ~25 GB free.
+* MiniMax-M2.5 endpoint at 10.183.22.68:8005 has been continuously available across v4-v9. v9 pipeline confirms it can sustain ~12.8 AppWorld agent runs/min through 6 parallel workers.
 
-## 4.6. Running background processes (as of 2026-05-28 4:05 PM PT)
+## 4.6. Running background processes (as of 2026-05-29 12:15 PM PT)
 
 ```
 PID 3916707  bash /workspace/EASMO/motivation/scripts/auto_push_watcher.sh
              log: /tmp/easmo_watcher.log
-             after 4:05 PM symlink-fix it can push again.
+             healthy — last push 19:55Z (12:55 PM PT).
 PID 1114353  python -m vllm.entrypoints.openai.api_server
              --model Qwen/Qwen3-4B-Instruct-2507 --port 8000
              log: /workspace/qwen3-vllm/server_instruct.log
-PID 1148*    (LLMLingua demo_app, user-owned, terminal 2.txt, not ours)
+PID 2357806  bash /workspace/EASMO/motivation_v9/scripts/run_all.sh
+             STAGES="07,08,09a,09,10,11,12,13,14" CHUNK_MAX_CASES=20
+             log: motivation_v9/outputs/logs/runall_wide_n20.log
+             v9 widened-n addendum, started 20:11Z (1:11 PM PT), ETA ~55 min.
 ```
 
-No active experiment process is running. v7 pipeline finished at 2026-05-28 22:19Z (3:19 PM PT).
+No other experiment process running. Earlier v9 first-pass finished
+at 18:50Z (11:50 AM PT) and the refix run (stages 11-14) finished
+at 20:01Z (1:01 PM PT) — both reported in §4 v9 thread above.
 
 ## 5. Active background processes
 
@@ -275,7 +339,8 @@ and asks for a new motivation track, the established convention is:
 Common pitfalls observed across rounds:
 
 * **MiniMax-M2.5 emits `<think>...</think>` blocks** that take real tokens. For JSON mode, set `max_tokens ≥ 2048` and strip `<think>` post-hoc. v5's `clients.parse_json` is the canonical implementation.
-* **Qwen3-4B JSON mode + thinking interaction**: pass `extra_body={"chat_template_kwargs": {"enable_thinking": False}}` to disable Qwen's thinking; otherwise short max_tokens cuts off mid-think. v5's `clients.chat_qwen` does this.
+  * **Quantitative guard (v9, 2026-05-29)**: median thinking 543 tokens, p90 750, max 1361 (measured from v9 stage 02 n=270 compressions). Any `max_tokens < 1024` for MiniMax is dangerous; v9 stage 11 first shipped with `max_tokens=256` and all 144 chunk labels silently fell back to defaults because thinking ate the whole budget and `_strip_think()` returned `""`. **The bug is invisible** — the API call succeeds, no exception is raised, no error is logged. Fixed in `motivation_v9/clients.py` with `WARN_THINKING_MIN_MAX_TOKENS=1024` and a warn-once `chat()` guard. Use this pattern going forward.
+* **Qwen3-4B JSON mode + thinking interaction**: pass `extra_body={"chat_template_kwargs": {"enable_thinking": False}}` to disable Qwen's thinking; otherwise short max_tokens cuts off mid-think. v5's `clients.chat_qwen` does this. (MiniMax does NOT support this kwarg — its chat template doesn't recognise it; you must rely on the `max_tokens` budget being large enough.)
 * **Python `str.format()` chokes on JSON schemas with literal `{` `}`**. Use jinja-style `{{name}}` placeholders and a regex renderer (v5's `clients.render_template`).
 * **Qwen3-4B max_model_len = 8192**. Long AppWorld trajectories must be truncated before being sent to Qwen. v5's `clients.pack_prompt_for_qwen` does proportional shrinking of long fields.
 * **Python format-style placeholders that match `{name}` in prose** silently break things. Always smoke-test with one real case before full pipeline.
@@ -320,19 +385,21 @@ Common pitfalls observed across rounds:
 | motivation_v6_jacobian | 30 (reused v4) | 0 LLM API; **30 Qwen3-4B backward + 150 × 200-step soft-token training** | 240 MiniMax (Exp D) | 1 h compute + 25 min D | 2026-05-28 |
 | motivation_v7 | 30 (reused v3) | ~10,360 LLM calls (fact extract 30, conditions 233, compress 600 + 460, retention 600 + 3,640) | 0 agent runs (diagnostic-only) | 1 h 33 min | 2026-05-28 |
 | motivation_v8 | 30 (reused v7) | ~14,270 LLM calls (compress 1,160 + 1,470 iterative/basin; retention 12,640) | 0 agent runs (diagnostic-only) | ~1 h 50 min | 2026-05-28 |
+| motivation_v9 | 30 (reused v3) + 12 chunk-cases (first-pass) + 20 (widened) | ~1,360 LLM (270 compress + 810 stress-recompress + 144/240 chunk-context + 144/240 chunk-label) | 540 (C1+CK) + 156/~320 (chunk ablation) | 2 h 16 min first-pass + ~5 min refix + ~55 min widened (in progress) | 2026-05-29 |
 
 ## 9. Final advice for whoever picks this up
 
 * **Start with `docs/05_results_summary.md`** in whichever track is relevant. Each one is paper-tier and ~5-10 min to read.
 * **Don't refactor across tracks.** Each track is self-contained. v3 reuses v2 modules (e.g. `motivation_v2/data.py`); v4 reuses v3; v5 reuses v3+v2. Keep that direction (newer reuses older, never the other way).
 * **The auto-push watcher is your friend**. It commits whatever's in `outputs/` every 20 min. If you're mid-experiment and your shell dies, the data is still there.
-* **Six docs that frame the project at paper-level**:
+* **Seven docs that frame the project at paper-level**:
   - `motivation_v2/docs/05_results_summary.md` — the original three-tier story.
   - `motivation_v3/outputs/motivation_results.md` — the structural-vs-behavioral mismatch.
   - `motivation_v5/docs/05_results_summary.md` — the recovered-then-dropped bottleneck.
   - `motivation_v6_jacobian/docs/04_results_summary.md` — active-subspace exists, span-rank by gradient doesn't work.
   - `motivation_v7/docs/04_results_summary.md` — abstraction prior under ACON (SDI ≈ 1, cross-model τ = 0.49).
-  - **`motivation_v8/docs/04_results_summary.md`** — generalises v7 to non-ACON prompts (SDI = 1.00 under task-agnostic; cross-model τ up to 0.78) AND identifies two new mechanisms: task-aware prompts invert fixed-point composition, and different inits reach disjoint fixed points. **v7+v8 together are the paper headline as of 2026-05-28.**
+  - `motivation_v8/docs/04_results_summary.md` — generalises v7 to non-ACON prompts (SDI = 1.00 under task-agnostic; cross-model τ up to 0.78) AND identifies two new mechanisms: task-aware prompts invert fixed-point composition, and different inits reach disjoint fixed points.
+  - **`motivation_v9/docs/04_results_summary.md`** — behavior-side validation of v7/v8. Claim 1 STRONG (best-of-N beats greedy +27/+37 pp pass-rate, oracle win 90/83%); Claim 2 POSITIVE (greedy more stress-fragile than sample, 28.6% vs 21.8%); Claim 3 PARTIAL (ACTION_OUTCOME is the surprise top type, not CAUSAL_PRECONDITION as spec predicted; ENTITY_LIST_ONLY confirmed zero advantage). **v7+v8+v9 together are the paper headline as of 2026-05-29.** v7/v8 say *what compressors do*; v9 says *what it costs the agent*.
   v4 is methodologically interesting (decision-state probing) but its main empirical result is "recency is a strong baseline" which is a less-clean paper story.
 
 ---
