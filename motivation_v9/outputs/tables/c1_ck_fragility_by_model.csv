@@ -1,0 +1,3 @@
+compressor_model,generation_type,n_candidates,count_robust_pass,count_fragile_pass,count_stress_improved,count_robust_fail,pass_rate_C1,pass_rate_CK,stress_drop_pp,fragility_rate
+minimax,greedy,30,15,6,3,6,0.7,0.6,10.0,0.2857142857142857
+minimax,sample,240,122,34,29,55,0.65,0.6291666666666667,2.083333333333333,0.21794871794871795
