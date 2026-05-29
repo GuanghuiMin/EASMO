@@ -326,12 +326,13 @@ Common pitfalls observed across rounds:
 * **Start with `docs/05_results_summary.md`** in whichever track is relevant. Each one is paper-tier and ~5-10 min to read.
 * **Don't refactor across tracks.** Each track is self-contained. v3 reuses v2 modules (e.g. `motivation_v2/data.py`); v4 reuses v3; v5 reuses v3+v2. Keep that direction (newer reuses older, never the other way).
 * **The auto-push watcher is your friend**. It commits whatever's in `outputs/` every 20 min. If you're mid-experiment and your shell dies, the data is still there.
-* **Five docs that frame the project at paper-level**:
+* **Six docs that frame the project at paper-level**:
   - `motivation_v2/docs/05_results_summary.md` — the original three-tier story.
   - `motivation_v3/outputs/motivation_results.md` — the structural-vs-behavioral mismatch.
   - `motivation_v5/docs/05_results_summary.md` — the recovered-then-dropped bottleneck.
-  - `motivation_v6_jacobian/docs/04_results_summary.md` — active-subspace exists, span-rank by gradient doesn't work (clean negative + clean positive in one round).
-  - **`motivation_v7/docs/04_results_summary.md`** — the project's cleanest paper-tier result: LLM history compressors are unconditioned surface-type abstraction priors (SDI ≈ 1, cross-model Kendall τ = 0.49). **This is the best candidate for the paper headline as of 2026-05-28.**
+  - `motivation_v6_jacobian/docs/04_results_summary.md` — active-subspace exists, span-rank by gradient doesn't work.
+  - `motivation_v7/docs/04_results_summary.md` — abstraction prior under ACON (SDI ≈ 1, cross-model τ = 0.49).
+  - **`motivation_v8/docs/04_results_summary.md`** — generalises v7 to non-ACON prompts (SDI = 1.00 under task-agnostic; cross-model τ up to 0.78) AND identifies two new mechanisms: task-aware prompts invert fixed-point composition, and different inits reach disjoint fixed points. **v7+v8 together are the paper headline as of 2026-05-28.**
   v4 is methodologically interesting (decision-state probing) but its main empirical result is "recency is a strong baseline" which is a less-clean paper story.
 
 ---
