@@ -31,3 +31,7 @@ env/
 # under outputs/ ARE tracked so the paper-quality numbers live with
 # the code. Per-experiment oracle_memories.jsonl is small enough to
 # track too (a few hundred KB each).
+
+
+# v10 SFT adapter binaries (1.8GB total) — kept locally, not pushed
+motivation_v10/outputs/models/

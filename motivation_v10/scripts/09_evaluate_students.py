@@ -223,19 +223,35 @@ def phase_b(args) -> None:
         for r in _read_jsonl(out_path):
             done.add(r.get("run_id"))
 
-    # student variants → use phase-A compressions
+    # Look up CK text per student from student_stress_chains.jsonl (written by 09b)
+    student_stress_path = Path(args.student_stress)
+    student_ck_text = {}
+    if student_stress_path.exists():
+        for r in _read_jsonl(student_stress_path):
+            k = (r["variant"], r["case_id"])
+            if r["round"] >= student_ck_text.get(k, (-1, ""))[0]:
+                student_ck_text[k] = (r["round"], r["context_text"])
+    print(f"[09b] resolved CK text for {len(student_ck_text)} (variant, case) pairs from "
+          f"{student_stress_path.name}")
+
+    # student variants → use phase-A compressions for C1, stress chains for CK
     for r in student_runs:
         if r["case_id"] not in test_case_ids:
             continue
         if not r.get("compressed_text"):
             continue
+        # C1 — student's own one-shot compression
         wid = f"{r['variant']}__{r['case_id']}__C1__cap{args.cap_steps}"
         if wid not in done:
             work.append((r["variant"], r["case_id"], "C1",
                          r["compressed_text"], args.cap_steps, args.tag))
-        # CK for student variant requires stress on the student output —
-        # implemented in a separate stress_students helper script
-        # (deferred; placeholder is single-step CK = C1 for now).
+        # CK — MiniMax-stressed K-round recompression of the student output
+        ck = student_ck_text.get((r["variant"], r["case_id"]))
+        if ck is not None:
+            wid = f"{r['variant']}__{r['case_id']}__CK__cap{args.cap_steps}"
+            if wid not in done:
+                work.append((r["variant"], r["case_id"], "CK",
+                             ck[1], args.cap_steps, args.tag))
 
     # MiniMax-greedy / oracle baselines reuse existing rows
     proxy_oracle_by_case = {}
@@ -337,6 +353,8 @@ def main() -> None:
                     default=str(_REPO / "outputs" / "raw" / "behavior_runs_candidates.jsonl"))
     ap.add_argument("--behavior_out",
                     default=str(_REPO / "outputs" / "raw" / "student_behavior_runs.jsonl"))
+    ap.add_argument("--student_stress",
+                    default=str(_REPO / "outputs" / "raw" / "student_stress_chains.jsonl"))
     ap.add_argument("--cap_steps", type=int, default=15)
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--tag", default="mv10_student")

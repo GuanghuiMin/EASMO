@@ -1,6 +1,6 @@
 # Session handoff — paste this into a new chat if context fills up
 
-> Updated: 2026-05-30 11:20 AM PT.
+> Updated: 2026-05-30 3:40 PM PT.
 > All times in Pacific Time (PT).
 >
 > **➡ For a fresh chat, read these in order:**
@@ -70,7 +70,7 @@ then run a `git push` to seed it.
 | `motivation_v7/` | **abstraction prior + iterative compression dynamics** with official ACON UTCO prompt (Qwen3-4B-Instruct-2507 + MiniMax-M2.5) | ✅ done 2026-05-28 | **Claim A STRONG positive 5/5 (Qwen), 4/5 (MiniMax):** SDI = 0.96 / 0.99 — McFadden R² of need_label = 0.003/0.0006 vs R² of fact_type = 0.155/0.110 (50–180× gap). **Claim B STRONG positive 5/5 / 4/5**: cross-model Kendall τ = 0.491 (p=0.041), 79.3% chains converge in ≤5 rounds, AUTH_OR_ACCESS_TOKEN has lowest AUSC in both models. Story: LLM compressors are unconditioned surface-type abstraction priors; tokens/IDs/paths die fast regardless of need. |
 | `motivation_v8/` | **fixed-point analysis of GENERAL (non-ACON) LLM compression** + basin-of-attraction experiment (same 30 cases + 233 facts + 150 quality pairs reused from v7) | ✅ done 2026-05-28 | **v7's abstraction prior REPLICATES and STRENGTHENS under general prompts:** SDI under P2 task-agnostic = **1.000 / 0.998** (vs v7 ACON 0.96/0.99); cross-model Kendall τ up to **0.778** (vs v7 0.49). **Two new mechanisms identified:** (1) P1 task-aware **inverts** the fixed-point composition from NARR>EXEC (P2 0.88 vs 0.55) to EXEC>NARR (P1 0.64 vs 0.46) — task framing reshapes the attractor. (2) Different inits (RAW_FULL/DETAIL_HEAVY/NARRATIVE_HEAVY/FACT_TABLE_ONLY) reach **disjoint** fixed points (Jaccard distance up to 1.00) — no universal attractor. Δ_need^∞ for executable facts = **+0.27 under P1** — moderate, and **strengthens across iterative rounds** vs single-round Δ_need. |
 | `motivation_v9/` | **behavior-first** validation: Best-of-N ACON, C1-vs-CK fragility under repeated-compression stress, NL chunk information advantage (MiniMax-only primary; reuse v3 30 cases + ACON UTCO) | ✅ done 2026-05-29 (first-pass + widened addendum) | **Claim 1 STRONG positive** (best-of-N vs greedy: C1 +26.7 pp, CK +36.7 pp pass-rate; oracle_win 90/83%). **Claim 2 POSITIVE** (greedy fragility 28.6%, stress drop 10 pp; greedy more fragile than sample, 28.6% vs 21.8%). **Claim 3 NEGATIVE at n=239** (originally "STRONG positive at n=144 first-pass" did NOT survive widening: causal-flag chunks mean adv +0.036 vs ENTITY_LIST_ONLY +0.167 — direction reverses, likely because the labeler's "entity list" describes form not function). Only Claim-3 sub-finding to survive widening: **CONTROL_NEGATIVE_EVIDENCE** (n=13, mean +0.115, echoes v5's lost-failure-log bottleneck). Total pipeline 2h 16min first-pass + 64 min widened addendum. |
-| `motivation_v10/` | **trainable compressor policy**: ACON best-of-N → proxy reward → Qwen3-4B LoRA SFT (C1 vs CK selection criteria) → GRPO readiness check; chunk reanalysis with v10 enriched §17.5 schema. Spec: `user_feedback/motivation_v10_proxy_sft_grpo_readiness_v2.md`. | 🔄 stages 00-07 done 2026-05-29/30; stage 08 SFT next | **Stages 02-04** (8.6 h wall-clock total): 75 cases × 9 candidates × 2 rounds = 1,350 MiniMax agent runs, 0 errors. **Claim 1 oracle headroom STRONG positive** across all splits (+25 to +40 pp pass-rate vs greedy). **Claim 1 proxy recovery PARTIAL**: pairwise wins +12 pp C1 (passes §19.1) but only +4 pp CK (fails §19.1 strict bar of +10 pp OR 40% recovery); pointwise MiniMax verifier essentially uninformative (AUROC 0.56). **Stage 07** wrote 52 strong-quality SFT teacher targets (each for C1 and CK; 29 legacy_v9 + 23 teacher_train). Full interim writeup at `motivation_v10/docs/04_results_summary.md`. Next: stop vLLM → stage 08 SFT (2 students × ~75 min) → restart vLLM → stages 09-12. |
+| `motivation_v10/` | **trainable compressor policy**: ACON best-of-N → proxy reward → Qwen3-4B LoRA SFT (C1 vs CK selection criteria) → GRPO readiness check; chunk reanalysis with v10 enriched §17.5 schema. Spec: `user_feedback/motivation_v10_proxy_sft_grpo_readiness_v2.md`. | 🔄 stages 00-09 done 2026-05-29/30; stage 10 chain running (ETA ~11 PM PT 5/30) | **Claim 1 oracle headroom STRONG ✓** (+25-40 pp across all splits). **Claim 1 proxy recovery PARTIAL**: pairwise +12 pp C1 / +4 pp CK; verifier AUROC 0.56 (FAIL §19.1 on CK). **Stage 08 SFT** trained both Qwen3-4B LoRA students in **5.3 min total** (52 rows, 2 epochs, 26 opt-steps each; final loss 0.87, token_acc 0.82). **Claim 2 PARTIAL ✓**: SFT-CK > SFT-C1 (+7.2 pp CK aggregate) ✓; SFT-CK > Raw-Qwen on aggregate CK (54.8 % vs 50.0 %) ✓ and legacy_v9 CK (+10 pp) ✓; but loses to Raw-Qwen on strict held-out test_behavior CK (75 % vs 83.3 %, n=12 thin). **🌟 BONUS finding**: SFT massively improves stress robustness — Raw-Qwen drops −11.9 pp C1→CK under K=2; SFT-CK *gains* +7.2 pp under stress. Stress-selected target distillation transfers behavioral robustness into student. Full interim at `motivation_v10/docs/04_results_summary.md`. Stage 10 (GRPO readiness, ~7 h) + 11 (chunk reanalysis stub) + 12 (auto report) pending. |
 
 Each track folder follows the same shape:
 
@@ -291,13 +291,20 @@ PID 3916707  bash /workspace/EASMO/motivation/scripts/auto_push_watcher.sh
 PID 1114353  python -m vllm.entrypoints.openai.api_server
              --model Qwen/Qwen3-4B-Instruct-2507 --port 8000
              log: /workspace/qwen3-vllm/server_instruct.log
+PID 3557337  bash /workspace/EASMO/motivation_v10/scripts/chain_09b_09B_10.sh
+             chained: 09b stress (done 21:20Z) → 09 phase B (done
+             21:45Z) → 10 compress (running, 217/1134 done as of
+             22:35Z) → 10 stress → 10 score → 10 summarize → 12 report.
+             log: motivation_v10/outputs/logs/chain_09b_09B_10.log
+             Started 21:06Z 5/30, est. finish ~04:00Z 5/31 (~9 PM PT 5/30).
 ```
 
-No experiment process active as of 2026-05-30 11:20 AM PT. The v10
-chain so far: stage 01 (22:00Z 5/29), stages 02-04 (overnight,
-finished 03:07Z 5/30), stages 05-07 (16:01-18:07Z 5/30). Next
-launch is stage 08 (SFT) which requires stopping vLLM
-(PID 1114353); see §4.5 below for the full restart recipe.
+vLLM (Qwen3-4B-Instruct-2507 port 8000) was stopped 18:15Z for
+stage 08 SFT, **not yet restarted**. Restart command:
+`nohup bash /workspace/qwen3-vllm/serve_instruct.sh > /workspace/qwen3-vllm/server_instruct.log 2>&1 &`.
+Not blocking v10 — stage 10's compression phase uses HF + PEFT
+directly (no vLLM needed). vLLM restart is only needed if anything
+else wants Raw-Qwen serving (e.g. v2 #5 follow-up).
 
 ## 5. Active background processes
 

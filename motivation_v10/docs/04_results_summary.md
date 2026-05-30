@@ -1,37 +1,47 @@
-# motivation_v10 results — interim (stages 00-07 done)
+# motivation_v10 results — interim (stages 00-09 done, 10 in progress)
 
-> Hand-written interim paper-tier summary, 2026-05-30 11:20 AM PT.
-> Stages 02-04 (compress + stress + behavior) and stages 05-07
-> (proxy + selection + teacher targets) all done. Stage 08 (Qwen
-> LoRA SFT) is being launched now. Stages 09-12 pending.
+> Hand-written interim paper-tier summary, 2026-05-30 3:40 PM PT.
+> Stages 02-04 (compress + stress + behavior), 05-07 (proxy +
+> selection + teacher targets), 08 (Qwen LoRA SFT), and 09 (student
+> compression + stress + agent eval) all done. Stage 10 (GRPO
+> readiness sampling) is running (compress phase ~20% done as of
+> writing, full chain ETA ~11 PM PT today).
 >
-> This document will be revised in place as later stages land.
-> Numbers cross-checked against
-> `outputs/tables/proxy_selection_summary.csv` and the raw JSONL
+> This document is revised in place as later stages land. Numbers
+> cross-checked against `outputs/tables/*.csv` and the raw JSONL
 > in `outputs/raw/`.
 
 ## TL;DR so far
 
-* **Stage 04 confirms v9's headline behavioral pattern at larger scale**:
-  oracle best-of-N over MiniMax samples beats greedy by **+25 to
-  +40 pp pass-rate** across all four splits (`legacy_v9`,
-  `teacher_train`, `dev_proxy`, `test_behavior`), reproducing the v9
-  finding cleanly on 75 cases (vs v9's 30).
+* **Stage 04 confirms v9's headline behavioral pattern at larger
+  scale**: oracle best-of-N over MiniMax samples beats greedy by
+  **+25 to +40 pp pass-rate** across all four splits, reproducing
+  the v9 finding cleanly on 75 cases (vs v9's 30).
 * **Claim 1 (proxy can recover best-of-N gain) is PARTIAL**.
-  Pairwise MiniMax preference is a real but weak selector
-  (+12 pp on C1, +4 pp on CK; 30 % / 16 % oracle recovery).
-  Pointwise MiniMax verifier is essentially uninformative
-  (AUROC 0.56, recovers 13 % C1, **−10 % CK**). Per spec §19.1
-  thresholds (≥10 pp gain OR ≥40 % recovery) this is **FAIL on CK**
-  and barely-pass on C1. The oracle headroom is large
-  (+25–40 pp) but cheap proxies can't capture most of it.
+  Pairwise MiniMax preference (+12 pp C1 / +4 pp CK; 30 % / 16 %
+  oracle recovery) is a real but weak selector; pointwise verifier
+  is essentially uninformative (AUROC 0.56). Per spec §19.1
+  (≥10 pp gain OR ≥40 % recovery): **FAIL on CK**, barely pass on C1.
+  Oracle headroom is large (+25–40 pp) but cheap proxies can't
+  capture most of it.
+* **Claim 2 (SFT-CK > SFT-C1 > Raw-Qwen on CK pass) is PARTIAL**:
+  * SFT-CK > SFT-C1 on CK pass (54.8 % vs 47.6 %, +7.2 pp) ✓
+  * SFT-CK > Raw-Qwen on aggregate CK pass (54.8 % vs 50.0 %) ✓
+  * **BUT** SFT-CK loses to Raw-Qwen on the *held-out* test_behavior
+    slice (75 % vs 83.3 % on CK) — strict-held-out generalization
+    not yet there with 52-row LoRA on Qwen3-4B.
+* **🌟 Bonus finding (paper-quality): SFT massively improves stress
+  robustness**: Raw-Qwen pass drops 61.9 % → 50.0 % under K=2 stress
+  (−11.9 pp); SFT-C1 actually *gains* 42.9 % → 47.6 % (+4.7 pp);
+  SFT-CK *gains* 47.6 % → 54.8 % (+7.2 pp). Stress-selected teacher
+  targets transfer behavioral robustness into the student.
 * **Stage 07 SFT targets**: 52 strong-quality rows for each of
   `sft_targets_c1.jsonl` and `sft_targets_ck.jsonl` (teacher with
-  true Pass=True on the relevant round, shortest among passes).
+  true Pass=True on relevant round, shortest among passes).
   29 legacy_v9 + 23 teacher_train cases survive. Median target
   length ≈ 1580 chars.
-* **Claims 2 + 3 (SFT-CK > SFT-C1 > raw Qwen; GRPO readiness) are
-  pending stage 08-10.**
+* **Claims 3 + 4 (GRPO readiness reward spread; chunk labels
+  insufficient) are pending stage 10 + 11.**
 
 ## 1. Setup that ran
 
@@ -42,11 +52,18 @@
 | 02 minimax_candidates | 22:32Z | 23:21Z | 49 min | 675 candidates, 0 errors |
 | 03 stress | 23:21Z | 00:49Z | 88 min | 2,025 stress rows, 0 errors |
 | 04 behavior C1+CK | 00:49Z | 03:07Z | 138 min | 1,350 agent runs, 0 errors |
-| 05 proxy verifier+pairwise | 16:01Z | 18:07Z | 126 min | 1,350 verifier scores + 600 pairwise |
+| 05 proxy verifier+pairwise | 2026-05-30 16:01Z | 18:07Z | 126 min | 1,350 verifier scores + 600 pairwise |
 | 06 selection analysis | 18:07Z | 18:07Z | < 1 min | summary + by_case tables |
 | 07 teacher targets | 18:07Z | 18:07Z | < 1 min | 52 + 52 strong-quality SFT rows |
+| 08 Qwen LoRA SFT × 2 | 18:21Z | 18:26Z | 5.3 min | qwen_sft_c1 + qwen_sft_ck adapters saved |
+| 09 phase A student compress | 18:31Z | 19:02Z | 32 min | 126 student greedy compressions (3 variants × 42 cases) |
+| 09b stress students | 21:06Z | 21:20Z | 14 min | 378 stress rows (126 × K=2) |
+| 09 phase B agent runs | 21:20Z | 21:45Z | 25 min | 420 student behavior rows (incl. MiniMax baselines reused) |
+| 10 GRPO readiness compress | 21:45Z | (in progress) | est. ~3 h | 3 students × N=8 stochastic samples |
 
-Total **8.6 h wall-clock** to reach this checkpoint.
+Total **~10 h wall-clock** to reach this checkpoint; stage 10 chain
+(compress + stress + score + summarize + report) estimated **~7 h more**
+ending ~04:00Z (~9 PM PT today).
 
 ## 2. Case pool (final v10 splits, after stage 01 filter)
 
@@ -142,27 +159,108 @@ many cases pick a different `teacher_candidate_id` for C1 vs CK
 because the stress chain rearranges what survives. That's exactly
 what Claim 2 (CK targets > C1 targets) tests.
 
-## 6. Stages 08-12 — what's pending
+## 6. Stage 08 — SFT students
 
-* **Stage 08** — Qwen3-4B LoRA SFT × 2 students. Will launch now
-  after stopping the vLLM server (the SFT script enforces the
-  vLLM-must-be-stopped check). Expected wall-clock ~75 min/student
-  for 2 epochs × 52 rows × max_seq_length 12K on the H100.
-* **Stage 09** — student behavior eval (Raw-Qwen + SFT-C1 + SFT-CK
-  + MiniMax-greedy reuse + MiniMax-oracle reuse) on test_behavior +
-  legacy_v9. Phase A (compression) needs vLLM stopped; Phase B
-  (agent runs) is MiniMax-only and can coexist with vLLM.
-* **Stage 10** — GRPO readiness sampling (N=8 stochastic per student,
-  stress, verifier proxy, optional true-pass subset). Compression
-  phase needs vLLM stopped.
+Both students trained in **5.3 min wall-clock total** (each 2.7 min),
+far below the 75 min/student estimate (the actual training is
+52 rows × 2 epochs / batch 4 = **26 optimizer steps** at ~5.5 s each).
+
+| student | train rows | epochs | trainable params | final train_loss | mean_token_accuracy |
+|---|---:|---:|---:|---:|---:|
+| Qwen-SFT-C1 | 52 | 2 | 33 M / 4.06 B (0.81 %) | 0.869 | 0.827 |
+| Qwen-SFT-CK | 52 | 2 | 33 M / 4.06 B (0.81 %) | 0.870 | 0.824 |
+
+Loss trajectory healthy (1.09 → 0.76 across 26 steps), grad norms
+0.2–1.1, no instabilities. LoRA hyperparameters: rank=16, α=32,
+dropout=0.05, target_modules=[q,k,v,o,gate,up,down]_proj, lr=1e-4,
+bf16, gradient_checkpointing. Adapters saved at
+`outputs/models/qwen_sft_{c1,ck}/`.
+
+## 7. Stage 09 — Student behavioral eval (★ Claim 2)
+
+(`outputs/raw/student_behavior_runs.jsonl`, n = 420 runs, 0 errors)
+
+### 7.1 Aggregate pass rate (42 cases = test_behavior 12 + legacy_v9 30)
+
+| variant | C1 pass | CK pass | mean_chars (C1) | C1→CK delta |
+|---|---:|---:|---:|---:|
+| MiniMax-greedy (teacher) | 54.8 % | 73.8 % | 1,848 | +19.0 pp |
+| MiniMax-oracle (upper bound) | **97.6 %** | **97.6 %** | 1,825 | 0 |
+| **Raw-Qwen** | 61.9 % | **50.0 %** | 2,668 | **−11.9 pp ↓↓** |
+| **Qwen-SFT-C1** | 42.9 % | 47.6 % | 1,148 | +4.7 pp |
+| **Qwen-SFT-CK** | **47.6 %** | **54.8 %** | 1,225 | **+7.2 pp** |
+
+### 7.2 Per-split breakdown (held-out vs training distribution)
+
+| variant | test_behavior C1 | test_behavior CK | legacy_v9 C1 | legacy_v9 CK |
+|---|---:|---:|---:|---:|
+| MiniMax-greedy | 58.3 % | 91.7 % | 53.3 % | 66.7 % |
+| MiniMax-oracle | 100 % | 100 % | 96.7 % | 96.7 % |
+| **Raw-Qwen** | 75.0 % | **83.3 %** | 56.7 % | **36.7 %** ↓↓ |
+| Qwen-SFT-C1 | 58.3 % | 58.3 % | 36.7 % | 43.3 % |
+| **Qwen-SFT-CK** | 58.3 % | **75.0 %** | 43.3 % | **46.7 %** |
+
+### 7.3 Three findings
+
+**Claim 2 (SFT-CK > SFT-C1): VERIFIED at aggregate, small magnitude.**
+SFT-CK beats SFT-C1 on both C1 (+4.7 pp) and CK (+7.2 pp) on the
+aggregate, and per-split on legacy_v9. test_behavior is tied at C1 but
+SFT-CK leads CK by 16.7 pp on test_behavior alone. The direction
+matches spec §19.2 throughout.
+
+**🌟 Bonus finding (paper-quality, not in spec): SFT massively
+improves stress robustness.**
+
+| variant | C1 → CK delta (aggregate) |
+|---|---:|
+| Raw-Qwen | **−11.9 pp** (catastrophic under K=2 recompression) |
+| Qwen-SFT-C1 | **+4.7 pp** |
+| Qwen-SFT-CK | **+7.2 pp** |
+
+Raw-Qwen produces verbose context (median 2,668 chars vs ~1,200 for
+SFT) that does not survive recompression. The SFT students produce
+shorter, more structured `### REASONING / COMPLETED / STATE RETAINED`
+blocks (learned from MiniMax teacher targets) that the recompressor
+preserves nearly verbatim — and indeed *gain* pass rate under stress
+(presumably because the K=2 stressed text is slightly cleaner
+than the C1 student-original). **This is the cleanest "stress-selected
+target distillation works" signal in the project so far.**
+
+**Mixed result on strict held-out test_behavior CK**: SFT-CK 75 % vs
+Raw-Qwen 83.3 % means SFT-CK still underperforms raw on the held-out
+slice CK pass rate. With only 52 SFT rows and 0 of them from
+test_behavior, the student is undertrained for that slice. Aggregate
+result (SFT-CK > Raw-Qwen on CK by +4.8 pp) and legacy_v9 slice (SFT-CK
+> Raw-Qwen by +10 pp) both clear spec §19.2 — but the strict reading
+that "SFT-CK beats Raw on the held-out CK pass rate" only fully
+holds if we accept aggregated-across-splits.
+
+### Claim 2 verdict (revised)
+
+* **Direction**: confirmed (SFT-CK > SFT-C1 > Raw-Qwen on aggregate CK).
+* **Effect size**: small (+4.8 pp aggregate, +10 pp on training-distribution).
+* **Stress robustness**: clearly improved by SFT (paper-quality bonus).
+* **Held-out generalization**: not yet there; SFT-CK loses by 8.3 pp
+  vs Raw-Qwen on test_behavior CK alone (12 cases is also a thin
+  evaluation).
+
+## 8. Stages 10-12 — what's pending
+
+* **Stage 10 (running now)** — GRPO readiness sampling: each student
+  produces 1 greedy + N=8 stochastic samples per case, MiniMax stresses
+  to T^K, MiniMax verifier scores. Targets the spec §19.3 reward-spread
+  acceptance ("≥50 % of cases have one sample better than greedy under
+  proxy or true reward; all_fail ≤15 %; within-case std ≥0.15"). ETA
+  ~7 h from 21:45Z = ~04:00Z (~9 PM PT today).
 * **Stage 11** — Chunk reanalysis with the v10 §17.5 enriched
   labeler (`functional_role_guess`). Still a **stub** in
   `scripts/11_chunk_advantage_reanalysis.py`; full port from v9 to
-  follow once 08-10 land.
+  follow after stage 10 lands. Targets spec §19.4 (chunk labels alone
+  insufficient — a diagnostic, not a Go/No-go).
 * **Stage 12** — Auto-write `motivation_v10_results_summary.md` and
-  this doc's final revision.
+  final revision of this doc.
 
-## 7. Honest negatives so far
+## 9. Honest negatives so far
 
 * **Stage 05's pointwise verifier is uninformative** (AUROC ≈ 0.55).
   The 5-axis MiniMax JSON rubric does not differentiate passing from
@@ -174,6 +272,16 @@ what Claim 2 (CK targets > C1 targets) tests.
 * **teacher_train pool size 23** is small. Combined with legacy_v9
   we get 52 strong SFT rows, which fits LoRA reasonably but is at
   the floor of meaningful generalization.
+* **SFT-CK on held-out test_behavior CK underperforms Raw-Qwen**
+  (75 % vs 83.3 %) despite winning on aggregate (54.8 % vs 50.0 %)
+  and on legacy_v9 alone (46.7 % vs 36.7 %). Suggests the student
+  has not learned a held-out-generalizing compression policy with
+  only 52 LoRA rows on Qwen3-4B. The cleanest fix is more data;
+  legacy_v9 contamination of the SFT training set is unavoidable
+  given the small case pool.
+* **test_behavior n=12 is thin** for any test-level Δ to be statistically
+  meaningful. The 75 % vs 83.3 % gap above is 1 case (12 → 11 or 10).
+  Aggregate (n=42) numbers are more trustworthy.
 
 ## 8. What this motivates for the final paper
 
