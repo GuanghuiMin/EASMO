@@ -1,6 +1,8 @@
-"""Stage 03 — generate C1 candidates: 4 families × cases × (1 greedy + N samples).
+"""Stage 05 — generate C1 candidates: 4 families × cases × (1 greedy + N samples).
 
-Output: outputs/raw/compression_candidates_c1.jsonl
+Reads from `outputs/raw/compression_boundaries.jsonl` (written by
+stage 03). Output: outputs/raw/candidate_compressions_c1.jsonl
+(spec §8 schema).
 
 Resumable: skips already-generated candidate_ids.
 """
@@ -38,11 +40,10 @@ def _read_jsonl(p):
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--cases",
-                    default=str(_REPO / "data" / "v11_primary_cases.jsonl"),
-                    help="Default = primary cases. Use --cases v11_secondary_all_cases.jsonl "
-                         "to include baseline-fail cases too (for compression rescue analysis).")
-    ap.add_argument("--out", default=str(raw_path("compression_candidates_c1.jsonl")))
+    ap.add_argument("--boundaries",
+                    default=str(raw_path("compression_boundaries.jsonl")),
+                    help="Input: compression boundaries written by stage 03.")
+    ap.add_argument("--out", default=str(raw_path("candidate_compressions_c1.jsonl")))
     ap.add_argument("--families", default="general_task_agnostic,general_task_aware,ACON_UT,ACON_UTCO")
     ap.add_argument("--n_samples", type=int, default=8)
     ap.add_argument("--max_chars", type=int, default=2000)
@@ -52,11 +53,12 @@ def main() -> None:
     args = ap.parse_args()
     ensure_outputs()
 
-    cases = read_jsonl(Path(args.cases))
+    boundaries = read_jsonl(Path(args.boundaries))
+    boundaries = [b for b in boundaries if b.get("history_text", "").strip()]
     families = [f.strip() for f in args.families.split(",") if f.strip()]
-    print(f"[03] {len(cases)} cases × {len(families)} families × "
+    print(f"[05] {len(boundaries)} cases × {len(families)} families × "
           f"(1 greedy + {args.n_samples} samples) = "
-          f"{len(cases) * len(families) * (1 + args.n_samples)} compressions")
+          f"{len(boundaries) * len(families) * (1 + args.n_samples)} compressions")
 
     client = make_client("minimax")
     bundles = {f: pf.get_bundle(f) for f in families}
@@ -67,11 +69,11 @@ def main() -> None:
     if out_path.exists():
         for r in _read_jsonl(out_path):
             done.add(r["candidate_id"])
-    print(f"[03] {len(done)} already done")
+    print(f"[05] {len(done)} already done")
 
-    # Build work list: (case, family, candidate_type, sample_id, temperature, seed)
+    # Build work list: (boundary, family, candidate_type, sample_id, temperature, seed)
     work: List[Tuple] = []
-    for case in cases:
+    for case in boundaries:
         for fam in families:
             cid = f"{case['task_id']}__{fam}__greedy"
             if cid not in done:
@@ -80,13 +82,13 @@ def main() -> None:
                 cid = f"{case['task_id']}__{fam}__sample_{i:02d}"
                 if cid not in done:
                     work.append((case, fam, "sample", i, args.temperature_sample, 1000 + i))
-    print(f"[03] {len(work)} pending compressions")
+    print(f"[05] {len(work)} pending compressions")
 
     def _do(item):
         case, fam, candidate_type, sample_id, temperature, seed = item
         b = bundles[fam]
-        user = pf.render(b, task=case["user_instruction"],
-                          history=case["full_trajectory_text"],
+        user = pf.render(b, task=case["task_instruction"],
+                          history=case["history_text"],
                           max_chars=args.max_chars)
         cid_suffix = "greedy" if candidate_type == "greedy" else f"sample_{sample_id:02d}"
         cid = f"{case['task_id']}__{fam}__{cid_suffix}"
@@ -97,14 +99,15 @@ def main() -> None:
             text = res.text
             return {
                 "task_id":              case["task_id"],
+                "split":                case["split"],
                 "prompt_family":        fam,
                 "candidate_id":         cid,
                 "candidate_type":       candidate_type,
                 "sample_id":            sample_id,
                 "temperature":          temperature,
                 "seed":                 seed,
-                "task_instruction":     case["user_instruction"],
-                "source_context_chars": len(case["full_trajectory_text"]),
+                "task_instruction":     case["task_instruction"],
+                "input_history_chars":  case.get("history_chars", len(case["history_text"])),
                 "c1_text":              text,
                 "c1_chars":             len(text),
                 "c1_tokens_est":        max(1, len(text) // 4),
@@ -119,6 +122,7 @@ def main() -> None:
         except Exception as e:
             return {
                 "task_id":          case["task_id"],
+                "split":            case.get("split", "?"),
                 "prompt_family":    fam,
                 "candidate_id":     cid,
                 "candidate_type":   candidate_type,
@@ -142,7 +146,7 @@ def main() -> None:
                     eta = (time.time()-t0)/n_done * (len(work)-n_done)
                     print(f"  [{n_done}/{len(work)}] err={n_err} eta={eta:.0f}s",
                           flush=True)
-    print(f"[03] done: {n_done} new ({n_err} errors); elapsed {(time.time()-t0)/60:.1f} min")
+    print(f"[05] done: {n_done} new ({n_err} errors); elapsed {(time.time()-t0)/60:.1f} min")
 
 
 if __name__ == "__main__":

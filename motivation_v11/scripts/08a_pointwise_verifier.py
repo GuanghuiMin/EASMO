@@ -30,8 +30,8 @@ def _read_jsonl(p):
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--cases", default=str(_REPO / "data" / "v11_primary_cases.jsonl"))
-    ap.add_argument("--candidates", default=str(raw_path("compression_candidates_c1.jsonl")))
+    ap.add_argument("--cases", default=str(_REPO / "outputs" / "raw" / "compression_boundaries.jsonl"))
+    ap.add_argument("--candidates", default=str(raw_path("candidate_compressions_c1.jsonl")))
     ap.add_argument("--stress", default=str(raw_path("stress_chains.jsonl")))
     ap.add_argument("--out", default=str(raw_path("pointwise_verifier_scores.jsonl")))
     ap.add_argument("--workers", type=int, default=6)
@@ -64,12 +64,12 @@ def main() -> None:
         if not case: continue
         key_c1 = (cand["candidate_id"], "C1")
         if key_c1 not in done:
-            work.append((cand, "C1", cand["c1_text"], case["user_instruction"]))
+            work.append((cand, "C1", cand["c1_text"], case["task_instruction"]))
         ck = ck_text.get(cand["candidate_id"])
         if ck:
             key_ck = (cand["candidate_id"], "CK")
             if key_ck not in done:
-                work.append((cand, "CK", ck[1], case["user_instruction"]))
+                work.append((cand, "CK", ck[1], case["task_instruction"]))
 
     print(f"[06a] pointwise verifier: {len(work)} pending of "
           f"{2*len(cands)} total")

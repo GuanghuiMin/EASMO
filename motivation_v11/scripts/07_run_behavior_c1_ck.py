@@ -2,7 +2,7 @@
 
 MUST run with /workspace/acon/.venv/bin/python.
 
-Output: outputs/raw/behavior_runs_c1_ck.jsonl
+Output: outputs/raw/behavior_runs.jsonl
         (one row per candidate × {C1, CK})
 """
 
@@ -71,11 +71,11 @@ def _read_jsonl_plain(p):
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--candidates",
-                    default=str(_REPO / "outputs" / "raw" / "compression_candidates_c1.jsonl"))
+                    default=str(_REPO / "outputs" / "raw" / "candidate_compressions_c1.jsonl"))
     ap.add_argument("--stress",
                     default=str(_REPO / "outputs" / "raw" / "stress_chains.jsonl"))
     ap.add_argument("--out",
-                    default=str(_REPO / "outputs" / "raw" / "behavior_runs_c1_ck.jsonl"))
+                    default=str(_REPO / "outputs" / "raw" / "behavior_runs.jsonl"))
     ap.add_argument("--cap_steps", type=int, default=15)
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--tag", default="mv11_behavior")

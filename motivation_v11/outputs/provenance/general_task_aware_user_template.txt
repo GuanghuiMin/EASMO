@@ -1,0 +1,22 @@
+Compress the previous interaction history into a shorter context for a downstream tool-use agent.
+
+The downstream agent will continue the following task:
+{task_instruction}
+
+Hard budget:
+- The compressed context should be no more than {max_chars} characters.
+
+Compression goals:
+- Preserve information that may help the downstream agent continue the task correctly.
+- Preserve exact identifiers, API names, parameter names, file paths, dates, amounts, auth values, object IDs, and state-changing action outcomes when they may matter.
+- Preserve failed attempts or negative evidence only if they may prevent repeated mistakes.
+- Remove redundant, obsolete, or irrelevant details.
+- Do not invent facts.
+- Do not solve the task.
+- Do not output the original input.
+- Return plain text only. You may use bullets, but do not use a fixed schema.
+
+Previous interaction history:
+{context}
+
+Compressed context:

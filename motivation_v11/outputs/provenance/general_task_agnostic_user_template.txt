@@ -1,0 +1,17 @@
+Compress the following interaction history into a shorter version.
+
+Hard budget:
+- The compressed context should be no more than {max_chars} characters.
+
+Compression goals:
+- Preserve important information.
+- Remove redundant, obsolete, or irrelevant details.
+- Keep exact values only if they appear important in the history.
+- Do not invent facts.
+- Do not output the original input.
+- Return plain text only. You may use bullets, but do not use a fixed schema.
+
+Interaction history:
+{context}
+
+Compressed context:

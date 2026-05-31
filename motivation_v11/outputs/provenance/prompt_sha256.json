@@ -1,0 +1,30 @@
+{
+  "general_task_agnostic": {
+    "sha256_system": "74fa558527bdb2c3636d2232c59c21de5da1693236d03f340f8d865ced16851b",
+    "sha256_user": "d9b1cf639686cb238e172f02f4a1097ad2b02cc0fe3d41ac0f8bcc39917d3538",
+    "source_path": "in-repo motivation_v11/prompt_families.py",
+    "template_kind": "python_format",
+    "acon_commit": null
+  },
+  "general_task_aware": {
+    "sha256_system": "19364075f0f9af341d6410fa70d78b1a69e8fa5c49cd3747d833ac44a6611a6e",
+    "sha256_user": "7398347c4b9b69044e7d43c87b23b202d83ec3185c71436a1dbc2c0d04a98206",
+    "source_path": "in-repo motivation_v11/prompt_families.py",
+    "template_kind": "python_format",
+    "acon_commit": null
+  },
+  "ACON_UT": {
+    "sha256_system": "f9a0a5188d643d0990a422e94557e781e9e4f9c00a6506f699c4956b7096a392",
+    "sha256_user": "0508caa837c50403be2c8545646359a0fb72009fb14df3a8acf85aedaf649834",
+    "source_path": "experiments/appworld/prompts/context_opt/prompt_history_v2.jinja",
+    "template_kind": "jinja_acon",
+    "acon_commit": "d63f9ae18959dc7215ff62899c94c5e8c56847ae"
+  },
+  "ACON_UTCO": {
+    "sha256_system": "f9a0a5188d643d0990a422e94557e781e9e4f9c00a6506f699c4956b7096a392",
+    "sha256_user": "9e50d0f93aca7f75eb723a90a758642d1aac3d7550f6afe1e692e56e2bc7b71c",
+    "source_path": "experiments/prompt_optimizer/outputs_appworld/stage1_minimax/optimized_prompts/improved_history_prompt_samples_4.jinja",
+    "template_kind": "jinja_acon",
+    "acon_commit": "d63f9ae18959dc7215ff62899c94c5e8c56847ae"
+  }
+}

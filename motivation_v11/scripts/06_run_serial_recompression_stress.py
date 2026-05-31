@@ -93,7 +93,7 @@ def _stress_one_candidate(*, cand, bundle, client, K_STRESS, max_chars, max_toke
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--candidates", default=str(raw_path("compression_candidates_c1.jsonl")))
+    ap.add_argument("--candidates", default=str(raw_path("candidate_compressions_c1.jsonl")))
     ap.add_argument("--out", default=str(raw_path("stress_chains.jsonl")))
     ap.add_argument("--rounds", type=int, default=2)
     ap.add_argument("--max_chars", type=int, default=2000)

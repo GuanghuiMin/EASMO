@@ -1,0 +1,31 @@
+{
+  "spec_path": "user_feedback/motivation_v11_final_full_dev_behavior_prompt_family_experiment.md",
+  "task_pool": "train+dev",
+  "n_samples": 8,
+  "stress_rounds_k": 2,
+  "cap_steps": 15,
+  "max_chars": 2000,
+  "temperature_greedy": 0.0,
+  "temperature_sample": 0.7,
+  "seed_greedy": 42,
+  "seed_sample_base": 1000,
+  "max_tokens_compression": 2048,
+  "max_tokens_verifier": 1536,
+  "max_tokens_pairwise": 1024,
+  "max_tokens_entropy": 1024,
+  "entropy_M": 5,
+  "entropy_scope_initial": [
+    "ACON_UTCO"
+  ],
+  "entropy_scope_extensible_to": [
+    "ACON_UT",
+    "general_task_aware",
+    "general_task_agnostic"
+  ],
+  "lambda_length": 0.05,
+  "selector_random_seed": 20260531,
+  "acon_commit": "d63f9ae18959dc7215ff62899c94c5e8c56847ae",
+  "downstream_agent_model": "MiniMaxAI/MiniMax-M2.5",
+  "compressor_model": "MiniMaxAI/MiniMax-M2.5",
+  "verifier_model": "MiniMaxAI/MiniMax-M2.5"
+}

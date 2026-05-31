@@ -47,8 +47,8 @@ def _read_jsonl(p):
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--cases", default=str(_REPO / "data" / "v11_primary_cases.jsonl"))
-    ap.add_argument("--candidates", default=str(raw_path("compression_candidates_c1.jsonl")))
+    ap.add_argument("--cases", default=str(_REPO / "outputs" / "raw" / "compression_boundaries.jsonl"))
+    ap.add_argument("--candidates", default=str(raw_path("candidate_compressions_c1.jsonl")))
     ap.add_argument("--stress", default=str(raw_path("stress_chains.jsonl")))
     ap.add_argument("--samples_out",
                     default=str(raw_path("continuation_entropy_samples.jsonl")))
@@ -95,7 +95,7 @@ def main() -> None:
             if not text: continue
             for i in range(args.M):
                 if (cand["candidate_id"], eval_round, i) in done_keys: continue
-                work.append((cand, eval_round, text, case["user_instruction"], i))
+                work.append((cand, eval_round, text, case["task_instruction"], i))
 
     print(f"[06c] entropy_samples: {len(work)} pending "
           f"(families={sorted(wanted_families)}, M={args.M})")

@@ -47,8 +47,8 @@ def _true_reward(p: bool, chars: int) -> float:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--behavior", default=str(raw_path("behavior_runs_c1_ck.jsonl")))
-    ap.add_argument("--candidates", default=str(raw_path("compression_candidates_c1.jsonl")))
+    ap.add_argument("--behavior", default=str(raw_path("behavior_runs.jsonl")))
+    ap.add_argument("--candidates", default=str(raw_path("candidate_compressions_c1.jsonl")))
     ap.add_argument("--pointwise", default=str(raw_path("pointwise_verifier_scores.jsonl")))
     ap.add_argument("--pairwise", default=str(table_path("pairwise_selector_by_case.csv")))
     ap.add_argument("--entropy", default=str(table_path("continuation_entropy_selector_by_case.csv")))

@@ -29,8 +29,8 @@ def _read_jsonl(p):
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--behavior", default=str(raw_path("behavior_runs_c1_ck.jsonl")))
-    ap.add_argument("--candidates", default=str(raw_path("compression_candidates_c1.jsonl")))
+    ap.add_argument("--behavior", default=str(raw_path("behavior_runs.jsonl")))
+    ap.add_argument("--candidates", default=str(raw_path("candidate_compressions_c1.jsonl")))
     ap.add_argument("--stress", default=str(raw_path("stress_chains.jsonl")))
     ap.add_argument("--out", default=str(table_path("stress_invariance_by_prompt_selector.csv")))
     ap.add_argument("--cross_out", default=str(table_path("best_c1_vs_best_ck_cross_eval.csv")))
