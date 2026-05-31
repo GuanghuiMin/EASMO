@@ -1,26 +1,89 @@
 # Session handoff — paste this into a new chat if context fills up
 
-> Updated: 2026-05-31 1:50 PM PT.
+> Updated: 2026-05-31 1:55 PM PT.
 > All times in Pacific Time (PT).
 >
 > **➡ For a fresh chat, read these in order:**
 > 1. This file (project map + open threads).
 > 2. The single track-level snapshot you care about most — each
->    track has a `docs/04_results_summary.md` (v6, v7, v8, v9) or
->    `docs/05_results_summary.md` (v2–v5) that's decision-ready in
->    ~5 minutes.
+>    track has a `docs/04_results_summary.md` (v6, v7, v8, v9, v10)
+>    or `docs/05_results_summary.md` (v2–v5) that's decision-ready
+>    in ~5 minutes.
+> 3. **For v11 (next experiment, scaffolded but NOT started)**: read
+>    `motivation_v11/docs/01_experimental_design.md` + the spec
+>    at `user_feedback/motivation_v11_final_full_dev_behavior_prompt_family_experiment.md`.
+>    User has signaled the spec is about to be revised — see
+>    "ACTIVE TASK" below for the two changes pending.
 >
 > The git remote is `git@github.com:GuanghuiMin/EASMO.git` (SSH).
-> Latest pushed: v9 **first-pass + widened-n addendum both complete**
-> (addendum finished 2026-05-29 2:15 PM PT after 64 min wall-clock).
-> All earlier tracks v2-v8 still pushed and final.
+> Latest pushed: v10 **all 4 claims judged** (commit `c5e6edb`,
+> 2026-05-31 1:50 PM PT). v11 scaffold pushed (`36f7780`) but no
+> compute started yet.
 >
-> Auto-push watcher PID 3916707 stages every 20 min and covers
-> `motivation/`, `motivation_v2/`, `motivation_v3/`, `motivation_v4/`,
-> `motivation_v5/`, `motivation_v6_jacobian/`, `motivation_v7/`,
-> `motivation_v8/`, **`motivation_v9/`** automatically.
+> Auto-push watcher PID 3916707 (8 days uptime) stages every 20 min
+> and covers `motivation/`, `motivation_v2/`-`motivation_v8/`,
+> **`motivation_v9/`**, **`motivation_v10/`**, **`motivation_v11/`**
+> automatically (the watcher auto-discovers any `motivation_v*/`
+> directory).
 
-## 0. Known gotcha — Cursor SSH agent forwarding can break silently
+## ★ ACTIVE TASK — v11 spec revision incoming
+
+User is about to re-upload a revised
+`user_feedback/motivation_v11_final_full_dev_behavior_prompt_family_experiment.md`
+that incorporates:
+
+1. **Use `train+dev` (145 tasks), not `dev` alone** — already
+   decided 2026-05-31 ~1:10 PM PT after user pointed out v10 was
+   "data too small". v11 scripts already wired for `TASK_POOL=train+dev`.
+2. **"Don't only look at pass-trajectory" — include baseline-fail
+   cases too**. User cited ACON paper finding that compression
+   can BEAT raw full context on some baseline-fail tasks
+   (denoising effect). v11 scripts already wired to run candidates
+   on the secondary set (all 145, not just primary baseline-pass) —
+   see `motivation_v11/scripts/03_generate_candidates.py` which
+   defaults `--cases data/v11_secondary_all_cases.jsonl`.
+
+**Next step for fresh chat**: read the revised spec, cross-check
+it against `motivation_v11/docs/01_experimental_design.md` (which
+captures our current plan β), surface any further discrepancies,
+then kick off v11.
+
+The launch command (when ready) is:
+
+```bash
+cd /workspace/EASMO/motivation_v11
+nohup env TASK_POOL=train+dev N_SAMPLES=8 STRESS_ROUNDS_K=2 CAP_STEPS=15 \
+   ENTROPY_FAMILIES=ACON_UTCO WORKERS=6 \
+   bash scripts/run_all.sh \
+   > outputs/logs/runall_v11_full.log 2>&1 &
+disown
+```
+
+ETA at this scale: **~63 h ≈ 2.6 days** to Wednesday afternoon PT
+under plan (β). To upgrade to (α) entropy-on-all-4-families later,
+re-run stage 06c with `--families general_task_agnostic,...,ACON_UTCO`
+(+5 h incremental, no rework of earlier stages).
+
+## 0.1 Project status snapshot (2026-05-31 1:55 PM PT)
+
+| track | status | key entry point |
+|---|---|---|
+| v2-v8 | ✅ complete since 2026-05-28 | see §4 threads + per-track docs |
+| **v9** | ✅ complete 2026-05-29 (full + widened addendum, ~2h 50min total) | `motivation_v9/docs/04_results_summary.md` |
+| **v10** | ✅ all 4 claims judged 2026-05-31 1:37 PM PT (chain 11 chunk reanalysis done) | `motivation_v10/docs/04_results_summary.md` |
+| **v11** | 🔄 SCAFFOLD complete, NOT STARTED. Pending spec revision (see "ACTIVE TASK"). | `motivation_v11/docs/01_experimental_design.md` |
+
+## 0.2 No active experiment processes (2026-05-31 1:55 PM PT)
+
+```
+PID 3916707  auto-push watcher (8d uptime, healthy)
+```
+
+No v11 process running. No vLLM running (stopped 2026-05-30 18:15Z
+for v10 stage 08 SFT, never restarted; v11 doesn't need it per spec
+§4.2 "Do not use Qwen3-4B as a verifier in v11"). GPU 81 GB free.
+
+## 0.3 Known gotcha — Cursor SSH agent forwarding can break silently
 
 The auto-push watcher pushes via SSH using a forwarded agent socket
 at `/tmp/cursor-remote-ssh-auth-sock-…sock`. That symlink is owned
@@ -71,6 +134,7 @@ then run a `git push` to seed it.
 | `motivation_v8/` | **fixed-point analysis of GENERAL (non-ACON) LLM compression** + basin-of-attraction experiment (same 30 cases + 233 facts + 150 quality pairs reused from v7) | ✅ done 2026-05-28 | **v7's abstraction prior REPLICATES and STRENGTHENS under general prompts:** SDI under P2 task-agnostic = **1.000 / 0.998** (vs v7 ACON 0.96/0.99); cross-model Kendall τ up to **0.778** (vs v7 0.49). **Two new mechanisms identified:** (1) P1 task-aware **inverts** the fixed-point composition from NARR>EXEC (P2 0.88 vs 0.55) to EXEC>NARR (P1 0.64 vs 0.46) — task framing reshapes the attractor. (2) Different inits (RAW_FULL/DETAIL_HEAVY/NARRATIVE_HEAVY/FACT_TABLE_ONLY) reach **disjoint** fixed points (Jaccard distance up to 1.00) — no universal attractor. Δ_need^∞ for executable facts = **+0.27 under P1** — moderate, and **strengthens across iterative rounds** vs single-round Δ_need. |
 | `motivation_v9/` | **behavior-first** validation: Best-of-N ACON, C1-vs-CK fragility under repeated-compression stress, NL chunk information advantage (MiniMax-only primary; reuse v3 30 cases + ACON UTCO) | ✅ done 2026-05-29 (first-pass + widened addendum) | **Claim 1 STRONG positive** (best-of-N vs greedy: C1 +26.7 pp, CK +36.7 pp pass-rate; oracle_win 90/83%). **Claim 2 POSITIVE** (greedy fragility 28.6%, stress drop 10 pp; greedy more fragile than sample, 28.6% vs 21.8%). **Claim 3 NEGATIVE at n=239** (originally "STRONG positive at n=144 first-pass" did NOT survive widening: causal-flag chunks mean adv +0.036 vs ENTITY_LIST_ONLY +0.167 — direction reverses, likely because the labeler's "entity list" describes form not function). Only Claim-3 sub-finding to survive widening: **CONTROL_NEGATIVE_EVIDENCE** (n=13, mean +0.115, echoes v5's lost-failure-log bottleneck). Total pipeline 2h 16min first-pass + 64 min widened addendum. |
 | `motivation_v10/` | **trainable compressor policy**: ACON best-of-N → proxy reward → Qwen3-4B LoRA SFT (C1 vs CK selection criteria) → GRPO readiness check; chunk reanalysis with v10 enriched §17.5 schema. Spec: `user_feedback/motivation_v10_proxy_sft_grpo_readiness_v2.md`. | ✅ all 4 claims judged 2026-05-31 1:37 PM PT (stages 00-13 + chunk reanalysis chain 11) | **Final spec §19 verdict: 3 of 4 claims PASS / PARTIAL-positive, 1 FAIL.** Claim 1 (proxy recovers best-of-N): **FAIL on CK** (pairwise +4 pp / 16 % recovery). Claim 2 (SFT-CK > SFT-C1 > Raw on CK): **PARTIAL ✓** (aggregate ✓, held-out test_behavior 12 cases thin). Claim 3 (GRPO readiness reward spread): **PASS ✓ for all 3 variants** (std 0.42-0.47, oracle_win 0.81-0.83, all_fail 0). **Claim 4 (chunk labels insufficient): PASS ✓** — multivariate R² of behavior advantage on labels-only = 0.019 vs full feature set 0.037 (both very low). **🌟 BONUS findings**: (a) SFT stress robustness — Raw-Qwen drops −11.9 pp C1→CK while SFT-CK *gains* +7.2 pp; (b) **SFT compression is a stress-invariant fixed point** — Raw-Qwen output gets compressed −33% by MiniMax stress, SFT output drifts only +4.7% (causal mechanism behind (a)). **⚠ Caveat**: verifier reward ranks Raw-Qwen > SFT (greedy verifier 0.82 vs 0.64) but actual pass ranks SFT-CK > Raw-Qwen — DO NOT use verifier composite as GRPO reward; use true Pass. Full paper-tier writeup at `motivation_v10/docs/04_results_summary.md`. |
+| `motivation_v11/` | **final motivation-section experiment for the paper**: full AppWorld train+dev × 4 prompt families (`general_task_agnostic`, `general_task_aware`, `ACON_UT`, `ACON_UTCO`) × N=8 stochastic samples × K=2 stress × 9 selectors (greedy/random/shortest/oracle/best_c1/best_ck/pointwise/pairwise/entropy). Core metric: Q_dist (best-of-N pass@CK) vs G_calib (best-of-N − greedy pass@CK) per family. Spec: `user_feedback/motivation_v11_final_full_dev_behavior_prompt_family_experiment.md` (**user revising — see ACTIVE TASK at top**). | 🔄 SCAFFOLD complete 2026-05-31 1:30 PM PT; NOT started | **15 stage scripts (00-13 incl. 06a/06b/06c) all compile-tested.** 4 prompt families load + render verified; ACON_UTCO sha256 matches v7-v10 verbatim (`9e50d0f93a...`). Spec acceptance per §17: 5 criteria (structured distribution quality, calibration gap, stress matters, verbal selectors insufficient, no length-mediated win). Plan **(β) train+dev 145 tasks, N=8, K=2, entropy on ACON_UTCO only, ~63 h ≈ 2.6 days ETA**. Forward-compat to **(α) entropy on all 4 families**: re-run stage 06c with `--families ...` flag, +5 h incremental, no earlier-stage rework. Scripts in `motivation_v11/scripts/`; modules in `motivation_v11/motivation_v11/{data,clients,compress,stress,chunks,acon_prompt_loader,prompt_families,selectors,plots,metrics}.py`. No Qwen / SFT / GRPO in v11 (spec §4.2). |
 
 Each track folder follows the same shape:
 
@@ -257,8 +321,32 @@ use `acon/.venv` for `appworld` / `productive_agents`.
   - P3 ablation: does an extra "first identify exact facts" instruction step further amplify need-conditioning at fixed point?
   - Method round: project residual stream onto top-k SVD of v6-style active vectors AND condition on a P1-style task prompt — does the combination exceed either alone in downstream success?
 
+### v11 — final motivation-section paper experiment (NOT YET STARTED)
+* Spec: `user_feedback/motivation_v11_final_full_dev_behavior_prompt_family_experiment.md` (**user revising** — see "ACTIVE TASK" at top of this file).
+* Compares 4 prompt families (`general_task_agnostic` / `general_task_aware` / `ACON_UT` / `ACON_UTCO`) on full AppWorld **train+dev = 145 tasks**, runs candidates on the SECONDARY (all 145, incl. baseline-fail) case set so we can measure compression-rescue per ACON paper's finding.
+* 9 selectors compared: greedy / random / shortest / oracle_best_of_n / best_c1 / best_ck / pointwise_verifier / pairwise_verifier / continuation_entropy.
+* Core metrics: `Q_dist = best-of-N pass@CK`, `G_calib = best-of-N - greedy pass@CK`, per (family).
+* Plan (β) cost: 5,220 compressions + 10,440 stress + 10,440 agent runs + 10,440 pointwise + 8,120 pairwise + 1,450 entropy ≈ **~63 h ≈ 2.6 days** at 6 workers.
+* Forward-compat to (α) entropy-on-all-4-families: `--families general_task_agnostic,general_task_aware,ACON_UT,ACON_UTCO` on stage 06c, +5 h incremental.
+* All 15 scripts written + compile-tested. 4 prompt families verified to load + render with sha256s matching v7-v10 ACON_UTCO (`9e50d0f93a...`).
+* Acceptance per spec §17: 5 criteria — see `motivation_v11/docs/01_experimental_design.md` §7.
+* No Qwen / SFT / GRPO in v11 (spec §4.2). MiniMax-M2.5 only.
+* Launch command + ETA both documented in the ACTIVE TASK section at the top of this file.
+
+### v10
+* **Done 2026-05-31 1:37 PM PT** — all 4 spec §19 claims judged. Full chain (stages 00-13 + stage 11 chunk reanalysis chain) took roughly 36 h spread over 2026-05-29 → 2026-05-31.
+* Full hand-written paper-tier report at `motivation_v10/docs/04_results_summary.md`. Final verdict snapshot is in this file's §1 project map row.
+* Headline findings for paper:
+  - Claim 1 (proxy recovers best-of-N): **FAIL on CK** — pairwise +4 pp / 16% recovery vs spec's 10 pp / 40% bar.
+  - Claim 2 (SFT-CK > SFT-C1 > Raw on CK): **PARTIAL** — aggregate ✓ (54.8% > 50.0% > 47.6%), held-out test_behavior CK fails (75% < 83.3% vs Raw, n=12 thin).
+  - Claim 3 (SFT-CK GRPO-trainable reward spread): **PASS** for all 3 variants (std 0.42-0.47, oracle_win 0.81-0.83, all_fail 0).
+  - Claim 4 (chunk labels insufficient): **PASS** — multivariate R²(labels) = 0.019 vs R²(full) = 0.037. Even full features explain only 3.7% of advantage variance.
+  - 🌟 Bonus (paper-quality): SFT is stress-invariant fixed point — Raw-Qwen output gets compressed −33% by MiniMax stress in 2 rounds, SFT-C1 drifts only +4.7%. Causal mechanism for SFT's +11 pp stress-robustness advantage over Raw-Qwen.
+  - ⚠ Important caveat that propagates to v11: MiniMax verifier composite ranks Raw-Qwen > SFT (greedy verifier score 0.82 vs 0.64) but actual AppWorld pass ranks SFT-CK > Raw-Qwen. The verifier is NOT a calibrated cross-policy ranker; this is why v11 treats verbal selectors as negative baselines.
+* SFT adapters at `motivation_v10/outputs/models/qwen_sft_{c1,ck}/` (~400 MB each, in .gitignore — kept locally only).
+
 ### v9
-* **First-pass done 2026-05-29 11:50 AM PT** (pipeline 9:34→11:50, 2h 16min, ~3× faster than spec's 6-7h estimate). **Widened-n addendum in progress** (kicked off 1:11 PM PT, ETA ~55 min).
+* **First-pass done 2026-05-29 11:50 AM PT** (pipeline 9:34→11:50, 2h 16min, ~3× faster than spec's 6-7h estimate). **Widened-n addendum done 2026-05-29 2:15 PM PT** (kicked off 1:11 PM PT, 64 min).
 * Full paper-tier report at `motivation_v9/docs/04_results_summary.md`.
 * Compressors used: MiniMax-M2.5 only (spec §3.3). ACON UTCO prompt loaded verbatim from `/workspace/acon` commit `d63f9ae`, sha256 of prompt = `9e50d0f93aca7f75eb723a90a758642d1aac3d7550f6afe1e692e56e2bc7b71c`.
 * Three claims:
@@ -282,28 +370,20 @@ use `acon/.venv` for `appworld` / `productive_agents`.
 * GPU memory used: ~56 GB / 80 GB. ~25 GB free.
 * MiniMax-M2.5 endpoint at 10.183.22.68:8005 has been continuously available across v4-v9. v9 pipeline confirms it can sustain ~12.8 AppWorld agent runs/min through 6 parallel workers.
 
-## 4.6. Running background processes (as of 2026-05-29 12:15 PM PT)
+## 4.6. Running background processes (as of 2026-05-31 1:55 PM PT)
 
 ```
 PID 3916707  bash /workspace/EASMO/motivation/scripts/auto_push_watcher.sh
              log: /tmp/easmo_watcher.log
-             healthy — last push 19:55Z (12:55 PM PT).
-PID 1114353  python -m vllm.entrypoints.openai.api_server
-             --model Qwen/Qwen3-4B-Instruct-2507 --port 8000
-             log: /workspace/qwen3-vllm/server_instruct.log
+             8 days uptime, healthy. Last push 19:55Z (commit 5978ac3).
+             Manual pushes since: c5e6edb (v10 chain 11 final).
 ```
 
-**No experiment processes active as of 2026-05-31 11:20 AM PT.**
-v10 chain finished 05:56Z (10:56 PM PT 5/30). All raw outputs and
-tables in `motivation_v10/outputs/`; auto-written report at
-`outputs/reports/motivation_v10_results_summary.md`; honest
-hand-written companion at `motivation_v10/docs/04_results_summary.md`.
-
-vLLM (Qwen3-4B-Instruct-2507 port 8000) is still **stopped** since
-stage 08 (18:15Z 5/30). Restart with:
-`nohup bash /workspace/qwen3-vllm/serve_instruct.sh > /workspace/qwen3-vllm/server_instruct.log 2>&1 &`
-if needed (only matters for v2 #5 follow-up or future Raw-Qwen
-serving — not required for any current v10 stage).
+**No experiment processes active as of 2026-05-31 1:55 PM PT.**
+v10 fully complete (chain 11 finished 20:37Z = 1:37 PM PT). v11
+scaffold complete but NOT started — waiting for user's revised spec
+(see "ACTIVE TASK" at top of this file). vLLM remains stopped
+since v10 stage 08 (2026-05-30 18:15Z); not needed for v11.
 
 ## 5. Active background processes
 
@@ -393,7 +473,9 @@ Common pitfalls observed across rounds:
 | motivation_v6_jacobian | 30 (reused v4) | 0 LLM API; **30 Qwen3-4B backward + 150 × 200-step soft-token training** | 240 MiniMax (Exp D) | 1 h compute + 25 min D | 2026-05-28 |
 | motivation_v7 | 30 (reused v3) | ~10,360 LLM calls (fact extract 30, conditions 233, compress 600 + 460, retention 600 + 3,640) | 0 agent runs (diagnostic-only) | 1 h 33 min | 2026-05-28 |
 | motivation_v8 | 30 (reused v7) | ~14,270 LLM calls (compress 1,160 + 1,470 iterative/basin; retention 12,640) | 0 agent runs (diagnostic-only) | ~1 h 50 min | 2026-05-28 |
-| motivation_v9 | 30 (reused v3) + 12 chunk-cases (first-pass) + 20 (widened) | ~1,360 LLM (270 compress + 810 stress-recompress + 144/240 chunk-context + 144/240 chunk-label) | 540 (C1+CK) + 156/~320 (chunk ablation) | 2 h 16 min first-pass + ~5 min refix + ~55 min widened (in progress) | 2026-05-29 |
+| motivation_v9 | 30 (reused v3) + 12 chunk-cases (first-pass) + 20 (widened) | ~1,360 LLM (270 compress + 810 stress-recompress + 144/240 chunk-context + 144/240 chunk-label) | 540 (C1+CK) + 156/~320 (chunk ablation) | 2 h 16 min first-pass + ~5 min refix + 64 min widened | 2026-05-29 |
+| motivation_v10 | 75 (23 train + 30 legacy_v9 + 10 dev_proxy + 12 test_behavior) | ~5,640 LLM (270 compress + 810 stress + 1,350 verifier + 600 pairwise + 126 student compress + 378 stress + 1,134 grpo + 2,268 grpo stress + 2,268 grpo proxy + 600 chunk-stress + 600 chunk-label) | 1,800 (540 candidate behavior + 420 student behavior + 651 chunk ablation) | ~36 h spread over 2026-05-29 → 2026-05-31 | 2026-05-31 |
+| motivation_v11 | (planned) train+dev 145 tasks, secondary 145 cases | (planned) ~36,420 LLM (5,220 compress + 10,440 stress + 10,440 verifier + 8,120 pairwise + 1,450 entropy(ACON_UTCO only) + 750 baseline-baseline + extras) | (planned) 10,440 C1+CK agent runs | (planned) ~63 h ≈ 2.6 days under plan (β) | (not started) |
 
 ## 9. Final advice for whoever picks this up
 
