@@ -92,7 +92,9 @@ def main() -> None:
     df_grpo  = _read_csv_safe(table_path("grpo_readiness_summary.csv"))
     df_pcase = _read_csv_safe(table_path("proxy_by_case.csv"))
     df_frag  = _read_csv_safe(table_path("c1_ck_fragility_by_generation.csv"))
-    df_chunk = _read_csv_safe(table_path("chunk_advantage_revised.csv"))
+    df_chunk = _read_csv_safe(table_path("v11_chunk_advantage_by_type.csv"))
+    df_chunk_role = _read_csv_safe(table_path("v11_chunk_advantage_by_role.csv"))
+    df_chunk_reg = _read_csv_safe(table_path("v11_chunk_advantage_regression.csv"))
 
     lines = []
     lines.append("# motivation_v10 results (auto-written)\n")
@@ -122,8 +124,14 @@ def main() -> None:
     lines.append("## §4 C1-vs-CK fragility (stage 04 post-hoc)\n")
     lines.append(_md_table(df_frag))
 
-    lines.append("## §5 Chunk advantage (revised, stage 11)\n")
+    lines.append("## §5 Chunk advantage by type (stage 11c)\n")
     lines.append(_md_table(df_chunk, max_rows=12))
+
+    lines.append("\n## §5b Chunk advantage by functional_role_guess (stage 11c)\n")
+    lines.append(_md_table(df_chunk_role, max_rows=12))
+
+    lines.append("\n## §5c Claim 4 regression (label-only R² vs full R²)\n")
+    lines.append(_md_table(df_chunk_reg, max_rows=20))
 
     lines.append("\n## Files of record\n")
     for p in (
