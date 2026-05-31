@@ -1,6 +1,6 @@
 # Session handoff — paste this into a new chat if context fills up
 
-> Updated: 2026-05-31 1:55 PM PT.
+> Updated: 2026-05-31 2:05 PM PT.
 > All times in Pacific Time (PT).
 >
 > **➡ For a fresh chat, read these in order:**
@@ -26,29 +26,80 @@
 > automatically (the watcher auto-discovers any `motivation_v*/`
 > directory).
 
-## ★ ACTIVE TASK — v11 spec revision incoming
+## ★ ACTIVE TASK — v11 revision against new spec, then launch
 
-User is about to re-upload a revised
-`user_feedback/motivation_v11_final_full_dev_behavior_prompt_family_experiment.md`
-that incorporates:
+User uploaded the revised v11 spec at
+`user_feedback/motivation_v11_final_train_dev_transition_experiment.md`
+(1258 lines, different filename from the old draft —
+`motivation_v11_final_full_dev_behavior_prompt_family_experiment.md`
+is the OLD one).
 
-1. **Use `train+dev` (145 tasks), not `dev` alone** — already
-   decided 2026-05-31 ~1:10 PM PT after user pointed out v10 was
-   "data too small". v11 scripts already wired for `TASK_POOL=train+dev`.
-2. **"Don't only look at pass-trajectory" — include baseline-fail
-   cases too**. User cited ACON paper finding that compression
-   can BEAT raw full context on some baseline-fail tasks
-   (denoising effect). v11 scripts already wired to run candidates
-   on the secondary set (all 145, not just primary baseline-pass) —
-   see `motivation_v11/scripts/03_generate_candidates.py` which
-   defaults `--cases data/v11_secondary_all_cases.jsonl`.
+**Status (2026-05-31 2:05 PM PT)**: v11 scaffold from before the
+spec change is in place (15 scripts + 5 docs, all compile-tested,
+sha256s match v7-v10 ACON_UTCO). User has approved revising the
+scaffold to match the new spec, then launching.
 
-**Next step for fresh chat**: read the revised spec, cross-check
-it against `motivation_v11/docs/01_experimental_design.md` (which
-captures our current plan β), surface any further discrepancies,
-then kick off v11.
+### What's the same vs old spec (no rework needed)
 
-The launch command (when ready) is:
+* 4 prompt families (general_task_agnostic / general_task_aware / ACON_UT / ACON_UTCO) and their loaders.
+* ACON commit d63f9ae + UTCO sha256 9e50d0f93a... (matches v7-v10).
+* MiniMax-only, no Qwen, no SFT, no GRPO.
+* 145 tasks (train 89 + dev 56), N=8 samples, K=2 stress, cap_steps=15.
+* 9 selectors (greedy / random / shortest / oracle_C1 / oracle_CK / best_c1 / best_ck / pointwise_verifier / pairwise_verifier / continuation_entropy).
+* Compute budget: ~63 h ≈ 2.6 days for compress + stress + behavior + selectors.
+
+### What's new in the revised spec (REWORK NEEDED)
+
+1. **🌟 Full-vs-Compressed Transition Matrix becomes the headline**
+   (spec §2.1). 2×2 per (selector, eval_round):
+   preserve_success / harm / rescue / both_fail. Identity:
+   `overall_gain = rescue_rate − harm_rate`. **NEW stage script:**
+   `10_compute_transition_metrics.py`.
+2. **🌟 Decomposed Q_dist by full-context outcome** (spec §2.3):
+   `Q_dist_preserve = P(BestN CK=1 | F=1)` and
+   `Q_dist_rescue = P(BestN CK=1 | F=0)`. Extends stage 08.
+3. **🌟 Bootstrap CIs (spec §13.7)**: 8 specific paired comparisons,
+   2000 resamples. **NEW stage** `13_bootstrap_confidence_intervals.py`.
+4. **🌟 Case studies (spec §18)**: 6 representative cases dumped as
+   markdown per task (`outputs/reports/case_studies/{task_id}.md`).
+   **NEW stage** `15_write_case_studies.py`.
+5. **Primary analysis = ALL 145 with valid baseline run** (spec §4.2),
+   NOT filtered to baseline-pass. Stage 01 changes: instead of writing
+   primary = baseline-pass, write primary = all valid baseline rows.
+   Drop the old "secondary_only" distinction; replace with
+   `full_context_outcome ∈ {pass, fail}` per-row.
+6. **Every table gets train / dev / combined rows** (spec §4.3).
+   Stages 07-12 need to add `split ∈ {train, dev, combined}` dimension.
+7. **Compression boundary protocol** (spec §7): preferred is "online
+   checkpoint continuation" at `T_hist=4096`, but our local AppWorld
+   runner doesn't support env restoration, so we fall back to
+   "trajectory-derived" (same as v9/v10). Must record
+   `evaluation_protocol="trajectory_derived"` and document it. New
+   intermediate output: `outputs/raw/compression_boundaries.jsonl`.
+8. **random_sample → `random_sample_mean`** (mean over all 8 samples)
+   + optional `random_sample_fixed` (sample_id=0).
+9. **Pairwise tournament**: randomized but deterministic bracket
+   with seed 42 (not the sequential A→B→winner→C v10 used).
+10. **Stage renumbering** to match spec §19: 17 stages (00-16),
+    including new task_inventory, boundary, bootstrap, case_studies.
+11. **New filename for 00_spec symlink**:
+    `motivation_v11_final_train_dev_transition_experiment.md`.
+12. **Report (stage 16) gets 13 new section headings** (spec §17).
+
+### Revision execution order
+
+1. Update 00_spec symlink + docs/01_experimental_design.md (~10 min)
+2. Edit stage 01: primary = all-valid-baseline + write
+   `appworld_task_inventory.csv` + `compression_boundaries.jsonl` (~20 min)
+3. Write 3 new stages (10 transition / 13 bootstrap / 15 case_studies) (~45 min)
+4. Edit stages 07-12: add train/dev/combined dimension + Q_dist preserve/rescue (~30 min)
+5. Update random_sample_mean + deterministic pairwise bracket (~10 min)
+6. Rewrite report (16) outline to spec §17 13 sections (~20 min)
+7. Smoke-test all (~5 min)
+8. Commit + push the revised scaffold
+9. Launch v11 with `nohup ... bash scripts/run_all.sh ...`
+
+### Launch command (after revision)
 
 ```bash
 cd /workspace/EASMO/motivation_v11
@@ -61,8 +112,9 @@ disown
 
 ETA at this scale: **~63 h ≈ 2.6 days** to Wednesday afternoon PT
 under plan (β). To upgrade to (α) entropy-on-all-4-families later,
-re-run stage 06c with `--families general_task_agnostic,...,ACON_UTCO`
-(+5 h incremental, no rework of earlier stages).
+re-run stage 06c (or its new number after restructuring) with
+`--families general_task_agnostic,...,ACON_UTCO` (+5 h incremental,
+no rework of earlier stages).
 
 ## 0.1 Project status snapshot (2026-05-31 1:55 PM PT)
 
