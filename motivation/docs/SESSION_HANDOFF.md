@@ -1,6 +1,6 @@
 # Session handoff — paste this into a new chat if context fills up
 
-> Updated: 2026-05-31 2:05 PM PT.
+> Updated: 2026-05-31 2:15 PM PT.
 > All times in Pacific Time (PT).
 >
 > **➡ For a fresh chat, read these in order:**
@@ -26,80 +26,20 @@
 > automatically (the watcher auto-discovers any `motivation_v*/`
 > directory).
 
-## ★ ACTIVE TASK — v11 revision against new spec, then launch
+## ★ ACTIVE TASK — v11 scaffold revised and READY TO LAUNCH
 
-User uploaded the revised v11 spec at
-`user_feedback/motivation_v11_final_train_dev_transition_experiment.md`
-(1258 lines, different filename from the old draft —
-`motivation_v11_final_full_dev_behavior_prompt_family_experiment.md`
-is the OLD one).
+Spec: `user_feedback/motivation_v11_final_train_dev_transition_experiment.md`
+(frozen 2026-05-31 PM PT, 1258 lines, replaces the older
+`..._full_dev_behavior_prompt_family_experiment.md` which is no
+longer in the repo).
 
-**Status (2026-05-31 2:05 PM PT)**: v11 scaffold from before the
-spec change is in place (15 scripts + 5 docs, all compile-tested,
-sha256s match v7-v10 ACON_UTCO). User has approved revising the
-scaffold to match the new spec, then launching.
+**Status (2026-05-31 2:15 PM PT)**: v11 scaffold revised to spec
+§19 numbering. **18 scripts** (stages 00-16 incl. 08a/b/c) all
+compile-tested. Commits: `7697dd6` (scaffold revision) +
+`f8cd45f` (spec file replace). User has authorized launching v11
+in a NEW chat window (current context near full).
 
-### What's the same vs old spec (no rework needed)
-
-* 4 prompt families (general_task_agnostic / general_task_aware / ACON_UT / ACON_UTCO) and their loaders.
-* ACON commit d63f9ae + UTCO sha256 9e50d0f93a... (matches v7-v10).
-* MiniMax-only, no Qwen, no SFT, no GRPO.
-* 145 tasks (train 89 + dev 56), N=8 samples, K=2 stress, cap_steps=15.
-* 9 selectors (greedy / random / shortest / oracle_C1 / oracle_CK / best_c1 / best_ck / pointwise_verifier / pairwise_verifier / continuation_entropy).
-* Compute budget: ~63 h ≈ 2.6 days for compress + stress + behavior + selectors.
-
-### What's new in the revised spec (REWORK NEEDED)
-
-1. **🌟 Full-vs-Compressed Transition Matrix becomes the headline**
-   (spec §2.1). 2×2 per (selector, eval_round):
-   preserve_success / harm / rescue / both_fail. Identity:
-   `overall_gain = rescue_rate − harm_rate`. **NEW stage script:**
-   `10_compute_transition_metrics.py`.
-2. **🌟 Decomposed Q_dist by full-context outcome** (spec §2.3):
-   `Q_dist_preserve = P(BestN CK=1 | F=1)` and
-   `Q_dist_rescue = P(BestN CK=1 | F=0)`. Extends stage 08.
-3. **🌟 Bootstrap CIs (spec §13.7)**: 8 specific paired comparisons,
-   2000 resamples. **NEW stage** `13_bootstrap_confidence_intervals.py`.
-4. **🌟 Case studies (spec §18)**: 6 representative cases dumped as
-   markdown per task (`outputs/reports/case_studies/{task_id}.md`).
-   **NEW stage** `15_write_case_studies.py`.
-5. **Primary analysis = ALL 145 with valid baseline run** (spec §4.2),
-   NOT filtered to baseline-pass. Stage 01 changes: instead of writing
-   primary = baseline-pass, write primary = all valid baseline rows.
-   Drop the old "secondary_only" distinction; replace with
-   `full_context_outcome ∈ {pass, fail}` per-row.
-6. **Every table gets train / dev / combined rows** (spec §4.3).
-   Stages 07-12 need to add `split ∈ {train, dev, combined}` dimension.
-7. **Compression boundary protocol** (spec §7): preferred is "online
-   checkpoint continuation" at `T_hist=4096`, but our local AppWorld
-   runner doesn't support env restoration, so we fall back to
-   "trajectory-derived" (same as v9/v10). Must record
-   `evaluation_protocol="trajectory_derived"` and document it. New
-   intermediate output: `outputs/raw/compression_boundaries.jsonl`.
-8. **random_sample → `random_sample_mean`** (mean over all 8 samples)
-   + optional `random_sample_fixed` (sample_id=0).
-9. **Pairwise tournament**: randomized but deterministic bracket
-   with seed 42 (not the sequential A→B→winner→C v10 used).
-10. **Stage renumbering** to match spec §19: 17 stages (00-16),
-    including new task_inventory, boundary, bootstrap, case_studies.
-11. **New filename for 00_spec symlink**:
-    `motivation_v11_final_train_dev_transition_experiment.md`.
-12. **Report (stage 16) gets 13 new section headings** (spec §17).
-
-### Revision execution order
-
-1. Update 00_spec symlink + docs/01_experimental_design.md (~10 min)
-2. Edit stage 01: primary = all-valid-baseline + write
-   `appworld_task_inventory.csv` + `compression_boundaries.jsonl` (~20 min)
-3. Write 3 new stages (10 transition / 13 bootstrap / 15 case_studies) (~45 min)
-4. Edit stages 07-12: add train/dev/combined dimension + Q_dist preserve/rescue (~30 min)
-5. Update random_sample_mean + deterministic pairwise bracket (~10 min)
-6. Rewrite report (16) outline to spec §17 13 sections (~20 min)
-7. Smoke-test all (~5 min)
-8. Commit + push the revised scaffold
-9. Launch v11 with `nohup ... bash scripts/run_all.sh ...`
-
-### Launch command (after revision)
+### Exact launch command (for the fresh chat)
 
 ```bash
 cd /workspace/EASMO/motivation_v11
@@ -110,11 +50,71 @@ nohup env TASK_POOL=train+dev N_SAMPLES=8 STRESS_ROUNDS_K=2 CAP_STEPS=15 \
 disown
 ```
 
-ETA at this scale: **~63 h ≈ 2.6 days** to Wednesday afternoon PT
-under plan (β). To upgrade to (α) entropy-on-all-4-families later,
-re-run stage 06c (or its new number after restructuring) with
-`--families general_task_agnostic,...,ACON_UTCO` (+5 h incremental,
-no rework of earlier stages).
+After launching, verify with:
+
+```bash
+sleep 15
+ps -ef | grep run_all.sh | grep -v grep   # confirm PID alive
+tail -30 /workspace/EASMO/motivation_v11/outputs/logs/runall_main.log
+tail -10 /workspace/EASMO/motivation_v11/outputs/logs/runall_00_prepare.log
+```
+
+ETA **~63 h ≈ 2.6 days** to Wednesday afternoon PT.
+
+### Stage milestones to monitor (for the fresh chat)
+
+| stage | what to verify when it finishes | expected from logs |
+|---|---|---|
+| 00 prepare | provenance written; ACON commit + sha256 logged | `outputs/provenance/prompt_sha256.json` exists |
+| 01 task inventory | 145 task_ids listed | `outputs/provenance/appworld_task_inventory.csv` has 145+ rows |
+| 02 baseline (~25 min) | full-context pass rate ~30 % expected | `outputs/raw/full_context_runs.jsonl` 145 rows, ~45 pass |
+| 03 boundaries | history text per task | `outputs/raw/compression_boundaries.jsonl` 145 rows |
+| 05 compress (~6.2 h) | 5,220 candidates, 0 errors | `outputs/raw/candidate_compressions_c1.jsonl` |
+| 06 stress (~12.4 h) | 10,440 stress chains | `outputs/raw/stress_chains.jsonl` |
+| 07 behavior (~17.4 h) | 10,440 agent runs | `outputs/raw/behavior_runs.jsonl` |
+| 08a/b/c selectors (~14 h) | 10,440 + 4,060 + 1,450 verifier outputs | `outputs/raw/pointwise_/pairwise_/continuation_*.jsonl` |
+| 09-13 analysis (~10 min) | transition + dqcg + bootstrap CSVs | `outputs/tables/*.csv` |
+| 14-16 plots + report | figures + paper-tier markdown | `outputs/figures/*.pdf` + `outputs/reports/motivation_v11_results_summary.md` |
+
+### Known deferred items (do NOT block launch; patch later)
+
+* Stage 09 `compute_selectors`: does not yet emit explicit `split ∈
+  {train, dev, combined}` rows; train/dev breakdown is implicit
+  via candidate `split` field. Stage 10/11/12 already do explicit
+  split breakdown so the paper tables are correct; only the
+  per-selector summary CSV from stage 09 is single-split-only.
+* Stage 09 also does not yet implement `random_sample_mean`
+  (averaging over 8 samples). The 8 individual sample rows are in
+  the raw behavior file so this can be computed post-hoc.
+* Stage 12 `serial_recompression_metrics`: same — no explicit
+  split column yet. Can patch in ~10 min after v11 runs.
+
+### Forward-compat to plan (α): entropy on all 4 families
+
+After plan (β) finishes, run incrementally:
+
+```bash
+cd /workspace/EASMO/motivation_v11
+nohup /workspace/EASMO/.venv/bin/python -u scripts/08c_continuation_entropy.py \
+   --families general_task_agnostic,general_task_aware,ACON_UT,ACON_UTCO \
+   --workers 6 \
+   > outputs/logs/stage08c_alpha_extension.log 2>&1 &
+disown
+```
+
+Adds ~5 h of compute; no rework of earlier stages. Then re-run
+stages 09 + 14 + 16 (~30 min) to refresh selector tables + figures + report.
+
+### Background safety
+
+* Auto-push watcher PID 3916707 (8 days uptime) pushes every 20 min,
+  so even if the run crashes the latest outputs are on GitHub.
+* All v11 stage scripts are RESUMABLE — interrupted runs skip
+  already-done items via `done_ids` checks.
+* No vLLM needed (Qwen out of scope in v11 per spec §4.2).
+* MiniMax endpoint `10.183.22.68:8005` has been continuously
+  available across v4-v10; expected stable across the v11 ~63 h run
+  too, but transient blips will be auto-retried by the worker pool.
 
 ## 0.1 Project status snapshot (2026-05-31 1:55 PM PT)
 
@@ -123,7 +123,7 @@ no rework of earlier stages).
 | v2-v8 | ✅ complete since 2026-05-28 | see §4 threads + per-track docs |
 | **v9** | ✅ complete 2026-05-29 (full + widened addendum, ~2h 50min total) | `motivation_v9/docs/04_results_summary.md` |
 | **v10** | ✅ all 4 claims judged 2026-05-31 1:37 PM PT (chain 11 chunk reanalysis done) | `motivation_v10/docs/04_results_summary.md` |
-| **v11** | 🔄 SCAFFOLD complete, NOT STARTED. Pending spec revision (see "ACTIVE TASK"). | `motivation_v11/docs/01_experimental_design.md` |
+| **v11** | 🔄 SCAFFOLD REVISED + READY TO LAUNCH (18 scripts, spec §19 numbering). See "ACTIVE TASK" for exact launch command. | `motivation_v11/docs/01_experimental_design.md` |
 
 ## 0.2 No active experiment processes (2026-05-31 1:55 PM PT)
 
@@ -186,7 +186,7 @@ then run a `git push` to seed it.
 | `motivation_v8/` | **fixed-point analysis of GENERAL (non-ACON) LLM compression** + basin-of-attraction experiment (same 30 cases + 233 facts + 150 quality pairs reused from v7) | ✅ done 2026-05-28 | **v7's abstraction prior REPLICATES and STRENGTHENS under general prompts:** SDI under P2 task-agnostic = **1.000 / 0.998** (vs v7 ACON 0.96/0.99); cross-model Kendall τ up to **0.778** (vs v7 0.49). **Two new mechanisms identified:** (1) P1 task-aware **inverts** the fixed-point composition from NARR>EXEC (P2 0.88 vs 0.55) to EXEC>NARR (P1 0.64 vs 0.46) — task framing reshapes the attractor. (2) Different inits (RAW_FULL/DETAIL_HEAVY/NARRATIVE_HEAVY/FACT_TABLE_ONLY) reach **disjoint** fixed points (Jaccard distance up to 1.00) — no universal attractor. Δ_need^∞ for executable facts = **+0.27 under P1** — moderate, and **strengthens across iterative rounds** vs single-round Δ_need. |
 | `motivation_v9/` | **behavior-first** validation: Best-of-N ACON, C1-vs-CK fragility under repeated-compression stress, NL chunk information advantage (MiniMax-only primary; reuse v3 30 cases + ACON UTCO) | ✅ done 2026-05-29 (first-pass + widened addendum) | **Claim 1 STRONG positive** (best-of-N vs greedy: C1 +26.7 pp, CK +36.7 pp pass-rate; oracle_win 90/83%). **Claim 2 POSITIVE** (greedy fragility 28.6%, stress drop 10 pp; greedy more fragile than sample, 28.6% vs 21.8%). **Claim 3 NEGATIVE at n=239** (originally "STRONG positive at n=144 first-pass" did NOT survive widening: causal-flag chunks mean adv +0.036 vs ENTITY_LIST_ONLY +0.167 — direction reverses, likely because the labeler's "entity list" describes form not function). Only Claim-3 sub-finding to survive widening: **CONTROL_NEGATIVE_EVIDENCE** (n=13, mean +0.115, echoes v5's lost-failure-log bottleneck). Total pipeline 2h 16min first-pass + 64 min widened addendum. |
 | `motivation_v10/` | **trainable compressor policy**: ACON best-of-N → proxy reward → Qwen3-4B LoRA SFT (C1 vs CK selection criteria) → GRPO readiness check; chunk reanalysis with v10 enriched §17.5 schema. Spec: `user_feedback/motivation_v10_proxy_sft_grpo_readiness_v2.md`. | ✅ all 4 claims judged 2026-05-31 1:37 PM PT (stages 00-13 + chunk reanalysis chain 11) | **Final spec §19 verdict: 3 of 4 claims PASS / PARTIAL-positive, 1 FAIL.** Claim 1 (proxy recovers best-of-N): **FAIL on CK** (pairwise +4 pp / 16 % recovery). Claim 2 (SFT-CK > SFT-C1 > Raw on CK): **PARTIAL ✓** (aggregate ✓, held-out test_behavior 12 cases thin). Claim 3 (GRPO readiness reward spread): **PASS ✓ for all 3 variants** (std 0.42-0.47, oracle_win 0.81-0.83, all_fail 0). **Claim 4 (chunk labels insufficient): PASS ✓** — multivariate R² of behavior advantage on labels-only = 0.019 vs full feature set 0.037 (both very low). **🌟 BONUS findings**: (a) SFT stress robustness — Raw-Qwen drops −11.9 pp C1→CK while SFT-CK *gains* +7.2 pp; (b) **SFT compression is a stress-invariant fixed point** — Raw-Qwen output gets compressed −33% by MiniMax stress, SFT output drifts only +4.7% (causal mechanism behind (a)). **⚠ Caveat**: verifier reward ranks Raw-Qwen > SFT (greedy verifier 0.82 vs 0.64) but actual pass ranks SFT-CK > Raw-Qwen — DO NOT use verifier composite as GRPO reward; use true Pass. Full paper-tier writeup at `motivation_v10/docs/04_results_summary.md`. |
-| `motivation_v11/` | **final motivation-section experiment for the paper**: full AppWorld train+dev × 4 prompt families (`general_task_agnostic`, `general_task_aware`, `ACON_UT`, `ACON_UTCO`) × N=8 stochastic samples × K=2 stress × 9 selectors (greedy/random/shortest/oracle/best_c1/best_ck/pointwise/pairwise/entropy). Core metric: Q_dist (best-of-N pass@CK) vs G_calib (best-of-N − greedy pass@CK) per family. Spec: `user_feedback/motivation_v11_final_full_dev_behavior_prompt_family_experiment.md` (**user revising — see ACTIVE TASK at top**). | 🔄 SCAFFOLD complete 2026-05-31 1:30 PM PT; NOT started | **15 stage scripts (00-13 incl. 06a/06b/06c) all compile-tested.** 4 prompt families load + render verified; ACON_UTCO sha256 matches v7-v10 verbatim (`9e50d0f93a...`). Spec acceptance per §17: 5 criteria (structured distribution quality, calibration gap, stress matters, verbal selectors insufficient, no length-mediated win). Plan **(β) train+dev 145 tasks, N=8, K=2, entropy on ACON_UTCO only, ~63 h ≈ 2.6 days ETA**. Forward-compat to **(α) entropy on all 4 families**: re-run stage 06c with `--families ...` flag, +5 h incremental, no earlier-stage rework. Scripts in `motivation_v11/scripts/`; modules in `motivation_v11/motivation_v11/{data,clients,compress,stress,chunks,acon_prompt_loader,prompt_families,selectors,plots,metrics}.py`. No Qwen / SFT / GRPO in v11 (spec §4.2). |
+| `motivation_v11/` | **final motivation-section experiment for the paper**: full AppWorld train+dev × 4 prompt families (`general_task_agnostic`, `general_task_aware`, `ACON_UT`, `ACON_UTCO`) × N=8 stochastic samples × K=2 stress × 9 selectors (greedy/random/shortest/oracle/best_c1/best_ck/pointwise/pairwise/entropy). **Headline: Full-vs-Compressed transition matrix** (preserve_success / harm / rescue / both_fail per selector × round; spec §2.1) — overall_gain = rescue_rate − harm_rate. **Decomposed Q_dist** by full-context outcome (preserve / rescue). Spec: `user_feedback/motivation_v11_final_train_dev_transition_experiment.md`. | 🔄 SCAFFOLD REVISED 2026-05-31 2:15 PM PT; READY TO LAUNCH | **18 stage scripts** (00-16 incl. 08a/08b/08c) all compile-tested. Scripts revised from earlier scaffold to match spec §19 numbering exactly via `git mv` (history preserved). New stages added: `10_compute_transition_metrics.py` (headline 2×2), `13_bootstrap_confidence_intervals.py` (8 paired comparisons × 2000 resamples), `15_write_case_studies.py` (6 representative cases). Stage 11 extended with Q_dist_preserve/rescue + train/dev/combined split breakdown. Stage 08b pairwise switched from sequential A→B→winner→C to randomized but deterministic single-elimination bracket (seed 42). Primary analysis set = ALL 145 valid-baseline tasks (no longer baseline-pass-only) so compression-rescue is captured. Plan **(β) train+dev 145 tasks, N=8, K=2, entropy on ACON_UTCO only, ~63 h ≈ 2.6 days ETA**. Plan **(α) entropy on all 4 families** = +5 h incremental via `--families ...` flag on stage 08c (no earlier-stage rework). 4 prompt families load + render verified; ACON_UTCO sha256 matches v7-v10 verbatim (`9e50d0f93a...`). No Qwen / SFT / GRPO in v11 (spec §4.2). |
 
 Each track folder follows the same shape:
 
@@ -373,8 +373,8 @@ use `acon/.venv` for `appworld` / `productive_agents`.
   - P3 ablation: does an extra "first identify exact facts" instruction step further amplify need-conditioning at fixed point?
   - Method round: project residual stream onto top-k SVD of v6-style active vectors AND condition on a P1-style task prompt — does the combination exceed either alone in downstream success?
 
-### v11 — final motivation-section paper experiment (NOT YET STARTED)
-* Spec: `user_feedback/motivation_v11_final_full_dev_behavior_prompt_family_experiment.md` (**user revising** — see "ACTIVE TASK" at top of this file).
+### v11 — final motivation-section paper experiment (SCAFFOLD REVISED, READY TO LAUNCH)
+* Spec: `user_feedback/motivation_v11_final_train_dev_transition_experiment.md` (1258 lines, frozen 2026-05-31 PM PT). Exact launch command + monitoring milestones in the **ACTIVE TASK** section at the top of this file.
 * Compares 4 prompt families (`general_task_agnostic` / `general_task_aware` / `ACON_UT` / `ACON_UTCO`) on full AppWorld **train+dev = 145 tasks**, runs candidates on the SECONDARY (all 145, incl. baseline-fail) case set so we can measure compression-rescue per ACON paper's finding.
 * 9 selectors compared: greedy / random / shortest / oracle_best_of_n / best_c1 / best_ck / pointwise_verifier / pairwise_verifier / continuation_entropy.
 * Core metrics: `Q_dist = best-of-N pass@CK`, `G_calib = best-of-N - greedy pass@CK`, per (family).
