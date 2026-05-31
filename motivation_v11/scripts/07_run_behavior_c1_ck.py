@@ -21,7 +21,7 @@ sys.path.insert(0, str(_REPO))
 
 
 def _run_one(args_tuple):
-    (cid, task_id, family, candidate_type, sample_id,
+    (cid, task_id, split, family, candidate_type, sample_id,
      eval_round, text, max_steps, tag) = args_tuple
     sys.path.insert(0, str(_REPO))
     sys.path.insert(0, "/workspace/EASMO/motivation_v4")
@@ -34,11 +34,13 @@ def _run_one(args_tuple):
         method=f"v11_{family}_{candidate_type}_{eval_round}",
         compressed_context=text,
         max_steps=max_steps,
+        split=split,
         tag=tag,
     )
     return {
         "run_id":           f"{cid}__{eval_round}__cap{max_steps}",
         "task_id":          task_id,
+        "split":            split,
         "prompt_family":    family,
         "candidate_id":     cid,
         "candidate_type":   candidate_type,
@@ -96,19 +98,25 @@ def main() -> None:
             ck_text[cid] = (r["round"], r["context_text"])
 
     work: List[Tuple] = []
+    n_missing_split = 0
     for cand in cands:
         cid = cand["candidate_id"]
         family = cand["prompt_family"]
         ctype = cand["candidate_type"]
         sid = cand.get("sample_id", -1)
-        # C1
-        work.append((cid, cand["task_id"], family, ctype, sid,
+        split = cand.get("split")
+        if not split:
+            n_missing_split += 1
+            continue
+        work.append((cid, cand["task_id"], split, family, ctype, sid,
                      "C1", cand["c1_text"], args.cap_steps, args.tag))
-        # CK
         ck = ck_text.get(cid)
         if ck is not None:
-            work.append((cid, cand["task_id"], family, ctype, sid,
+            work.append((cid, cand["task_id"], split, family, ctype, sid,
                          "CK", ck[1], args.cap_steps, args.tag))
+    if n_missing_split:
+        print(f"[07] WARNING: dropped {n_missing_split} candidates missing 'split' field "
+              f"(would have defaulted to 'dev' and likely mis-loaded train tasks)")
 
     print(f"[05] {len(work)} agent runs "
           f"(candidates={len(cands)}, both C1+CK)")
@@ -120,7 +128,7 @@ def main() -> None:
         for r in _read_jsonl_plain(out_path):
             done_ids.add(r.get("run_id"))
     pending = [w for w in work
-               if f"{w[0]}__{w[5]}__cap{w[7]}" not in done_ids]
+               if f"{w[0]}__{w[6]}__cap{w[8]}" not in done_ids]
     print(f"[05] {len(done_ids)} done; {len(pending)} pending")
 
     t0 = time.time(); n_done = 0; n_pass = 0; n_err = 0

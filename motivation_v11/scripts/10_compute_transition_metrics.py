@@ -160,8 +160,12 @@ def main() -> None:
         Path(args.out).write_text("split,prompt_family,selector,eval_round,n_tasks,"
                                     "full_pass_rate,compressed_pass_rate,overall_delta_pp,"
                                     "preserve_success_count,harm_count,rescue_count,both_fail_count,"
-                                    "preserve_success_rate,harm_rate,rescue_rate,net_gain_pp,"
-                                    "mean_chars,median_chars,pass_per_1k_chars\n")
+                                    "preserve_success_rate,harm_rate,rescue_rate,"
+                                    "harm_rate_conditional_on_full_pass,"
+                                    "rescue_rate_conditional_on_full_fail,"
+                                    "preserve_success_share_of_total,"
+                                    "n_full_pass,n_full_fail,"
+                                    "net_gain_pp,mean_chars,median_chars,pass_per_1k_chars\n")
         return
 
     # Add full-context label
@@ -191,6 +195,14 @@ def main() -> None:
             median_chars = int(g["selected_chars"].median())
             net_gain_pp = 100 * (rescue - harm) / max(n, 1)
             overall_delta_pp = 100 * (comp_pass_rate - full_pass_rate)
+            # Spec §13.1 column definitions:
+            #   preserve_success_rate = P(C=1 | F=1)   conditional on full_pass
+            #   harm_rate             = P(F=1, C=0)    unconditional share of N
+            #   rescue_rate           = P(F=0, C=1)    unconditional share of N
+            # We also emit symmetric conditional rates as *_conditional columns
+            # for downstream readers who want the both-directions view.
+            n_full_pass = preserve + harm
+            n_full_fail = rescue + both_f
             out_rows.append({
                 "split":                 split_label,
                 "prompt_family":         family,
@@ -204,9 +216,14 @@ def main() -> None:
                 "harm_count":            harm,
                 "rescue_count":          rescue,
                 "both_fail_count":       both_f,
-                "preserve_success_rate": preserve / max(n, 1),
-                "harm_rate":             harm / max(n, 1),
-                "rescue_rate":           rescue / max(n, 1),
+                "preserve_success_rate": preserve / max(n_full_pass, 1),  # P(C=1|F=1) per spec §13.1
+                "harm_rate":             harm / max(n, 1),                # unconditional, per spec §13.1
+                "rescue_rate":           rescue / max(n, 1),               # unconditional, per spec §13.1
+                "harm_rate_conditional_on_full_pass":  harm / max(n_full_pass, 1),
+                "rescue_rate_conditional_on_full_fail": rescue / max(n_full_fail, 1),
+                "preserve_success_share_of_total":      preserve / max(n, 1),
+                "n_full_pass":           n_full_pass,
+                "n_full_fail":           n_full_fail,
                 "net_gain_pp":           net_gain_pp,
                 "mean_chars":            mean_chars,
                 "median_chars":          median_chars,

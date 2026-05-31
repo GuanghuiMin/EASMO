@@ -1,0 +1,284 @@
+# family: general_task_agnostic
+# task_id: 07b42fd_2
+# split: train
+
+## SYSTEM
+You are a careful context compression module.
+Return only the compressed context. Do not include explanations about your compression process.
+
+## USER
+Compress the following interaction history into a shorter version.
+
+Hard budget:
+- The compressed context should be no more than 2000 characters.
+
+Compression goals:
+- Preserve important information.
+- Remove redundant, obsolete, or irrelevant details.
+- Keep exact values only if they appear important in the history.
+- Do not invent facts.
+- Do not output the original input.
+- Return plain text only. You may use bullets, but do not use a fixed schema.
+
+Interaction history:
+### step 1
+action:
+# Let me first check what Spotify APIs are available to search for artists and follow them.
+print(apis.api_docs.show_api_descriptions(app_name='spotify'))
+
+output:
+[
+ {
+  "name": "show_account",
+  "description": "Show your account information. Unlike show_profile, this includes private information."
+ },
+ {
+  "name": "signup",
+  "description": "Sign up to create account."
+ },
+ {
+  "name": "delete_account",
+  "description": "Delete your account."
+ },
+ {
+  "name": "update_account_name",
+  "description": "Update your first or last name in the account profile."
+ },
+ {
+  "name": "login",
+  "description": "Login to your account."
+ },
+ {
+  "name": "logout",
+  "description": "Logout from your account."
+ },
+ {
+  "name": "send_verification_code",
+  "description": "Send account verification code to your email address."
+ },
+ {
+  "name": "verify_account",
+  "description": "Verify your account using the verification code sent to your email address."
+ },
+ {
+  "name"…[truncated]
+
+### step 2
+action:
+# Let me check the search_artists API specification to understand how to search for artists and get their follower counts.
+print(apis.api_docs.show_api_doc(app_name='spotify', api_name='search_artists'))
+
+output:
+{
+ "app_name": "spotify",
+ "api_name": "search_artists",
+ "path": "/artists",
+ "method": "GET",
+ "description": "Search for artists with a query.",
+ "parameters": [
+  {
+   "name": "query",
+   "type": "string",
+   "required": false,
+   "description": "The search query string.",
+   "default": "",
+   "constraints": []
+  },
+  {
+   "name": "genre",
+   "type": "string",
+   "required": false,
+   "description": "The genre to filter the artists by.",
+   "default": null,
+   "constraints": []
+  },
+  {
+   "name": "min_follower_count",
+   "type": "integer",
+   "required": false,
+   "description": "The minimum number of followers for search results.",
+   "default": 0,
+   "constraints": [
+    "value >= 0.0"
+   ]
+  },
+  {
+   "name": "max_follower_count",
+   "type": "integer",
+   "required": false,
+   "des…[truncated]
+
+### step 3
+action:
+# Let me also check the follow_artist API to understand how to follow artists.
+print(apis.api_docs.show_api_doc(app_name='spotify', api_name='follow_artist'))
+
+output:
+{
+ "app_name": "spotify",
+ "api_name": "follow_artist",
+ "path": "/following_artists/{artist_id}",
+ "method": "POST",
+ "description": "Follow an artist.",
+ "parameters": [
+  {
+   "name": "artist_id",
+   "type": "integer",
+   "required": true,
+   "description": "The artist id to follow.",
+   "default": null,
+   "constraints": []
+  },
+  {
+   "name": "access_token",
+   "type": "string",
+   "required": true,
+   "description": "Access token obtained from spotify app login.",
+   "default": null,
+   "constraints": []
+  }
+ ],
+ "response_schemas": {
+  "success": {
+   "message": "string"
+  },
+  "failure": {
+   "message": "string"
+  }
+ }
+}
+
+### step 4
+action:
+# Now I'll search for EDM artists with at least 23 followers. Let me start with page 0 and check how many pages there are.
+result = apis.spotify.search_artists(genre="edm", min_follower_count=23, page_index=0, page_limit=20)
+print(result)
+
+output:
+[
+ {
+  "artist_id": 3,
+  "name": "Jasper Skye",
+  "genre": "EDM",
+  "follower_count": 23,
+  "created_at": "2018-06-08T03:51:02"
+ }
+]
+
+### step 5
+action:
+# I found one EDM artist with at least 23 followers: Jasper Skye (artist_id: 3) with 23 followers. Now I need to follow this artist. But I need an access_token. Let me check how to login to get an access token.
+print(apis.api_docs.show_api_doc(app_name='spotify', api_name='login'))
+
+output:
+{
+ "app_name": "spotify",
+ "api_name": "login",
+ "path": "/auth/token",
+ "method": "POST",
+ "description": "Login to your account.",
+ "parameters": [
+  {
+   "name": "username",
+   "type": "string",
+   "required": true,
+   "description": "Your account email.",
+   "default": null,
+   "constraints": []
+  },
+  {
+   "name": "password",
+   "type": "string",
+   "required": true,
+   "description": "Your account password.",
+   "default": null,
+   "constraints": []
+  }
+ ],
+ "response_schemas": {
+  "success": {
+   "access_token": "string",
+   "token_type": "string"
+  },
+  "failure": {
+   "message": "string"
+  }
+ }
+}
+
+### step 6
+action:
+# I need to login to Spotify. Let me get the Spotify password from the supervisor app.
+print(apis.supervisor.show_account_passwords())
+
+output:
+[
+ {
+  "account_name": "amazon",
+  "password": "C9psawk"
+ },
+ {
+  "account_name": "file_system",
+  "password": "-CxbZJC"
+ },
+ {
+  "account_name": "gmail",
+  "password": "$qw]=[8"
+ },
+ {
+  "account_name": "phone",
+  "password": "0UG!s=f"
+ },
+ {
+  "account_name": "simple_note",
+  "password": "RCejMcP"
+ },
+ {
+  "account_name": "splitwise",
+  "password": "Hv#jxzI"
+ },
+ {
+  "account_name": "spotify",
+  "password": "i5ZKWxI"
+ },
+ {
+  "account_name": "todoist",
+  "password": "l_l2ekC"
+ },
+ {
+  "account_name": "venmo",
+  "password": "%4=TaFw"
+ }
+]
+
+### step 7
+action:
+# Now let me login to Spotify using the email and password.
+result = apis.spotify.login(username="joseph.webe@gmail.com", password="i5ZKWxI")
+print(result)
+
+output:
+{
+ "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzcG90aWZ5K2pvc2VwaC53ZWJlQGdtYWlsLmNvbSIsImV4cCI6MTY4NDQxMjA5OH0.0NxpKr6JsvTIf82OYmXLYdhD4Gulvh9Qdo_s6DKB5PU",
+ "token_type": "Bearer"
+}
+
+### step 8
+action:
+# Now I'll follow the EDM artist Jasper Skye (artist_id: 3) who has 23 followers.
+result = apis.spotify.follow_artist(artist_id=3, access_token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzcG90aWZ5K2pvc2VwaC53ZWJlQGdtYWlsLmNvbSIsImV4cCI6MTY4NDQxMjA5OH0.0NxpKr6JsvTIf82OYmXLYdhD4Gulvh9Qdo_s6DKB5PU")
+print(result)
+
+output:
+{"message": "Artist followed."}
+
+### step 9
+action:
+# I have successfully followed all EDM artists with at least 23 followers. There was only one such artist: Jasper Skye with 23 followers. Now I'll complete the task.
+apis.supervisor.complete_task(answer="Jasper Skye")
+
+output:
+Execution successful.
+
+
+Compressed context:

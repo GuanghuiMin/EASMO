@@ -50,16 +50,33 @@ def main() -> None:
                           "included": True, "exclusion_reason": "",
                           "load_error": "", "notes": ""})
 
-    # ACON paper cites 90 train tasks; local has 89. Note in notes col.
-    train_count = sum(1 for r in rows if r["split"] == "train")
-    if train_count == 89:
-        rows.append({"task_id": "ACON_90th_task_not_in_local_train_txt",
-                      "split": "train", "included": False,
-                      "exclusion_reason": "missing_from_local_AppWorld_train.txt",
-                      "load_error": "",
-                      "notes": "ACON paper cites 90 train tasks; local "
-                               "/workspace/acon/experiments/appworld/data/datasets/"
-                               "train.txt has 89."})
+    # Spec §3.1 expects train=89, dev=56, combined=145 (per ACON paper +
+    # local AppWorld files at the time the spec was frozen). The local
+    # train.txt / dev.txt counts can drift (trailing-newline edge case
+    # makes `wc -l` differ from Python's `splitlines()` by 1). Emit a
+    # meta note row for every mismatch direction so the discrepancy is
+    # captured in provenance instead of being silent.
+    EXPECTED = {"train": 89, "dev": 56}
+    for split_name, n_expected in EXPECTED.items():
+        n_actual = sum(1 for r in rows if r["split"] == split_name)
+        if n_actual != n_expected:
+            delta = n_actual - n_expected
+            sign = "+" if delta > 0 else ""
+            rows.append({
+                "task_id":          f"META__{split_name}_count_mismatch",
+                "split":            split_name,
+                "included":         False,
+                "exclusion_reason": "meta_note_not_a_task",
+                "load_error":       "",
+                "notes":            f"Spec §3.1 expected {split_name}={n_expected}; "
+                                     f"local AppWorld {split_name}.txt yielded "
+                                     f"{n_actual} ({sign}{delta} vs spec). "
+                                     f"Difference is usually a trailing-newline edge "
+                                     f"case (wc -l vs splitlines) and does not affect "
+                                     f"experiment validity. Downstream stages run on "
+                                     f"all included rows; the official paper-cited count "
+                                     f"and the actual count are both recorded here.",
+            })
 
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)

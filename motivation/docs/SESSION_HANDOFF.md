@@ -1,6 +1,6 @@
 # Session handoff — paste this into a new chat if context fills up
 
-> Updated: 2026-05-31 2:15 PM PT.
+> Updated: 2026-05-31 2:45 PM PT (post-launch + GPT-5.5-Pro audit patches).
 > All times in Pacific Time (PT).
 >
 > **➡ For a fresh chat, read these in order:**
@@ -26,20 +26,31 @@
 > automatically (the watcher auto-discovers any `motivation_v*/`
 > directory).
 
-## ★ ACTIVE TASK — v11 scaffold revised and READY TO LAUNCH
+## ★ ACTIVE TASK — v11 LAUNCHED 2:17 PM PT, running ~3× faster than handoff predicted
 
 Spec: `user_feedback/motivation_v11_final_train_dev_transition_experiment.md`
-(frozen 2026-05-31 PM PT, 1258 lines, replaces the older
-`..._full_dev_behavior_prompt_family_experiment.md` which is no
-longer in the repo).
+(frozen 2026-05-31 PM PT, 1258 lines).
 
-**Status (2026-05-31 2:15 PM PT)**: v11 scaffold revised to spec
-§19 numbering. **18 scripts** (stages 00-16 incl. 08a/b/c) all
-compile-tested. Commits: `7697dd6` (scaffold revision) +
-`f8cd45f` (spec file replace). User has authorized launching v11
-in a NEW chat window (current context near full).
+**Status (2026-05-31 2:45 PM PT)**: v11 LIVE — PID 577823 (parent),
+577824 (run_all.sh). Launched 21:17:44 UTC = 2:17 PM PT. Auto-push
+watcher PID 3916707 still healthy. Patches `82e7069` (watcher v10/v11
+glob fix) + audit patches commit pending push.
 
-### Exact launch command (for the fresh chat)
+### Live pipeline progress (early signal, holds → done much earlier than Wed)
+
+| stage | handoff ETA | actual | speedup | finish UTC |
+|---|---|---|---|---|
+| 00 prepare | <1s | <1s | — | 21:17:45 |
+| 01 task inventory | <1s | <1s | — | 21:17:45 |
+| 02 baseline | ~25 min | 18:32 | 1.3× | 21:36:17 |
+| 03 boundaries | <1s | <1s | — | 21:36:18 |
+| 04 provenance | <1s | <1s | — | 21:36:18 |
+| 05 compress | ~6.2 h | **44/min → ~2.0h proj** | 3.1× | (in progress) |
+
+**If 3× holds through stages 06/07/08, headline ETA drops from 63h →
+~20–25h ⇒ DONE Mon late evening PT, not Wed afternoon.**
+
+### Resume-launch command (if PID 577823 dies; resumable from disk)
 
 ```bash
 cd /workspace/EASMO/motivation_v11
@@ -50,16 +61,76 @@ nohup env TASK_POOL=train+dev N_SAMPLES=8 STRESS_ROUNDS_K=2 CAP_STEPS=15 \
 disown
 ```
 
-After launching, verify with:
+### GPT-5.5-Pro checklist audit + patches shipped (2:45 PM PT)
 
-```bash
-sleep 15
-ps -ef | grep run_all.sh | grep -v grep   # confirm PID alive
-tail -30 /workspace/EASMO/motivation_v11/outputs/logs/runall_main.log
-tail -10 /workspace/EASMO/motivation_v11/outputs/logs/runall_00_prepare.log
-```
+User shared `user_feedback/motivation_v11_checklist.md` — 10 GPT-5.5
+concerns. Audit verdict + fixes:
 
-ETA **~63 h ≈ 2.6 days** to Wednesday afternoon PT.
+| # | item | verdict | patch |
+|---|---|---|---|
+| 1 | stage 07 passes `split=train\|dev` | 🔴 **BUG** — silently defaulted to `dev` | ✅ patched `07_run_behavior_c1_ck.py` (added split to tuple + passed to `run_with_compressed_context`) |
+| 2 | rerun pre-fix stage 07 rows | N/A — stage 07 hasn't started | ✅ patch lands before stage 07 begins (~3h out at 3× rate) |
+| 3 | inventory 145 vs 147 | ⚠ trailing-newline edge case | ✅ stage 01 patched to emit META__ rows in both directions; stage 02 filters them out |
+| 4 | train=89 stale special-case | ⚠ generalized to ±N for any split | (same patch as #3) |
+| 5 | candidates = N × 4 × 9 | ✅ correct as-is | none |
+| 6 | stress preserves prompt_family | ✅ correct (`bundles[c["prompt_family"]]`) | none |
+| 7 | transition matrix is all-task | ✅ correct (loads all baseline rows, not filtered) | none |
+| 8 | preserve_success_rate naming | 🔴 **BUG — was unconditional, spec §13.1 says P(C=1\|F=1)** | ✅ patched `10_compute_transition_metrics.py`: preserve_success_rate now = preserve/(preserve+harm), added 5 new explicit conditional/unconditional columns |
+| 9 | full_context_retry for F=0 | 🟡 design choice — defer | NOT patched. User decides if rescue claim needs N>1 baseline |
+| 10 | merged candidate bank file | 🟡 spec §12.2 requires `full_train_dev_compression_candidate_bank.jsonl`; no stage wrote it | ✅ NEW `scripts/13b_export_candidate_bank.py` + run_all.sh wired (also slotted into default WANTED) |
+
+**Live-process behavior of these patches**:
+
+* ✅ stage 07 + stage 10 patches WILL take effect (live process hasn't
+  reached those stages yet — it's still in stage 05).
+* ⚠ stage 01 + 02 patches will NOT re-execute on this run (already
+  finished at 21:17:45). Inventory is correct (147 rows, all valid),
+  so this is doc-only impact for now; future re-runs benefit.
+* ⚠ stage 13b will NOT auto-run on this orchestrator pass (env captured
+  at launch, WANTED frozen without 13b). **MUST manually run after
+  stage 13 finishes**:
+  ```bash
+  /workspace/EASMO/.venv/bin/python -u \
+    /workspace/EASMO/motivation_v11/scripts/13b_export_candidate_bank.py
+  ```
+  Output: `motivation_v11/outputs/data/full_train_dev_compression_candidate_bank.jsonl`
+
+### Stage milestones to monitor (updated counts)
+
+| stage | what to verify when it finishes | target |
+|---|---|---|
+| 00 prepare | provenance + ACON commit + 4 family sha256 (incl. `9e50d0f93a` for ACON_UTCO matching v7-v10) | ✅ done |
+| 01 task inventory | 147 rows (90 train + 57 dev), 0 META mismatch since spec=145 ≠ actual 147 from trailing-newline drift | ✅ done — 147 included |
+| 02 baseline (~25 min handoff; ACTUAL 18:32) | ~30 % pass rate target | ✅ done — 147 rows |
+| 03 boundaries | 147 rows in `compression_boundaries.jsonl` | ✅ done — 147 rows |
+| 05 compress (~6.2h handoff; PROJ ~2.0h) | 5,220 candidates, 0 errors | in progress |
+| 06 stress (~12.4h handoff; PROJ ~4h if 3× holds) | 10,440 stress chains | pending |
+| 07 behavior (~17.4h handoff; PROJ ~6h if 3× holds) | 10,440 agent runs, all carry split field now | pending |
+| 08a/b/c selectors (~14h handoff; PROJ ~5h if 3× holds) | 10,440 + 4,060 + 1,450 verifier outputs | pending |
+| 09-13 analysis (~10 min) | transition + dqcg + bootstrap CSVs | pending |
+| **13b** | candidate_bank.jsonl with `len == n_valid_candidates`, all have `pass_c1`/`pass_ck`/`selector_tags` populated | **manual after stage 13** |
+| 14-16 plots + report | figures + paper-tier markdown | pending |
+
+### Open design question (not blocking — user decides)
+
+* **#9 from checklist**: rescue claim assumes single-shot F=0 is reliable
+  signal. baseline is temp=0 (deterministic same-seed) but doesn't probe
+  cross-seed stability. To strengthen rescue: rerun N=4 baseline on the
+  ~100 F=0 tasks → ~25 min extra. Decide before paper writing, not before
+  pipeline finishes.
+
+### Known deferred items (do NOT block launch; patch later)
+
+* Stage 09 `compute_selectors`: does not yet emit explicit `split ∈
+  {train, dev, combined}` rows; train/dev breakdown is implicit
+  via candidate `split` field. Stage 10/11/12 already do explicit
+  split breakdown so the paper tables are correct; only the
+  per-selector summary CSV from stage 09 is single-split-only.
+* Stage 09 also does not yet implement `random_sample_mean`
+  (averaging over 8 samples). The 8 individual sample rows are in
+  the raw behavior file so this can be computed post-hoc.
+* Stage 12 `serial_recompression_metrics`: same — no explicit
+  split column yet. Can patch in ~10 min after v11 runs.
 
 ### Stage milestones to monitor (for the fresh chat)
 
@@ -109,11 +180,16 @@ stages 09 + 14 + 16 (~30 min) to refresh selector tables + figures + report.
 
 * Auto-push watcher PID 3916707 (8 days uptime) pushes every 20 min,
   so even if the run crashes the latest outputs are on GitHub.
+* **CRITICAL FIX (2:22 PM PT)**: `motivation/scripts/sync_and_push.sh`
+  previously had a HARDCODED list of `motivation_v2/`-`motivation_v9/`
+  and silently SKIPPED `motivation_v10/` + `motivation_v11/`. Replaced
+  with `motivation_v*/` glob in commit `82e7069`. Verified: watcher
+  picked up first v11 outputs immediately after the fix.
 * All v11 stage scripts are RESUMABLE — interrupted runs skip
   already-done items via `done_ids` checks.
 * No vLLM needed (Qwen out of scope in v11 per spec §4.2).
 * MiniMax endpoint `10.183.22.68:8005` has been continuously
-  available across v4-v10; expected stable across the v11 ~63 h run
+  available across v4-v10; expected stable across the v11 run
   too, but transient blips will be auto-retried by the worker pool.
 
 ## 0.1 Project status snapshot (2026-05-31 1:55 PM PT)

@@ -10,8 +10,9 @@
 #   TASK_POOL          train+dev (default) | dev
 #   ENTROPY_FAMILIES   initial entropy selector families; default "ACON_UTCO"
 #                      (extend later to all 4 with --families on stage 08c)
-#   STAGES             comma list of stages to run; default 00..16
-#                      stages: 00 01 02 03 04 05 06 07 08a 08b 08c 09 10 11 12 13 14 15 16
+#   STAGES             comma list of stages to run; default 00..16 + 13b
+#                      stages: 00 01 02 03 04 05 06 07 08a 08b 08c 09 10 11 12 13 13b 14 15 16
+#                      13b = export full candidate bank per spec §12.2
 #   WORKERS            parallel workers per stage; default 6
 #
 # All stages are RESUMABLE — interrupted runs skip already-done items.
@@ -29,7 +30,7 @@ CAP_STEPS="${CAP_STEPS:-15}"
 TASK_POOL="${TASK_POOL:-train+dev}"
 ENTROPY_FAMILIES="${ENTROPY_FAMILIES:-ACON_UTCO}"
 WORKERS="${WORKERS:-6}"
-WANTED="${STAGES:-00,01,02,03,04,05,06,07,08a,08b,08c,09,10,11,12,13,14,15,16}"
+WANTED="${STAGES:-00,01,02,03,04,05,06,07,08a,08b,08c,09,10,11,12,13,13b,14,15,16}"
 
 LOG=outputs/logs/runall_main.log
 echo "==== motivation_v11 orchestrator ====" | tee $LOG
@@ -100,6 +101,9 @@ run_stage "12_compute_serial_recompression_metrics" \
 
 run_stage "13_bootstrap_confidence_intervals" \
   "${PYBIN} -u scripts/13_bootstrap_confidence_intervals.py"
+
+run_stage "13b_export_candidate_bank" \
+  "${PYBIN} -u scripts/13b_export_candidate_bank.py"
 
 run_stage "14_plot_figures" \
   "${PYBIN} -u scripts/14_plot_figures.py"

@@ -79,8 +79,10 @@ def main() -> None:
     args = ap.parse_args()
 
     rows = list(csv.DictReader(open(args.inventory)))
+    # Exclude (a) anything not marked included=true and (b) meta-note
+    # rows that document expected-vs-actual count drift (META__/ACON_).
     rows = [r for r in rows if r["included"].lower() == "true"
-            and not r["task_id"].startswith("ACON_")]
+            and not r["task_id"].startswith(("ACON_", "META__"))]
     print(f"[02] {len(rows)} tasks in inventory")
 
     out_path = Path(args.out)
