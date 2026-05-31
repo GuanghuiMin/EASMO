@@ -482,14 +482,16 @@ Common pitfalls observed across rounds:
 * **Start with `docs/05_results_summary.md`** in whichever track is relevant. Each one is paper-tier and ~5-10 min to read.
 * **Don't refactor across tracks.** Each track is self-contained. v3 reuses v2 modules (e.g. `motivation_v2/data.py`); v4 reuses v3; v5 reuses v3+v2. Keep that direction (newer reuses older, never the other way).
 * **The auto-push watcher is your friend**. It commits whatever's in `outputs/` every 20 min. If you're mid-experiment and your shell dies, the data is still there.
-* **Seven docs that frame the project at paper-level**:
+* **Eight docs that frame the project at paper-level**:
   - `motivation_v2/docs/05_results_summary.md` — the original three-tier story.
   - `motivation_v3/outputs/motivation_results.md` — the structural-vs-behavioral mismatch.
   - `motivation_v5/docs/05_results_summary.md` — the recovered-then-dropped bottleneck.
   - `motivation_v6_jacobian/docs/04_results_summary.md` — active-subspace exists, span-rank by gradient doesn't work.
   - `motivation_v7/docs/04_results_summary.md` — abstraction prior under ACON (SDI ≈ 1, cross-model τ = 0.49).
   - `motivation_v8/docs/04_results_summary.md` — generalises v7 to non-ACON prompts (SDI = 1.00 under task-agnostic; cross-model τ up to 0.78) AND identifies two new mechanisms: task-aware prompts invert fixed-point composition, and different inits reach disjoint fixed points.
-  - **`motivation_v9/docs/04_results_summary.md`** — behavior-side validation of v7/v8. Claim 1 STRONG (best-of-N beats greedy +27/+37 pp pass-rate, oracle win 90/83%); Claim 2 POSITIVE (greedy more stress-fragile than sample, 28.6% vs 21.8%); Claim 3 NEGATIVE at n=239 (spec's causal>entity prediction reverses at widened n; only stable sub-finding is CONTROL_NEGATIVE_EVIDENCE +0.115, n=13). **v7+v8+v9 together are the paper headline as of 2026-05-29.** v7/v8 say *what compressors do*; v9 says *what it costs the agent for Claims 1+2* and warns *that the spec-level chunk taxonomy doesn't cleanly track behavior at chunk granularity*.
+  - `motivation_v9/docs/04_results_summary.md` — behavior-side validation of v7/v8. Claim 1 STRONG (best-of-N beats greedy +27/+37 pp pass-rate, oracle win 90/83%); Claim 2 POSITIVE (greedy more stress-fragile than sample, 28.6% vs 21.8%); Claim 3 NEGATIVE at n=239 (spec's causal>entity prediction reverses at widened n; only stable sub-finding is CONTROL_NEGATIVE_EVIDENCE +0.115, n=13).
+  - **`motivation_v10/docs/04_results_summary.md`** — trainable compressor policy (SFT only, no GRPO). Claim 1 FAIL on CK (proxy recovers only 16% of oracle gain), Claim 2 PARTIAL (SFT-CK > SFT-C1 > Raw aggregate), Claim 3 PASS (GRPO-trainable reward spread), Claim 4 PASS (labels-only R² 0.019 vs full 0.037 → labels insufficient). 🌟 Bonus: SFT compression is a stress-invariant fixed point (Raw drops 33% under stress, SFT drifts only 5%). **v7+v8+v9+v10 together are the project headline as of 2026-05-31.**
+  - **`motivation_v11/`** — final motivation-section experiment (NOT STARTED; user revising spec). Will produce the paper's main motivation figure (`Q_dist` vs `G_calib` per prompt family).
   v4 is methodologically interesting (decision-state probing) but its main empirical result is "recency is a strong baseline" which is a less-clean paper story.
 
 ---
