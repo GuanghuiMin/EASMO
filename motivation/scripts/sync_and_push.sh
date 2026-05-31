@@ -27,11 +27,13 @@ cp -f "$GUIDANCES_SRC/ICLR27_Memory_motivation_experiments.md" \
 cp -f "$GUIDANCES_SRC/ICLR27_Memory_motivation_results_and_interpretation.md" \
       motivation/docs/02_results_and_interpretation.md
 
-# Stage everything under motivation/, motivation_v2/, motivation_v3/,
-# motivation_v4/ + the doc + top-level README. Per-track outputs are
-# kept in-repo so the paper-quality numbers live with the code; *.log
-# is gitignored so sprint_logs/ don't bloat history.
-git add -A motivation/ motivation_v2/ motivation_v3/ motivation_v4/ motivation_v5/ motivation_v6_jacobian/ motivation_v7/ motivation_v8/ motivation_v9/ user_feedback/ README.md .gitignore 2>/dev/null || true
+# Stage everything under motivation/ + all motivation_v*/ tracks (glob
+# auto-discovers new tracks like v10, v11, …) + user_feedback/ + the
+# top-level docs. Per-track outputs are kept in-repo so the paper-quality
+# numbers live with the code; *.log is gitignored so sprint_logs/ don't
+# bloat history. Heavy binaries (e.g. motivation_v10/outputs/models/) are
+# excluded via .gitignore.
+git add -A motivation/ motivation_v*/ user_feedback/ README.md .gitignore 2>/dev/null || true
 
 if git diff --cached --quiet; then
     echo "[sync_and_push] No changes to commit."
