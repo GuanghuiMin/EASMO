@@ -1,0 +1,12 @@
+feature,kind,univariate_pearson
+chunk_chars,numeric,-0.02442025917432533
+chunk_index,numeric,-0.025939228282048272
+contains_exact_literals,bool,0.028480778677825707
+contains_entity_list_form,bool,0.0457371335996473
+contains_causal_relation,bool,0.061662107066518514
+contains_negative_evidence,bool,-0.02810522886977815
+contains_action_outcome,bool,0.03957787437141167
+contains_runtime_binding,bool,0.03633842555652798
+MULTIVARIATE_R2_FULL,regression,0.03691572940498
+MULTIVARIATE_R2_LABELS_ONLY,regression,0.01900462239435885
+MULTIVARIATE_R2_NUMERIC_ONLY,regression,0.01712346342303328

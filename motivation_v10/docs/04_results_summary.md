@@ -56,8 +56,13 @@
   AppWorld pass rates rank SFT-CK > Raw-Qwen on CK. The verifier
   composite is not a calibrated cross-policy ranker — use true Pass,
   not verifier proxy, as the GRPO reward.
-* **Claim 4 (chunk surface labels insufficient): PENDING stage 11**
-  — diagnostic only, does not gate Go/No-go.
+* **Claim 4 (chunk surface labels insufficient): PASS ✓**
+  (stage 11 chain complete 2026-05-31 1:37 PM PT). Multivariate
+  R² of behavior advantage on `chunk_type + functional_role_guess`
+  alone = **0.019** (1.9%); adding numeric features (chars, flags)
+  brings full R² to **0.037** (3.7%). Labels < full → labels alone
+  cannot explain behavior advantage, supporting behavior-based
+  credit assignment as motivation for the eventual method paper.
 
 ## 1. Setup that ran
 
@@ -388,14 +393,80 @@ raw verifier composite.
 mechanism finding 🌟 (stress-invariant fixed point) gives v10 the
 mechanism story it needs to motivate the eventual paper.
 
-## 10. Stage 11 — still a stub
+## 10. Stage 11 — Chunk reanalysis (DONE 2026-05-31 1:37 PM PT)
 
-* **Stage 11** — Chunk reanalysis with the v10 §17.5 enriched
-  labeler (`functional_role_guess`). Still a **stub** in
-  `scripts/11_chunk_advantage_reanalysis.py`. This is a diagnostic
-  for spec §19.4 (chunk labels alone insufficient — a diagnostic,
-  *not* a Go/No-go criterion). Full port from v9 stages 07-12 takes
-  ~1-2 h compute on the existing student compressions; deferrable.
+Full chunk pipeline (stages 11a select+segment+stress / 11b agent
+runs / 11c labels+advantage+aggregate) completed in **2h 6min total**:
+
+* **11a** — 51 candidate selections × 5 variants per case = 600
+  chunks segmented + 600 chunk-minus contexts re-stressed via
+  MiniMax (53 min).
+* **11b** — 651 AppWorld agent runs on (51 controls + 600
+  chunk-minus contexts), cap_steps=15 (49 min).
+* **11c** — 600 enriched-schema labels (`chunk_type` ×
+  `functional_role_guess` × 6 boolean flags) + per-chunk
+  leave-one-out behavior advantage + aggregation tables (~24 min).
+
+### 10.1 Per-chunk-type behavior advantage (n_chunks, mean score adv)
+
+| chunk_type | n | mean score advantage |
+|---|---:|---:|
+| CAUSAL_PRECONDITION | 6 | 0.000 |
+| CONTROL_NEGATIVE_EVIDENCE | 6 | 0.000 |
+| TASK_GOAL_OR_TODO | 1 | 0.000 |
+| **ACTION_OUTCOME** | 177 | −0.017 |
+| RUNTIME_BINDING | 44 | −0.068 |
+| ENTITY_LIST_ONLY | 14 | −0.071 |
+| NARRATIVE_PROGRESS | 139 | −0.086 |
+| OTHER | 49 | −0.163 |
+
+Most chunks have negative or zero mean advantage (i.e. removing
+them slightly *helps* the agent, on average). This is consistent
+with v9 §10's "80 % of chunks removable" finding and with §8.5
+of this report ("verifier rewards verbose content the agent
+doesn't use"). The few chunk types with strictly-zero mean
+advantage (CAUSAL_PRECONDITION, CONTROL_NEGATIVE_EVIDENCE) have
+very small n.
+
+### 10.2 ★ Claim 4 verdict (spec §19.4)
+
+Multivariate R² of `score_advantage` on different feature subsets:
+
+| feature set | R² |
+|---|---:|
+| labels only (`chunk_type` + `functional_role_guess`) | **0.019** |
+| numeric only (`chunk_chars` + `chunk_index` + 6 boolean flags) | 0.017 |
+| **full feature set** | **0.037** |
+
+* **Claim 4 PASS ✓** — labels-only R² (0.019) < full R² (0.037).
+* Even the full feature set only explains **3.7 %** of variance —
+  chunk surface labels (categorical + functional role) are NOT a
+  reliable predictor of behavioral contribution at all.
+* Univariate Pearson correlations of individual features with
+  score advantage are all in [−0.03, +0.06] — no single feature
+  dominates.
+
+**Paper interpretation**: this is the third piece of evidence (after
+v9 §10 widened-n chunk study and v10 §8.5 proxy-vs-behavior
+mismatch) that chunk- and prompt-level surface signals cannot
+substitute for true behavioral reward in compressor training.
+Motivates the eventual GRPO step to use true downstream Pass, not
+a prompt/label proxy.
+
+## 11. Final spec §19 acceptance (after stage 11)
+
+| # | Claim | Threshold | Observed | Verdict |
+|---|---|---|---|---|
+| 1 | Proxy recovers best-of-N gain | ≥10 pp CK gain OR ≥40 % recovery | pairwise +4 pp / 16 % CK | **FAIL on CK** (pairwise barely-PASS on C1) |
+| 2 | SFT-CK > SFT-C1 > Raw-Qwen on CK | direction match | aggregate ✓, test_behavior CK ✗ | **PARTIAL ✓** |
+| 3 | SFT-CK GRPO-trainable reward spread | std ≥ 0.15, oracle_win ≥ 0.50, all_fail ≤ 0.15 | std 0.47, oracle 0.81, all_fail 0.00 | **PASS ✓** |
+| 4 | Chunk surface labels insufficient | label-only R² < full R² | 0.019 < 0.037 | **PASS ✓** |
+| 🌟 | (bonus) SFT is stress-invariant fixed point | qualitative | Raw −33 % length collapse vs SFT +5 % | **PASS (paper-quality)** |
+
+**Net for v10**: 3 of 4 testable claims PASS / PARTIAL-positive,
+1 FAIL on Claim 1 (motivates "use true Pass not proxy" as GRPO
+reward). The bonus 🌟 stress-invariant fixed-point finding gives
+v10 the mechanism it needs to motivate the next-paper RL stage.
 
 Auto-written report at
 `outputs/reports/motivation_v10_results_summary.md` (~10 KB) covers

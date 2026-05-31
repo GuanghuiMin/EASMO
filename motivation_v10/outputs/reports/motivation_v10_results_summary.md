@@ -1,6 +1,6 @@
 # motivation_v10 results (auto-written)
 
-> Auto-written by `scripts/12_write_report.py` at 2026-05-31 05:56Z.
+> Auto-written by `scripts/12_write_report.py` at 2026-05-31 20:37Z.
 
 > Honest hand-written counterpart: `docs/04_results_summary.md` (TBD).
 
@@ -51,9 +51,47 @@
 
 *(no data — table missing or empty)*
 
-## §5 Chunk advantage (revised, stage 11)
+## §5 Chunk advantage by type (stage 11c)
 
-*(no data — table missing or empty)*
+| chunk_type                |   n_chunks |   mean_score_advantage |   median_score_advantage |   mean_pass_advantage |   frac_positive_advantage |   contains_causal_relation_rate |   contains_runtime_binding_rate |   contains_negative_evidence_rate |
+|:--------------------------|-----------:|-----------------------:|-------------------------:|----------------------:|--------------------------:|--------------------------------:|--------------------------------:|----------------------------------:|
+| CAUSAL_PRECONDITION       |          6 |              0         |                        0 |             0         |                 0.166667  |                       0.833333  |                       0.333333  |                         0.333333  |
+| CONTROL_NEGATIVE_EVIDENCE |          6 |              0         |                        0 |             0         |                 0.166667  |                       0.333333  |                       0.166667  |                         0.833333  |
+| TASK_GOAL_OR_TODO         |          1 |              0         |                        0 |             0         |                 0         |                       0         |                       0         |                         0         |
+| ACTION_OUTCOME            |        177 |             -0.0169492 |                        0 |            -0.0169492 |                 0.175141  |                       0.0112994 |                       0.101695  |                         0.0112994 |
+| RUNTIME_BINDING           |         44 |             -0.0681818 |                        0 |            -0.0681818 |                 0.136364  |                       0         |                       1         |                         0         |
+| ENTITY_LIST_ONLY          |         14 |             -0.0714286 |                        0 |            -0.0714286 |                 0.0714286 |                       0         |                       0.0714286 |                         0         |
+| NARRATIVE_PROGRESS        |        139 |             -0.0863309 |                        0 |            -0.0863309 |                 0.129496  |                       0.0791367 |                       0.028777  |                         0.028777  |
+| OTHER                     |         49 |             -0.163265  |                        0 |            -0.163265  |                 0.0204082 |                       0.0204082 |                       0         |                         0         |
+
+
+## §5b Chunk advantage by functional_role_guess (stage 11c)
+
+| functional_role_guess   |   n_chunks |   mean_score_advantage |   median_score_advantage |   mean_pass_advantage |   frac_positive_advantage |
+|:------------------------|-----------:|-----------------------:|-------------------------:|----------------------:|--------------------------:|
+| api_argument_binding    |         62 |             -0.0483871 |                      0   |            -0.0483871 |                 0.129032  |
+| progress_summary        |        299 |             -0.0501672 |                      0   |            -0.0501672 |                 0.160535  |
+| object_set_binding      |         10 |             -0.1       |                      0   |            -0.1       |                 0         |
+| unknown                 |         56 |             -0.107143  |                      0   |            -0.107143  |                 0.0357143 |
+| failure_prevention      |          7 |             -0.142857  |                      0   |            -0.142857  |                 0.142857  |
+| task_restatement        |          2 |             -0.5       |                     -0.5 |            -0.5       |                 0         |
+
+
+## §5c Claim 4 regression (label-only R² vs full R²)
+
+| feature                      | kind       |   univariate_pearson |
+|:-----------------------------|:-----------|---------------------:|
+| chunk_chars                  | numeric    |           -0.0244203 |
+| chunk_index                  | numeric    |           -0.0259392 |
+| contains_exact_literals      | bool       |            0.0284808 |
+| contains_entity_list_form    | bool       |            0.0457371 |
+| contains_causal_relation     | bool       |            0.0616621 |
+| contains_negative_evidence   | bool       |           -0.0281052 |
+| contains_action_outcome      | bool       |            0.0395779 |
+| contains_runtime_binding     | bool       |            0.0363384 |
+| MULTIVARIATE_R2_FULL         | regression |            0.0369157 |
+| MULTIVARIATE_R2_LABELS_ONLY  | regression |            0.0190046 |
+| MULTIVARIATE_R2_NUMERIC_ONLY | regression |            0.0171235 |
 
 
 ## Files of record
