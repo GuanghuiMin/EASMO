@@ -1,0 +1,13 @@
+task_id,family,round,n_sample_pass,mean_sample_sim,pair_sim_pass_fail,pair_sim_pass_greedy,char_range,char_pass_minus_fail,greedy_pass,full_success
+7d7fbf6_1,ACON_UTCO,CK,5,0.9292,0.4267,0.3041,299,-150,True,False
+34d9492_1,ACON_UTCO,CK,1,0.9202,0.4277,0.3933,428,428,False,False
+6ea6792_3,ACON_UTCO,CK,7,0.9176,0.5549,0.4156,369,-39,True,False
+07b42fd_2,ACON_UT,CK,5,0.9152,0.2288,0.1871,204,-122,False,True
+287e338_2,ACON_UT,CK,6,0.9116,0.3068,0.2281,261,-73,True,True
+6104387_1,ACON_UT,CK,1,0.9102,0.3908,0.135,460,60,False,False
+302c169_1,general_task_aware,CK,5,0.8721,0.396,0.3626,173,137,False,False
+29caf6f_2,general_task_aware,CK,5,0.8655,0.4944,0.5909,350,-125,True,False
+6ea6792_1,general_task_aware,CK,3,0.8647,0.4513,0.377,363,228,False,False
+07b42fd_1,general_task_agnostic,CK,5,0.8475,0.6575,0.5408,194,107,True,True
+27e1026_1,general_task_agnostic,CK,7,0.8424,0.4508,0.4034,209,-72,False,False
+2a163ab_1,general_task_agnostic,CK,3,0.8424,0.4408,0.274,291,188,False,False
