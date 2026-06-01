@@ -180,6 +180,18 @@ stages 09 + 14 + 16 (~30 min) to refresh selector tables + figures + report.
 
 * Auto-push watcher PID 3916707 (8 days uptime) pushes every 20 min,
   so even if the run crashes the latest outputs are on GitHub.
+* **🚨 KNOWN GOTCHA (2026-05-31 PM, learned the hard way)**: NEVER
+  edit `scripts/run_all.sh` while it is being executed. Bash reads
+  scripts by byte offset; inserting lines in the middle of the file
+  while a child stage runs causes bash to land in the middle of a
+  later line when it returns, producing
+  `unexpected EOF while looking for matching "'` and silently killing
+  the orchestrator. The actual stage process completes cleanly, but
+  no subsequent stages run. Mitigation: edit `run_all.sh` only when
+  the orchestrator is stopped, OR copy to `run_all_v2.sh` and launch
+  that instead. v11 hit this between stages 05 and 06 (01:47 UTC
+  Mon); relaunched from stage 06 via `STAGES=06,07,...` env var with
+  zero data loss but ~5 min dead time.
 * **CRITICAL FIX (2:22 PM PT)**: `motivation/scripts/sync_and_push.sh`
   previously had a HARDCODED list of `motivation_v2/`-`motivation_v9/`
   and silently SKIPPED `motivation_v10/` + `motivation_v11/`. Replaced
